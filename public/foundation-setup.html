@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Foundation Package – Venue Setup Checklist</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f0eb; color: #2c2c2c; min-height: 100vh; padding: 20px; }
+
+    header {
+      background: linear-gradient(135deg, #3a5a40, #8aad8f);
+      color: white; border-radius: 12px; padding: 28px 32px; margin-bottom: 24px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
+    header p  { font-size: 0.95rem; opacity: 0.88; }
+
+    .event-meta {
+      background: white; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    .meta-field label { display: block; font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.05em; color: #3a5a40; margin-bottom: 4px; }
+    .meta-field input, .meta-field select { width: 100%; padding: 8px 10px; border: 1px solid #ddd;
+      border-radius: 6px; font-size: 0.92rem; background: #f7faf7; }
+
+    .progress-bar-wrap { background: white; border-radius: 10px; padding: 16px 24px; margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .progress-bar-wrap p { font-size: 0.88rem; color: #666; margin-bottom: 8px; }
+    .bar-bg { background: #e8e0d8; border-radius: 20px; height: 14px; overflow: hidden; }
+    .bar-fill { background: linear-gradient(90deg, #3a5a40, #8aad8f); height: 100%;
+      border-radius: 20px; transition: width 0.4s ease; width: 0%; }
+
+    .section { background: white; border-radius: 10px; margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07); overflow: hidden; }
+    .section-header { background: #3a5a40; color: white; padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none; }
+    .section-header h2 { font-size: 1rem; font-weight: 600; }
+    .section-header .badge { background: rgba(255,255,255,0.2); border-radius: 20px;
+      padding: 2px 10px; font-size: 0.8rem; }
+    .section-body { padding: 6px 0; }
+
+    .checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 13px 20px;
+      border-bottom: 1px solid #f0ebe5; transition: background 0.15s; }
+    .checklist-item:last-child { border-bottom: none; }
+    .checklist-item:hover { background: #f4faf4; }
+    .checklist-item.done { background: #f2faf2; }
+    .checklist-item.done .item-label { text-decoration: line-through; color: #999; }
+    .checklist-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: #3a5a40;
+      margin-top: 2px; flex-shrink: 0; cursor: pointer; }
+    .item-content { flex: 1; }
+    .item-label { font-size: 0.93rem; font-weight: 500; }
+    .item-note  { font-size: 0.8rem; color: #999; margin-top: 2px; }
+
+    .item-qty { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .item-qty label { font-size: 0.78rem; color: #3a5a40; font-weight: 600; }
+    .item-qty input[type="number"], .item-qty input[type="text"] { width: 90px; padding: 4px 7px;
+      border: 1px solid #ddd; border-radius: 5px; font-size: 0.85rem; }
+
+    .notes-row { padding: 14px 20px; border-top: 1px dashed #e0d8d0; }
+    .notes-row label { font-size: 0.8rem; font-weight: 600; color: #3a5a40; display: block; margin-bottom: 4px; }
+    .notes-row textarea { width: 100%; min-height: 64px; padding: 8px 10px; border: 1px solid #ddd;
+      border-radius: 6px; font-size: 0.88rem; resize: vertical; background: #f7faf7; }
+
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; margin-bottom: 32px; }
+    button { padding: 12px 24px; border: none; border-radius: 8px; font-size: 0.92rem;
+      font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    button:hover { opacity: 0.88; }
+    #btn-reset { background: #e05c5c; color: white; }
+
+    @media print { .actions { display: none !important; } body { background: white; padding: 0; }
+      header { border-radius: 0; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🏛️ The Foundation Package – Venue Setup Checklist</h1>
+  <p>Waddesdon Hall &nbsp;|&nbsp; Staff use only &nbsp;|&nbsp; Complete all sections before guest arrival</p>
+</header>
+
+<!-- Event Meta -->
+<div class="event-meta">
+  <div class="meta-field">
+    <label>Guest Count</label>
+    <select id="meta-guests">
+      <option value="">Select...</option>
+      <option>Up to 120 seated</option>
+      <option>Up to 220 standing</option>
+    </select>
+  </div>
+  <div class="meta-field">
+    <label>Day of Week</label>
+    <select id="meta-day">
+      <option value="">Select...</option>
+      <option>Monday</option>
+      <option>Tuesday</option>
+      <option>Wednesday</option>
+      <option>Thursday</option>
+      <option>Friday</option>
+      <option>Saturday</option>
+    </select>
+  </div>
+</div>
+
+<!-- Staff Section -->
+<div class="section" id="staff-section">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>👑 Staff on Duty</h2>
+    <span class="badge" id="badge-staff"></span>
+  </div>
+  <div class="section-body">
+    <div style="padding: 16px 20px; border-bottom: 1px solid #f0ebe5;">
+      <label style="display:block; font-size:0.78rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#3a5a40; margin-bottom:8px;">👑 Team Leader</label>
+      <input type="text" id="team-leader" placeholder="Team leader name..." style="width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:0.92rem; background:#f7faf7;" />
+    </div>
+    <div style="padding: 16px 20px;">
+      <label style="display:block; font-size:0.78rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; color:#3a5a40; margin-bottom:10px;">👥 Staff on Shift</label>
+      <div id="staff-list"></div>
+      <button type="button" onclick="addStaffMember()" style="width:100%; margin-top:10px; padding:11px;
+        background:transparent; border:2px dashed #8aad8f; border-radius:8px; color:#3a5a40;
+        font-size:0.9rem; font-weight:600; cursor:pointer; transition:background 0.15s;"
+        onmouseover="this.style.background='#edf5ee'" onmouseout="this.style.background='transparent'">
+        + Add Staff Member
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Progress -->
+<div class="progress-bar-wrap">
+  <p>Setup Progress: <strong id="progress-text">0 / 0 items complete</strong></p>
+  <div class="bar-bg"><div class="bar-fill" id="bar-fill"></div></div>
+</div>
+
+
+    </div>
+
+    
+    </div>
+
+    
+    </div>
+
+    
+  </div>
+</div>
+
+<!-- =========================================================
+     SECTION 2 – WEDDING DAY MORNING (from 9am)
+     ========================================================= -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>2 · Wedding Day – Morning Setup (from 9am)</h2>
+    <span class="badge" id="badge-s2">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="checklist-item" data-section="s2">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Hall open and ready for supplier access from 9am</div>
+        <div class="item-note">All suppliers signed in, briefed on layout and timings</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s2">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Caterer access to kitchen and site confirmed from 9am</div>
+        <div class="item-note">Kitchen unlocked, equipment accessible</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s2">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">PA system tested and operational</div>
+        <div class="item-note">Microphone, speakers, and any external inputs checked</div>
+      </div>
+
+    <div class="notes-row">
+      <label>Section Notes</label>
+      <textarea placeholder="Supplier arrival times, any issues flagged..."></textarea>
+    </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     SECTION 3 – TABLES & CHAIRS
+     ========================================================= -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>3 · Tables &amp; Chairs (Undressed)</h2>
+    <span class="badge" id="badge-s3">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="checklist-item" data-section="s3">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">All guest tables positioned per couple's floor plan</div>
+        <div class="item-note">No dressing applied — blank canvas for couple/stylist</div>
+        <div class="item-qty">
+          <label>No. of tables:</label>
+          <input type="number" min="0" placeholder="0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s3">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">All chairs set out around tables</div>
+        <div class="item-note">Undressed — evenly spaced, consistent distance from table</div>
+        <div class="item-qty">
+          <label>Total chairs:</label>
+          <input type="number" min="0" placeholder="0" />
+        </div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s3">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">All tables levelled and stable</div>
+        <div class="item-note">No wobble; adjust legs or add pads as needed</div>
+      </div>
+    </div>
+
+    
+    </div>
+
+    <div class="notes-row">
+      <label>Section Notes</label>
+      <textarea placeholder="Floor plan reference, layout variations, any damaged furniture..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     SECTION 4 – GIFT TABLE
+     ========================================================= -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>4 · Gift Table (Undressed)</h2>
+    <span class="badge" id="badge-s4">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="checklist-item" data-section="s4">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Gift table positioned near entrance / as specified by couple</div>
+        <div class="item-note">Undressed — couple or stylist to dress as they wish</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s4">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Gift table stable and clear of obstruction</div>
+        <div class="item-note">Accessible for guests, not blocking fire exits</div>
+      </div>
+    </div>
+
+    <div class="notes-row">
+      <label>Section Notes</label>
+      <textarea placeholder="Couple's requested position, any notes..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     SECTION 5 – BAR SETUP
+     ========================================================= -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>5 · Bar Setup</h2>
+    <span class="badge" id="badge-s5">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="checklist-item" data-section="s5">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Bar stocked and ready for agreed opening time</div>
+        <div class="item-qty">
+          <label>Bar opens at:</label>
+          <input type="text" placeholder="e.g. 2:00pm" />
+        </div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s5">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Glasses polished and stocked at bar</div>
+        <div class="item-note">Wine, pint, shot, and soft drink glasses checked</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s5">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Bar confirmed to run until midnight</div>
+        <div class="item-note">Last orders call planned — confirm with team leader</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s5">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Arrival drinks prepared (if booked as upgrade)</div>
+        <div class="item-note">e.g. Prosecco, Pimm's — confirm count with caterer</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s5">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Toasting drinks prepared (if booked as upgrade)</div>
+        <div class="item-note">Ready to be served at speech time</div>
+      </div>
+    </div>
+
+    <div class="notes-row">
+      <label>Section Notes</label>
+      <textarea placeholder="Upgrade drinks details, bar staff notes..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     SECTION 6 – OPTIONAL UPGRADES CHECK
+     ========================================================= -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>6 · Optional Upgrades (if booked)</h2>
+    <span class="badge" id="badge-s6">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="checklist-item" data-section="s6">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Professional DJ / live band setup confirmed and in place</div>
+        <div class="item-note">Sound check completed before guest arrival</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s6">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Photo booth / 360 experience set up and tested</div>
+        <div class="item-note">Backdrop in position, props available, operator briefed</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s6">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Garden games set out in outside area</div>
+        <div class="item-note">Check weather — store indoors if wet</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s6">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Bouncy castle set up and safety checked (if booked)</div>
+        <div class="item-note">Must be packed away by 7pm per venue policy</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s6">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Chocolate fountain / sweet cart positioned (if booked)</div>
+        <div class="item-note">Ready before guests arrive, operator briefed</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s6">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Coloured uplighters positioned and tested (if booked)</div>
+        <div class="item-note">Colours set per couple's request</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s6">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Light-up dancefloor assembled and tested (if booked)</div>
+        <div class="item-note">All panels lit before guests arrive</div>
+      </div>
+    </div>
+
+    <div class="notes-row">
+      <label>Section Notes</label>
+      <textarea placeholder="List any upgrades booked, supplier contacts, notes..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================
+     SECTION 7 – FINAL PRE-GUEST CHECKS
+     ========================================================= -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>7 · Final Pre-Guest Checks</h2>
+    <span class="badge" id="badge-s7">0/0</span>
+  </div>
+  <div class="section-body">
+
+    <div class="checklist-item" data-section="s7">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Hall walked through and visually inspected</div>
+        <div class="item-note">All tables and chairs straight, floors swept, no clutter</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s7">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Toilets checked and stocked</div>
+        <div class="item-note">Soap, paper towels/hand dryer, bins empty</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s7">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Outside area clear and safe for guests</div>
+        <div class="item-note">No trip hazards, adequate lighting if evening</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s7">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Venue signage / welcome board in place (if provided by couple)</div>
+        <div class="item-note">Positioned at entrance, readable and upright</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s7">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">All staff briefed on timeline and responsibilities</div>
+        <div class="item-note">Everyone knows bar opening time, speech timing, and clear-up plan</div>
+      </div>
+    </div>
+
+    <div class="checklist-item" data-section="s7">
+      <input type="checkbox" />
+      <div class="item-content">
+        <div class="item-label">Team leader sign-off — hall ready for guests</div>
+      </div>
+    </div>
+
+    <div class="notes-row">
+      <label>Final Notes / Issues to Flag</label>
+      <textarea placeholder="Anything to escalate to Celina or the couple before guests arrive..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- Actions -->
+<div class="actions">
+  <button id="btn-reset" onclick="resetAll()">🔄 Reset</button>
+</div>
+
+<script>
+  // ── Firebase config ─────────────────────────────────────────────────────────
+  const firebaseConfig = {
+    apiKey:            "AIzaSyBa9zA9-RlT5SVAaOb208_KE644zY8dvUE",
+    authDomain:        "staff-forms-42a6f.firebaseapp.com",
+    projectId:         "staff-forms-42a6f",
+    storageBucket:     "staff-forms-42a6f.firebasestorage.app",
+    messagingSenderId: "977408765626",
+    appId:             "1:977408765626:web:809d5ad1eea80470b99c83"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // ── Progress tracking ────────────────────────────────────────────────────────
+  function updateProgress() {
+    const all  = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+    const done = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked');
+    const pct  = all.length ? Math.round((done.length / all.length) * 100) : 0;
+    document.getElementById('progress-text').textContent = `${done.length} / ${all.length} items complete`;
+    document.getElementById('bar-fill').style.width = pct + '%';
+
+    document.querySelectorAll('.section').forEach(sec => {
+      const item = sec.querySelector('.checklist-item');
+      if (!item) return;
+      const sid     = item.dataset.section;
+      const items   = sec.querySelectorAll(`.checklist-item[data-section="${sid}"] input[type="checkbox"]`);
+      const checked = sec.querySelectorAll(`.checklist-item[data-section="${sid}"] input[type="checkbox"]:checked`);
+      const badge   = sec.querySelector('.badge');
+      if (badge && sid) badge.textContent = `${checked.length}/${items.length}`;
+    });
+  }
+
+  document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', function () {
+      this.closest('.checklist-item').classList.toggle('done', this.checked);
+      updateProgress();
+    });
+  });
+
+  updateProgress();
+
+  // ── Collapsible sections ─────────────────────────────────────────────────────
+  function toggleSection(header) {
+    const body = header.nextElementSibling;
+    body.style.display = body.style.display === 'none' ? 'block' : 'none';
+  }
+
+  // ── Staff section ────────────────────────────────────────────────────────────
+  function addStaffMember(value = '') {
+    const list = document.getElementById('staff-list');
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; gap:8px; margin-bottom:8px; align-items:center;';
+    row.innerHTML = `
+      <input type="text" class="staff-input" placeholder="Staff member name..." value="${value}"
+        style="flex:1; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:0.92rem; background:#f7faf7;" />
+      <button type="button" onclick="this.parentElement.remove(); updateStaffBadge()"
+        style="width:38px; height:38px; background:#c0392b; border:none; border-radius:6px; color:white; font-size:1rem; cursor:pointer; flex-shrink:0;">✕</button>
+    `;
+    row.querySelector('input').addEventListener('input', updateStaffBadge);
+    list.appendChild(row);
+    row.querySelector('input').focus();
+    updateStaffBadge();
+  }
+
+  function updateStaffBadge() {
+    const inputs = document.querySelectorAll('.staff-input');
+    const filled = [...inputs].filter(i => i.value.trim() !== '').length;
+    const badge = document.getElementById('badge-staff');
+    if (badge) badge.textContent = filled + ' staff';
+  }
+
+  addStaffMember();
+
+  // ── Reset ────────────────────────────────────────────────────────────────────
+  function resetAll() {
+    if (!confirm('Reset all checkboxes? This cannot be undone.')) return;
+    document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+      cb.checked = false;
+      cb.closest('.checklist-item').classList.remove('done');
+    });
+    updateProgress();
+  }
+</script>
+</body>
+</html>
