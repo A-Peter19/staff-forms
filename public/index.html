@@ -91,7 +91,7 @@
   <button class="btn-add-task" onclick="addTaskRow()">+ Add Custom Task</button>
 
   <br/><br/>
-  <button class="btn-primary" onclick="createEvent()">Create Event</button>
+  <button class="btn-primary" onclick="submitNewEvent()">Create Event</button>
   <div id="status-msg"></div>
 </div>
 
@@ -145,17 +145,39 @@
     const row  = document.createElement('div');
     row.className = 'task-row';
     const fVal = task.form || 'setup';
-    row.innerHTML = `
-      <select class="task-form" onchange="updateSectionOpts(this)">
-        <option value="setup"   ${fVal==='setup'   ?'selected':''}>🔧 Setup</option>
-        <option value="during"  ${fVal==='during'  ?'selected':''}>🎉 During</option>
-        <option value="clearup" ${fVal==='clearup' ?'selected':''}>🧹 Clear Up</option>
-      </select>
-      <select class="task-section">${buildSectionOptions(fVal)}</select>
-      <input type="text" class="task-label" placeholder="e.g. Set up sweetheart table near window" value="${task.label||''}" />
-      <button class="btn-remove" onclick="this.closest('.task-row').remove()">✕</button>`;
-    // set saved section
-    if (task.section) row.querySelector('.task-section').value = task.section;
+
+    const formSel = document.createElement('select');
+    formSel.className = 'task-form';
+    ['setup','during','clearup'].forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f;
+      opt.textContent = f === 'setup' ? '🔧 Setup' : f === 'during' ? '🎉 During' : '🧹 Clear Up';
+      if (f === fVal) opt.selected = true;
+      formSel.appendChild(opt);
+    });
+    formSel.addEventListener('change', function() { updateSectionOpts(this); });
+
+    const secSel = document.createElement('select');
+    secSel.className = 'task-section';
+    secSel.innerHTML = buildSectionOptions(fVal);
+    if (task.section) secSel.value = task.section;
+
+    const labelIn = document.createElement('input');
+    labelIn.type = 'text';
+    labelIn.className = 'task-label';
+    labelIn.placeholder = 'e.g. Set up sweetheart table near window';
+    labelIn.value = task.label || '';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'btn-remove';
+    removeBtn.textContent = '✕';
+    removeBtn.type = 'button';
+    removeBtn.addEventListener('click', function() { row.remove(); });
+
+    row.appendChild(formSel);
+    row.appendChild(secSel);
+    row.appendChild(labelIn);
+    row.appendChild(removeBtn);
     list.appendChild(row);
   }
 
@@ -177,7 +199,7 @@
     return (couple + '-' + date).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   }
 
-  async function createEvent() {
+  async function submitNewEvent() {
     const couple = document.getElementById('f-couple').value.trim();
     const date   = document.getElementById('f-date').value;
     const pkg    = document.getElementById('f-package').value;
@@ -230,6 +252,7 @@
           ${forms.setup   ? `<a href="${forms.setup}?event=${ev.id}"   class="btn-setup">🔧 Setup</a>`   : ''}
           ${forms.during  ? `<a href="${forms.during}?event=${ev.id}"  class="btn-during">🎉 During</a>` : ''}
           ${forms.clearup ? `<a href="${forms.clearup}?event=${ev.id}" class="btn-clearup">🧹 Clear Up</a>` : ''}
+          <button style="background:#c9a96e;color:white;padding:8px 14px;border-radius:7px;font-size:0.82rem;font-weight:600;cursor:pointer;border:none;" onclick="openEditModal('${ev.id}', '${ev.couple.replace(/'/g, "\\'")}', '${ev.date}')">✏️ Tasks</button>
           <button class="btn-delete" onclick="deleteEvent('${ev.id}', this)">🗑️</button>
         </div>`;
       list.appendChild(card);
@@ -254,5 +277,26 @@
     catch(e) { alert('Error: ' + e.message); btn.disabled = false; }
   }
 </script>
+
+<!-- EDIT MODAL -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:12px;padding:28px;max-width:700px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+    <h2 style="color:#6b4c3b;margin-bottom:6px;font-size:1.1rem;">✏️ Edit Custom Tasks</h2>
+    <p id="edit-modal-subtitle" style="font-size:0.85rem;color:#888;margin-bottom:18px;"></p>
+    <div class="task-header" style="display:grid;grid-template-columns:130px 160px 1fr 36px;gap:8px;margin-bottom:6px;">
+      <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:#aaa;">Form</span>
+      <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:#aaa;">Section</span>
+      <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:#aaa;">Task Label</span>
+      <span></span>
+    </div>
+    <div id="edit-tasks-list"></div>
+    <button class="btn-add-task" onclick="addEditTaskRow()">+ Add Custom Task</button>
+    <div style="display:flex;gap:10px;margin-top:18px;">
+      <button class="btn-primary" onclick="saveEditedTasks()">💾 Save Tasks</button>
+      <button onclick="closeEditModal()" style="padding:11px 20px;background:#eee;color:#555;border:none;border-radius:8px;font-weight:600;cursor:pointer;">Cancel</button>
+    </div>
+    <div id="edit-status" style="margin-top:10px;font-size:0.85rem;"></div>
+  </div>
+</div>
 </body>
 </html>
