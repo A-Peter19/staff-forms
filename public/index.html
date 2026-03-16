@@ -3,108 +3,124 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Waddesdon Hall – Event Dashboard</title>
+  <title>Waddesdon Hall - Event Dashboard</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f0eb; color: #2c2c2c; min-height: 100vh; padding: 20px; }
-    header { background: linear-gradient(135deg, #6b4c3b, #c9a96e); color: white; border-radius: 12px;
-      padding: 28px 32px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
-    header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
-    header p  { font-size: 0.95rem; opacity: 0.88; }
-    .card { background: white; border-radius: 10px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
-    .card h2 { font-size: 1.05rem; font-weight: 700; color: #6b4c3b; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 2px solid #f0ebe5; }
-    .card h3 { font-size: 0.9rem; font-weight: 700; color: #7a6050; margin: 20px 0 12px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
-    .field label { display: block; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #7a6050; margin-bottom: 4px; }
-    .field input, .field select { width: 100%; padding: 9px 11px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.92rem; background: #fdfaf7; }
-    .field input:focus, .field select:focus { outline: none; border-color: #c9a96e; }
-    .btn-primary { padding: 11px 24px; background: #6b4c3b; color: white; border: none; border-radius: 8px; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
-    .btn-primary:hover { opacity: 0.88; }
-    .btn-add-task { padding: 10px; width: 100%; background: transparent; border: 2px dashed #c9a96e;
-      border-radius: 8px; color: #6b4c3b; font-size: 0.88rem; font-weight: 600; cursor: pointer; margin-top: 8px; transition: background 0.15s; }
-    .btn-add-task:hover { background: #fdf5ea; }
-    #status-msg { margin-top: 12px; padding: 10px 14px; border-radius: 6px; font-size: 0.88rem; display: none; }
-    #status-msg.success { background: #d4edda; color: #1e5c2d; display: block; }
-    #status-msg.error   { background: #f8d7da; color: #721c24; display: block; }
-    .task-row { display: grid; grid-template-columns: 130px 160px 1fr 36px; gap: 8px; margin-bottom: 8px; align-items: center; }
-    .task-row select, .task-row input { padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.85rem; background: #fdfaf7; width: 100%; }
-    .task-row .btn-remove { width: 36px; height: 36px; background: #c0392b; border: none; border-radius: 6px; color: white; font-size: 1rem; cursor: pointer; flex-shrink: 0; }
-    .task-row .task-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; background: #fff3cd; color: #856404; margin-left: 6px; vertical-align: middle; }
-    .events-list { display: flex; flex-direction: column; gap: 14px; }
-    .event-card { border: 1px solid #e8e0d8; border-radius: 10px; padding: 18px 20px;
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; transition: box-shadow 0.15s; }
-    .event-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
-    .event-info h3 { font-size: 1rem; font-weight: 700; }
-    .event-info p  { font-size: 0.82rem; color: #888; margin-top: 3px; }
-    .event-info .pkg-badge { display: inline-block; margin-top: 6px; padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; background: #f0ebe5; color: #6b4c3b; }
-    .custom-count { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; background: #fff3cd; color: #856404; }
-    .event-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-    .event-actions a, .event-actions button { padding: 8px 14px; border-radius: 7px; text-decoration: none; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: none; transition: opacity 0.15s; }
-    .event-actions a:hover, .event-actions button:hover { opacity: 0.82; }
-    .btn-setup   { background: #6b4c3b; color: white; }
-    .btn-during  { background: #c9a96e; color: white; }
-    .btn-clearup { background: #3a7d44; color: white; }
-    .btn-delete  { background: #e05c5c; color: white; }
-    .search-bar { margin-bottom: 16px; }
-    .search-bar input { width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 7px; font-size: 0.92rem; background: #fdfaf7; }
-    .search-bar input:focus { outline: none; border-color: #c9a96e; }
-    #loading-events { text-align: center; padding: 24px; color: #aaa; font-size: 0.9rem; }
-    .empty-state { text-align: center; padding: 40px 20px; color: #aaa; font-size: 0.95rem; }
-    .task-header { display: grid; grid-template-columns: 130px 160px 1fr 36px; gap: 8px; margin-bottom: 6px; }
-    .task-header span { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #aaa; letter-spacing: 0.04em; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;background:#f5f0eb;color:#2c2c2c;min-height:100vh;padding:20px}
+    header{background:linear-gradient(135deg,#6b4c3b,#c9a96e);color:white;border-radius:12px;padding:28px 32px;margin-bottom:24px;box-shadow:0 4px 16px rgba(0,0,0,.15)}
+    header h1{font-size:1.8rem;font-weight:700;margin-bottom:4px}
+    header p{font-size:.95rem;opacity:.88}
+    .card{background:white;border-radius:10px;padding:24px;margin-bottom:24px;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+    .card h2{font-size:1.05rem;font-weight:700;color:#6b4c3b;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #f0ebe5}
+    .card h3{font-size:.85rem;font-weight:700;color:#7a6050;margin:20px 0 10px;text-transform:uppercase;letter-spacing:.05em}
+    .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+    .field label{display:block;font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#7a6050;margin-bottom:4px}
+    .field input,.field select{width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:.92rem;background:#fdfaf7}
+    .field input:focus,.field select:focus{outline:none;border-color:#c9a96e}
+    .btn-primary{padding:11px 24px;background:#6b4c3b;color:white;border:none;border-radius:8px;font-size:.92rem;font-weight:600;cursor:pointer}
+    .btn-primary:hover{opacity:.88}
+    .btn-add-task{padding:10px;width:100%;background:transparent;border:2px dashed #c9a96e;border-radius:8px;color:#6b4c3b;font-size:.88rem;font-weight:600;cursor:pointer;margin-top:8px}
+    .btn-add-task:hover{background:#fdf5ea}
+    .task-col-headers{display:grid;grid-template-columns:130px 1fr 1fr 36px;gap:8px;margin-bottom:6px}
+    .task-col-headers span{font-size:.72rem;font-weight:700;text-transform:uppercase;color:#aaa;letter-spacing:.04em}
+    .task-row{display:grid;grid-template-columns:130px 1fr 1fr 36px;gap:8px;margin-bottom:8px;align-items:center}
+    .task-row select,.task-row input{padding:8px 10px;border:1px solid #ddd;border-radius:6px;font-size:.85rem;background:#fdfaf7;width:100%}
+    .task-row .btn-remove{width:36px;height:36px;background:#c0392b;border:none;border-radius:6px;color:white;font-size:1rem;cursor:pointer}
+    #status-create{margin-top:12px;padding:10px 14px;border-radius:6px;font-size:.88rem;display:none}
+    #status-create.success{background:#d4edda;color:#1e5c2d;display:block}
+    #status-create.error{background:#f8d7da;color:#721c24;display:block}
+    .events-list{display:flex;flex-direction:column;gap:14px}
+    .event-card{border:1px solid #e8e0d8;border-radius:10px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .event-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.1)}
+    .event-info h3{font-size:1rem;font-weight:700}
+    .event-info p{font-size:.82rem;color:#888;margin-top:3px}
+    .pkg-badge{display:inline-block;margin-top:6px;padding:2px 10px;border-radius:20px;font-size:.75rem;font-weight:600;background:#f0ebe5;color:#6b4c3b}
+    .custom-count{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:700;background:#fff3cd;color:#856404}
+    .event-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .event-actions a,.event-actions button{padding:8px 14px;border-radius:7px;text-decoration:none;font-size:.82rem;font-weight:600;cursor:pointer;border:none}
+    .btn-setup{background:#6b4c3b;color:white}
+    .btn-during{background:#c9a96e;color:white}
+    .btn-clearup{background:#3a7d44;color:white}
+    .btn-tasks{background:#4a6fa5;color:white}
+    .btn-delete{background:#e05c5c;color:white}
+    .search-bar{margin-bottom:16px}
+    .search-bar input{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:7px;font-size:.92rem;background:#fdfaf7}
+    #loading-events{text-align:center;padding:24px;color:#aaa;font-size:.9rem}
+    .empty-state{text-align:center;padding:40px 20px;color:#aaa;font-size:.95rem}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+    .overlay.open{display:flex}
+    .modal{background:white;border-radius:12px;padding:28px;max-width:680px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+    .modal h2{color:#6b4c3b;margin-bottom:6px;font-size:1.1rem}
+    .modal-sub{font-size:.85rem;color:#888;margin-bottom:18px}
+    #edit-status{margin-top:10px;font-size:.85rem}
   </style>
 </head>
 <body>
 
 <header>
-  <h1>🏛️ Waddesdon Hall – Event Dashboard</h1>
+  <h1>Waddesdon Hall - Event Dashboard</h1>
   <p>Create and manage wedding events. Open setup, during, and clear-up checklists per event.</p>
 </header>
 
-<!-- CREATE EVENT -->
 <div class="card">
-  <h2>➕ Create New Event</h2>
+  <h2>Create New Event</h2>
   <div class="form-grid">
-    <div class="field"><label>Couple's Names</label><input type="text" id="f-couple" placeholder="e.g. Sophie & James"/></div>
+    <div class="field"><label>Couple Names</label><input type="text" id="f-couple" placeholder="e.g. Sophie and James"/></div>
     <div class="field"><label>Wedding Date</label><input type="date" id="f-date"/></div>
     <div class="field"><label>Package</label>
       <select id="f-package">
         <option value="">Select...</option>
-        <option value="flourish">🌸 The Flourish Package</option>
-        <option value="feast">🍽️ The Feast & Flourish Package</option>
-        <option value="foundation">🏛️ The Foundation Package</option>
-        <option value="twilight">🌙 The Twilight Package</option>
+        <option value="flourish">The Flourish Package</option>
+        <option value="feast">The Feast and Flourish Package</option>
+        <option value="foundation">The Foundation Package</option>
+        <option value="twilight">The Twilight Package</option>
       </select>
     </div>
     <div class="field"><label>Guest Count</label><input type="number" id="f-guests" placeholder="e.g. 80" min="1"/></div>
-    <div class="field"><label>Sash Colour</label><input type="text" id="f-sash" placeholder="e.g. Ivory, Dusty Rose..."/></div>
-    <div class="field"><label>Runner Style</label><input type="text" id="f-runner" placeholder="e.g. Hessian, Lace..."/></div>
+    <div class="field"><label>Sash Colour</label><input type="text" id="f-sash" placeholder="e.g. Ivory"/></div>
+    <div class="field"><label>Runner Style</label><input type="text" id="f-runner" placeholder="e.g. Hessian"/></div>
   </div>
-
-  <h3>✏️ Custom Tasks (Optional)</h3>
-  <div class="task-header">
+  <h3>Custom Tasks (Optional)</h3>
+  <div class="task-col-headers">
     <span>Form</span><span>Section</span><span>Task Label</span><span></span>
   </div>
-  <div id="custom-tasks-list"></div>
-  <button class="btn-add-task" onclick="addTaskRow()">+ Add Custom Task</button>
-
+  <div id="create-tasks-list"></div>
+  <button class="btn-add-task" id="btn-add-create-task">+ Add Custom Task</button>
   <br/><br/>
-  <button class="btn-primary" onclick="submitNewEvent()">Create Event</button>
-  <div id="status-msg"></div>
+  <button class="btn-primary" id="btn-create-event">Create Event</button>
+  <div id="status-create"></div>
 </div>
 
-<!-- EVENTS LIST -->
 <div class="card">
-  <h2>📋 All Events</h2>
-  <div class="search-bar"><input type="text" id="search-input" placeholder="🔍 Search by couple name or date..." oninput="filterEvents()"/></div>
+  <h2>All Events</h2>
+  <div class="search-bar"><input type="text" id="search-input" placeholder="Search by couple name or date..."/></div>
   <div id="loading-events">Loading events...</div>
   <div class="events-list" id="events-list"></div>
   <div class="empty-state" id="empty-state" style="display:none">No events found. Create one above.</div>
 </div>
 
+<!-- EDIT TASKS MODAL -->
+<div class="overlay" id="edit-overlay">
+  <div class="modal">
+    <h2>Edit Custom Tasks</h2>
+    <p class="modal-sub" id="edit-modal-sub"></p>
+    <div class="task-col-headers">
+      <span>Form</span><span>Section</span><span>Task Label</span><span></span>
+    </div>
+    <div id="edit-tasks-list"></div>
+    <button class="btn-add-task" id="btn-add-edit-task">+ Add Custom Task</button>
+    <div style="display:flex;gap:10px;margin-top:18px">
+      <button class="btn-primary" id="btn-save-tasks">Save Tasks</button>
+      <button id="btn-close-modal" style="padding:11px 20px;background:#eee;color:#555;border:none;border-radius:8px;font-weight:600;cursor:pointer">Cancel</button>
+    </div>
+    <div id="edit-status"></div>
+  </div>
+</div>
+
 <script>
+  // Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBa9zA9-RlT5SVAaOb208_KE644zY8dvUE",
     authDomain: "staff-forms-42a6f.firebaseapp.com",
@@ -118,9 +134,9 @@
   const db = firebase.firestore();
 
   const SECTION_MAPS = {
-    setup:   {s1:"Hall Access",s2:"Tables",s3:"Chairs & Covers",s4:"Décor & Centrepieces",s5:"Gift Table",s6:"Bar Setup",s7:"Final Checks"},
+    setup:   {s1:"Hall Access",s2:"Tables",s3:"Chairs & Covers",s4:"Decor & Centrepieces",s5:"Gift Table",s6:"Bar Setup",s7:"Final Checks"},
     during:  {s1:"Guest Arrival",s2:"Bar Service",s3:"Food Service",s4:"Speeches & Toasts",s5:"Hall Checks",s6:"Evening Transition",s7:"Last Orders"},
-    clearup: {s1:"Guest Departure",s2:"Bar Closedown",s3:"Tables & Chairs",s4:"Décor Pack Down",s5:"Kitchen",s6:"Hall Clean",s7:"Lock Up"}
+    clearup: {s1:"Guest Departure",s2:"Bar Closedown",s3:"Tables & Chairs",s4:"Decor Pack Down",s5:"Kitchen",s6:"Hall Clean",s7:"Lock Up"}
   };
 
   const PACKAGE_FORMS = {
@@ -131,144 +147,189 @@
   };
 
   const PACKAGE_LABELS = {
-    flourish:"🌸 Flourish", feast:"🍽️ Feast & Flourish", foundation:"🏛️ Foundation", twilight:"🌙 Twilight"
+    flourish:"Flourish", feast:"Feast & Flourish", foundation:"Foundation", twilight:"Twilight"
   };
 
-  // ── Custom task rows ────────────────────────────────────────────────────────
+  // ── Section options helper ─────────────────────────────────────────────────
   function buildSectionOptions(formVal) {
-    const map = SECTION_MAPS[formVal] || {};
-    return Object.entries(map).map(([k,v]) => `<option value="${k}">${v}</option>`).join('');
+    const map = SECTION_MAPS[formVal] || SECTION_MAPS.setup;
+    return Object.entries(map).map(function(entry) {
+      return '<option value="' + entry[0] + '">' + entry[1] + '</option>';
+    }).join('');
   }
 
-  function addTaskRow(task = {}) {
-    const list = document.getElementById('custom-tasks-list');
-    const row  = document.createElement('div');
+  // ── Build a task row element ───────────────────────────────────────────────
+  function buildTaskRow(task) {
+    task = task || {};
+    var fVal = task.form || 'setup';
+    var row = document.createElement('div');
     row.className = 'task-row';
-    const fVal = task.form || 'setup';
 
-    const formSel = document.createElement('select');
+    var formSel = document.createElement('select');
     formSel.className = 'task-form';
-    ['setup','during','clearup'].forEach(f => {
-      const opt = document.createElement('option');
-      opt.value = f;
-      opt.textContent = f === 'setup' ? '🔧 Setup' : f === 'during' ? '🎉 During' : '🧹 Clear Up';
-      if (f === fVal) opt.selected = true;
+    var formOptions = [{v:'setup',l:'Setup'},{v:'during',l:'During'},{v:'clearup',l:'Clear Up'}];
+    formOptions.forEach(function(o) {
+      var opt = document.createElement('option');
+      opt.value = o.v;
+      opt.textContent = o.l;
+      if (o.v === fVal) opt.selected = true;
       formSel.appendChild(opt);
     });
-    formSel.addEventListener('change', function() { updateSectionOpts(this); });
+    formSel.addEventListener('change', function() {
+      secSel.innerHTML = buildSectionOptions(this.value);
+    });
 
-    const secSel = document.createElement('select');
+    var secSel = document.createElement('select');
     secSel.className = 'task-section';
     secSel.innerHTML = buildSectionOptions(fVal);
     if (task.section) secSel.value = task.section;
 
-    const labelIn = document.createElement('input');
+    var labelIn = document.createElement('input');
     labelIn.type = 'text';
     labelIn.className = 'task-label';
-    labelIn.placeholder = 'e.g. Set up sweetheart table near window';
-    labelIn.value = task.label || '';
+    labelIn.placeholder = 'e.g. Set up sweetheart table';
+    if (task.label) labelIn.value = task.label;
 
-    const removeBtn = document.createElement('button');
+    var removeBtn = document.createElement('button');
     removeBtn.className = 'btn-remove';
-    removeBtn.textContent = '✕';
     removeBtn.type = 'button';
+    removeBtn.textContent = 'x';
     removeBtn.addEventListener('click', function() { row.remove(); });
 
     row.appendChild(formSel);
     row.appendChild(secSel);
     row.appendChild(labelIn);
     row.appendChild(removeBtn);
-    list.appendChild(row);
+    return row;
   }
 
-  function updateSectionOpts(sel) {
-    const secSel = sel.closest('.task-row').querySelector('.task-section');
-    secSel.innerHTML = buildSectionOptions(sel.value);
+  function collectTasksFrom(containerId) {
+    var rows = document.getElementById(containerId).querySelectorAll('.task-row');
+    var result = [];
+    rows.forEach(function(row) {
+      var label = row.querySelector('.task-label').value.trim();
+      if (label) {
+        result.push({
+          form:    row.querySelector('.task-form').value,
+          section: row.querySelector('.task-section').value,
+          label:   label
+        });
+      }
+    });
+    return result;
   }
 
-  function collectTasks() {
-    return [...document.querySelectorAll('.task-row')].map(row => ({
-      form:    row.querySelector('.task-form').value,
-      section: row.querySelector('.task-section').value,
-      label:   row.querySelector('.task-label').value.trim()
-    })).filter(t => t.label !== '');
-  }
+  // ── Create form: Add Task button ───────────────────────────────────────────
+  document.getElementById('btn-add-create-task').addEventListener('click', function() {
+    document.getElementById('create-tasks-list').appendChild(buildTaskRow({}));
+  });
 
-  // ── Create event ────────────────────────────────────────────────────────────
+  // ── Create event ───────────────────────────────────────────────────────────
   function makeEventId(couple, date) {
-    return (couple + '-' + date).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    return (couple + '-' + date).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   }
 
-  async function submitNewEvent() {
-    const couple = document.getElementById('f-couple').value.trim();
-    const date   = document.getElementById('f-date').value;
-    const pkg    = document.getElementById('f-package').value;
-    const msg    = document.getElementById('status-msg');
+  document.getElementById('btn-create-event').addEventListener('click', async function() {
+    var couple  = document.getElementById('f-couple').value.trim();
+    var date    = document.getElementById('f-date').value;
+    var pkg     = document.getElementById('f-package').value;
+    var status  = document.getElementById('status-create');
     if (!couple || !date || !pkg) {
-      msg.className = 'error'; msg.textContent = '⚠️ Please fill in couple names, date and package.'; return;
+      status.className = 'error';
+      status.textContent = 'Please fill in couple names, date and package.';
+      return;
     }
-    const eventId = makeEventId(couple, date);
+    var eventId = makeEventId(couple, date);
+    var tasks   = collectTasksFrom('create-tasks-list');
     try {
       await db.collection('events').doc(eventId).set({
-        couple, date, package: pkg,
-        guests:  parseInt(document.getElementById('f-guests').value) || 0,
-        sash:    document.getElementById('f-sash').value.trim(),
-        runner:  document.getElementById('f-runner').value.trim(),
-        customTasks: collectTasks(),
-        createdAt: new Date().toISOString()
+        couple:      couple,
+        date:        date,
+        package:     pkg,
+        guests:      parseInt(document.getElementById('f-guests').value) || 0,
+        sash:        document.getElementById('f-sash').value.trim(),
+        runner:      document.getElementById('f-runner').value.trim(),
+        customTasks: tasks,
+        createdAt:   new Date().toISOString()
       });
-      msg.className = 'success'; msg.textContent = '✅ Event created! — ' + couple + ' (' + date + ')';
-      ['f-couple','f-date','f-package','f-guests','f-sash','f-runner'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('custom-tasks-list').innerHTML = '';
-    } catch(e) { msg.className = 'error'; msg.textContent = '❌ ' + e.message; }
-  }
+      status.className = 'success';
+      status.textContent = 'Event created: ' + couple + ' (' + date + ')' + (tasks.length ? ' with ' + tasks.length + ' custom task(s)' : '');
+      ['f-couple','f-date','f-package','f-guests','f-sash','f-runner'].forEach(function(id) {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('create-tasks-list').innerHTML = '';
+    } catch(e) {
+      status.className = 'error';
+      status.textContent = 'Error: ' + e.message;
+    }
+  });
 
-  // ── Load & render events ────────────────────────────────────────────────────
-  let allEvents = [];
+  // ── Event list ─────────────────────────────────────────────────────────────
+  var allEvents = [];
+
   function renderEvents(events) {
-    const list  = document.getElementById('events-list');
-    const empty = document.getElementById('empty-state');
+    var list  = document.getElementById('events-list');
+    var empty = document.getElementById('empty-state');
     list.innerHTML = '';
     if (!events.length) { empty.style.display = 'block'; return; }
     empty.style.display = 'none';
-    events.sort((a,b) => a.date.localeCompare(b.date));
-    events.forEach(ev => {
-      const forms   = PACKAGE_FORMS[ev.package] || {};
-      const label   = PACKAGE_LABELS[ev.package] || ev.package;
-      const taskCnt = (ev.customTasks||[]).length;
-      const formatted = ev.date ? new Date(ev.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : 'No date';
-      const card = document.createElement('div');
+    events.sort(function(a,b) { return a.date.localeCompare(b.date); });
+    events.forEach(function(ev) {
+      var forms    = PACKAGE_FORMS[ev.package] || {};
+      var label    = PACKAGE_LABELS[ev.package] || ev.package;
+      var taskCnt  = (ev.customTasks || []).length;
+      var dateFmt  = ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : 'No date';
+      var card = document.createElement('div');
       card.className = 'event-card';
-      card.dataset.couple = ev.couple.toLowerCase();
-      card.dataset.date   = ev.date;
-      card.innerHTML = `
-        <div class="event-info">
-          <h3>${ev.couple}</h3>
-          <p>${formatted} &nbsp;·&nbsp; ${ev.guests||'?'} guests</p>
-          <span class="pkg-badge">${label}</span>
-          ${taskCnt ? `<span class="custom-count">+${taskCnt} custom task${taskCnt>1?'s':''}</span>` : ''}
-        </div>
-        <div class="event-actions">
-          ${forms.setup   ? `<a href="${forms.setup}?event=${ev.id}"   class="btn-setup">🔧 Setup</a>`   : ''}
-          ${forms.during  ? `<a href="${forms.during}?event=${ev.id}"  class="btn-during">🎉 During</a>` : ''}
-          ${forms.clearup ? `<a href="${forms.clearup}?event=${ev.id}" class="btn-clearup">🧹 Clear Up</a>` : ''}
-          <button style="background:#c9a96e;color:white;padding:8px 14px;border-radius:7px;font-size:0.82rem;font-weight:600;cursor:pointer;border:none;" onclick="openEditModal('${ev.id}', '${ev.couple.replace(/'/g, "\\'")}', '${ev.date}')">✏️ Tasks</button>
-          <button class="btn-delete" onclick="deleteEvent('${ev.id}', this)">🗑️</button>
-        </div>`;
+      card.dataset.search = (ev.couple + ' ' + ev.date).toLowerCase();
+      var infoDiv = document.createElement('div');
+      infoDiv.className = 'event-info';
+      infoDiv.innerHTML = '<h3>' + ev.couple + '</h3>'
+        + '<p>' + dateFmt + ' &nbsp;·&nbsp; ' + (ev.guests || '?') + ' guests</p>'
+        + '<span class="pkg-badge">' + label + '</span>'
+        + (taskCnt ? '<span class="custom-count">+' + taskCnt + ' custom task' + (taskCnt > 1 ? 's' : '') + '</span>' : '');
+      var actDiv = document.createElement('div');
+      actDiv.className = 'event-actions';
+      if (forms.setup) {
+        var a = document.createElement('a'); a.href = forms.setup + '?event=' + ev.id; a.className = 'btn-setup'; a.textContent = 'Setup'; actDiv.appendChild(a);
+      }
+      if (forms.during) {
+        var b = document.createElement('a'); b.href = forms.during + '?event=' + ev.id; b.className = 'btn-during'; b.textContent = 'During'; actDiv.appendChild(b);
+      }
+      if (forms.clearup) {
+        var c = document.createElement('a'); c.href = forms.clearup + '?event=' + ev.id; c.className = 'btn-clearup'; c.textContent = 'Clear Up'; actDiv.appendChild(c);
+      }
+      var tasksBtn = document.createElement('button');
+      tasksBtn.className = 'btn-tasks';
+      tasksBtn.textContent = 'Tasks';
+      tasksBtn.addEventListener('click', (function(e) { return function() { openEditModal(e); }; })(ev));
+      actDiv.appendChild(tasksBtn);
+      var delBtn = document.createElement('button');
+      delBtn.className = 'btn-delete';
+      delBtn.textContent = 'Delete';
+      delBtn.addEventListener('click', (function(eid, btn) { return function() { deleteEvent(eid, btn); }; })(ev.id, delBtn));
+      actDiv.appendChild(delBtn);
+      card.appendChild(infoDiv);
+      card.appendChild(actDiv);
       list.appendChild(card);
     });
   }
 
-  function filterEvents() {
-    const q = document.getElementById('search-input').value.toLowerCase();
-    renderEvents(allEvents.filter(ev => ev.couple.toLowerCase().includes(q) || ev.date.includes(q)));
-  }
+  document.getElementById('search-input').addEventListener('input', function() {
+    var q = this.value.toLowerCase();
+    var filtered = allEvents.filter(function(ev) {
+      return (ev.couple + ' ' + ev.date).toLowerCase().includes(q);
+    });
+    renderEvents(filtered);
+  });
 
-  db.collection('events').onSnapshot(snap => {
+  db.collection('events').onSnapshot(function(snap) {
     document.getElementById('loading-events').style.display = 'none';
-    allEvents = snap.docs.map(d => ({id:d.id,...d.data()}));
+    allEvents = snap.docs.map(function(d) { return Object.assign({id: d.id}, d.data()); });
     renderEvents(allEvents);
-  }, err => { document.getElementById('loading-events').textContent = '⚠️ ' + err.message; });
+  }, function(err) {
+    document.getElementById('loading-events').textContent = 'Could not load events: ' + err.message;
+  });
 
   async function deleteEvent(eventId, btn) {
     if (!confirm('Delete this event? This cannot be undone.')) return;
@@ -276,27 +337,49 @@
     try { await db.collection('events').doc(eventId).delete(); }
     catch(e) { alert('Error: ' + e.message); btn.disabled = false; }
   }
-</script>
 
-<!-- EDIT MODAL -->
-<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
-  <div style="background:white;border-radius:12px;padding:28px;max-width:700px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
-    <h2 style="color:#6b4c3b;margin-bottom:6px;font-size:1.1rem;">✏️ Edit Custom Tasks</h2>
-    <p id="edit-modal-subtitle" style="font-size:0.85rem;color:#888;margin-bottom:18px;"></p>
-    <div class="task-header" style="display:grid;grid-template-columns:130px 160px 1fr 36px;gap:8px;margin-bottom:6px;">
-      <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:#aaa;">Form</span>
-      <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:#aaa;">Section</span>
-      <span style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:#aaa;">Task Label</span>
-      <span></span>
-    </div>
-    <div id="edit-tasks-list"></div>
-    <button class="btn-add-task" onclick="addEditTaskRow()">+ Add Custom Task</button>
-    <div style="display:flex;gap:10px;margin-top:18px;">
-      <button class="btn-primary" onclick="saveEditedTasks()">💾 Save Tasks</button>
-      <button onclick="closeEditModal()" style="padding:11px 20px;background:#eee;color:#555;border:none;border-radius:8px;font-weight:600;cursor:pointer;">Cancel</button>
-    </div>
-    <div id="edit-status" style="margin-top:10px;font-size:0.85rem;"></div>
-  </div>
-</div>
+  // ── Edit Tasks Modal ───────────────────────────────────────────────────────
+  var editingEventId = null;
+
+  function openEditModal(ev) {
+    editingEventId = ev.id;
+    document.getElementById('edit-modal-sub').textContent = ev.couple + '  -  ' + ev.date;
+    var list = document.getElementById('edit-tasks-list');
+    list.innerHTML = '';
+    (ev.customTasks || []).forEach(function(t) {
+      list.appendChild(buildTaskRow(t));
+    });
+    document.getElementById('edit-status').textContent = '';
+    document.getElementById('edit-overlay').classList.add('open');
+  }
+
+  document.getElementById('btn-close-modal').addEventListener('click', function() {
+    document.getElementById('edit-overlay').classList.remove('open');
+    editingEventId = null;
+  });
+
+  document.getElementById('btn-add-edit-task').addEventListener('click', function() {
+    document.getElementById('edit-tasks-list').appendChild(buildTaskRow({}));
+  });
+
+  document.getElementById('btn-save-tasks').addEventListener('click', async function() {
+    if (!editingEventId) return;
+    var status = document.getElementById('edit-status');
+    var tasks  = collectTasksFrom('edit-tasks-list');
+    status.textContent = 'Saving...';
+    try {
+      await db.collection('events').doc(editingEventId).update({ customTasks: tasks });
+      status.style.color = '#1e5c2d';
+      status.textContent = 'Saved ' + tasks.length + ' custom task(s)!';
+      setTimeout(function() {
+        document.getElementById('edit-overlay').classList.remove('open');
+        editingEventId = null;
+      }, 1200);
+    } catch(e) {
+      status.style.color = '#721c24';
+      status.textContent = 'Error: ' + e.message;
+    }
+  });
+</script>
 </body>
 </html>
