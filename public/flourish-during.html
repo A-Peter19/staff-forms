@@ -213,8 +213,8 @@
   </div>
 </div>
 <div class="actions">
-  <button id="btn-save" onclick="saveForm()" style="background:#6b4c3b;color:white;">💾 Save</button>
-  <button id="btn-reset" onclick="resetAll()" style="background:#e05c5c;color:white;">🔄 Reset</button>
+  <button id="btn-save" onclick="saveForm()" style="background:#6b4c3b;color:white;">Save</button>
+  <button id="btn-reset" onclick="resetAll()" style="background:#e05c5c;color:white;">Reset</button>
 </div>
 
 <script>
@@ -230,76 +230,78 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const EVENT_ID  = urlParams.get('event');
-  const FORM_KEY  = 'during';
+  const EVENT_ID = new URLSearchParams(window.location.search).get('event');
+  const FORM_KEY = 'during';
 
-  // ── No event warning ────────────────────────────────────────────────────────
+  // No event warning
   if (!EVENT_ID) {
-    const banner = document.createElement('div');
+    var banner = document.createElement('div');
     banner.style.cssText = 'background:#fff3cd;color:#856404;padding:14px 20px;border-radius:10px;margin-bottom:20px;font-weight:600;font-size:0.92rem;';
-    banner.innerHTML = '⚠️ No event selected. <a href="index.html" style="color:#6b4c3b;">Go to the dashboard</a> and open this form from there.';
+    banner.innerHTML = 'No event selected. <a href="index.html" style="color:#6b4c3b;">Go to the dashboard</a> and open this form from there.';
     document.body.insertBefore(banner, document.body.children[2]);
   } else {
-
-    db.collection('events').doc(EVENT_ID).get().then(snap => {
+    db.collection('events').doc(EVENT_ID).get().then(function(snap) {
       if (!snap.exists) return;
-      const ev = snap.data();
+      var ev = snap.data();
 
       // Update header subtitle
-      const sub = document.querySelector('header p');
-      if (sub) sub.textContent = ev.couple + '  ·  '
-        + (ev.date ? new Date(ev.date+'T00:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}) : '')
-        + '  ·  ' + (ev.guests||'?') + ' guests';
+      var sub = document.querySelector('header p');
+      if (sub) {
+        var dateFmt = ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'}) : '';
+        sub.textContent = ev.couple + '  -  ' + dateFmt + '  -  ' + (ev.guests || '?') + ' guests';
+      }
 
       // Pre-fill meta fields
-      const gf = document.getElementById('meta-guests'); if (gf) gf.value = ev.guests || '';
-      const sf = document.getElementById('meta-sash');   if (sf) sf.value = ev.sash   || '';
-      const rf = document.getElementById('meta-runner'); if (rf) rf.value = ev.runner || '';
+      var gf = document.getElementById('meta-guests'); if (gf) gf.value = ev.guests || '';
+      var sf = document.getElementById('meta-sash');   if (sf) sf.value = ev.sash   || '';
+      var rf = document.getElementById('meta-runner'); if (rf) rf.value = ev.runner || '';
 
-      // ── Inject custom tasks for this form ─────────────────────────────────
-      const customTasks = (ev.customTasks || []).filter(t => t.form === FORM_KEY);
-      customTasks.forEach(task => {
-        // Find the section body whose checklist items match the section ID
-        const sectionBodies = document.querySelectorAll('.section-body');
-        sectionBodies.forEach(body => {
-          const sample = body.querySelector('.checklist-item[data-section="' + task.section + '"]');
+      // Inject custom tasks for this form
+      var customTasks = (ev.customTasks || []).filter(function(t) { return t.form === FORM_KEY; });
+      customTasks.forEach(function(task) {
+        var sectionBodies = document.querySelectorAll('.section-body');
+        sectionBodies.forEach(function(body) {
+          var sample = body.querySelector('.checklist-item[data-section="' + task.section + '"]');
           if (!sample) return;
-          // Build the custom checklist item
-          const item = document.createElement('div');
+          var item = document.createElement('div');
           item.className = 'checklist-item custom-task';
           item.dataset.section = task.section;
-          item.innerHTML =
-            '<input type="checkbox"/>'
-            + '<div class="item-content">'
-            + '<div class="item-label">' + task.label
-            + ' <span class="custom-badge">★ Custom</span></div>'
-            + '</div>';
-          // Insert before the notes-row
-          const notesRow = body.querySelector('.notes-row');
-          if (notesRow) body.insertBefore(item, notesRow);
-          else body.appendChild(item);
-          // Wire up checkbox
-          item.querySelector('input').addEventListener('change', function() {
-            this.closest('.checklist-item').classList.toggle('done', this.checked);
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          var content = document.createElement('div');
+          content.className = 'item-content';
+          var labelDiv = document.createElement('div');
+          labelDiv.className = 'item-label';
+          labelDiv.textContent = task.label;
+          var badge = document.createElement('span');
+          badge.className = 'custom-badge';
+          badge.textContent = 'Custom';
+          labelDiv.appendChild(badge);
+          content.appendChild(labelDiv);
+          item.appendChild(cb);
+          item.appendChild(content);
+          cb.addEventListener('change', function() {
+            item.classList.toggle('done', this.checked);
             updateProgress();
           });
+          var notesRow = body.querySelector('.notes-row');
+          if (notesRow) body.insertBefore(item, notesRow);
+          else body.appendChild(item);
         });
       });
 
-      // Recount progress now custom items are in DOM
       updateProgress();
 
-      // ── Load saved form data ───────────────────────────────────────────────
-      const saved = ev[FORM_KEY];
+      // Load saved form data
+      var saved = ev[FORM_KEY];
       if (saved) {
         if (saved.teamLeader) document.getElementById('team-leader').value = saved.teamLeader;
         document.getElementById('staff-list').innerHTML = '';
-        (saved.staffMembers || []).forEach(n => addStaffMember(n));
+        (saved.staffMembers || []).forEach(function(n) { addStaffMember(n); });
         updateStaffBadge();
-        const cbs = document.querySelectorAll('.checklist-item input[type="checkbox"]');
-        cbs.forEach((cb, i) => {
-          cb.checked = !!(saved.checkboxes && saved.checkboxes['cb_'+i]);
+        var cbs = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+        cbs.forEach(function(cb, i) {
+          cb.checked = !!(saved.checkboxes && saved.checkboxes['cb_' + i]);
           cb.closest('.checklist-item').classList.toggle('done', cb.checked);
         });
         updateProgress();
@@ -309,52 +311,52 @@
     });
   }
 
-  // ── Save ────────────────────────────────────────────────────────────────────
+  // Save
   async function saveForm() {
-    if (!EVENT_ID) { alert('No event selected — cannot save.'); return; }
-    const checkboxes = {};
-    document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach((cb,i) => {
-      checkboxes['cb_'+i] = cb.checked;
+    if (!EVENT_ID) { alert('No event selected.'); return; }
+    var checkboxes = {};
+    document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb, i) {
+      checkboxes['cb_' + i] = cb.checked;
     });
-    const data = {
-      [FORM_KEY]: {
-        teamLeader:   document.getElementById('team-leader').value,
-        staffMembers: [...document.querySelectorAll('.staff-input')].map(i => i.value),
-        checkboxes,
-        savedAt: new Date().toISOString()
-      }
+    var data = {};
+    data[FORM_KEY] = {
+      teamLeader:   document.getElementById('team-leader').value,
+      staffMembers: Array.from(document.querySelectorAll('.staff-input')).map(function(i) { return i.value; }),
+      checkboxes:   checkboxes,
+      savedAt:      new Date().toISOString()
     };
-    const btn = document.getElementById('btn-save');
-    btn.textContent = '💾 Saving...';
+    var btn = document.getElementById('btn-save');
+    btn.textContent = 'Saving...';
     try {
-      await db.collection('events').doc(EVENT_ID).set(data, {merge: true});
-      btn.textContent = '✅ Saved!';
-      setTimeout(() => btn.textContent = '💾 Save', 2500);
+      await db.collection('events').doc(EVENT_ID).set(data, { merge: true });
+      btn.textContent = 'Saved!';
+      setTimeout(function() { btn.textContent = 'Save'; }, 2500);
     } catch(e) {
-      btn.textContent = '❌ Error';
+      btn.textContent = 'Error';
       alert('Save failed: ' + e.message);
-      setTimeout(() => btn.textContent = '💾 Save', 2500);
+      setTimeout(function() { btn.textContent = 'Save'; }, 2500);
     }
   }
 
-  // ── Progress ────────────────────────────────────────────────────────────────
+  // Progress
   function updateProgress() {
-    const all  = document.querySelectorAll('.checklist-item input[type="checkbox"]');
-    const done = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked');
-    const pct  = all.length ? Math.round((done.length/all.length)*100) : 0;
-    document.getElementById('progress-text').textContent = done.length+' / '+all.length+' items complete';
-    document.getElementById('bar-fill').style.width = pct+'%';
-    document.querySelectorAll('.section').forEach(sec => {
-      const item = sec.querySelector('.checklist-item');
+    var all    = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+    var done   = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked');
+    var pct    = all.length ? Math.round((done.length / all.length) * 100) : 0;
+    document.getElementById('progress-text').textContent = done.length + ' / ' + all.length + ' items complete';
+    document.getElementById('bar-fill').style.width = pct + '%';
+    document.querySelectorAll('.section').forEach(function(sec) {
+      var item = sec.querySelector('.checklist-item');
       if (!item) return;
-      const sid = item.dataset.section;
-      const items   = sec.querySelectorAll('.checklist-item[data-section="'+sid+'"] input[type="checkbox"]');
-      const checked = sec.querySelectorAll('.checklist-item[data-section="'+sid+'"] input[type="checkbox"]:checked');
-      const badge = sec.querySelector('.badge');
-      if (badge && sid) badge.textContent = checked.length+'/'+items.length;
+      var sid     = item.dataset.section;
+      var items   = sec.querySelectorAll('.checklist-item[data-section="' + sid + '"] input[type="checkbox"]');
+      var checked = sec.querySelectorAll('.checklist-item[data-section="' + sid + '"] input[type="checkbox"]:checked');
+      var badge   = sec.querySelector('.badge');
+      if (badge && sid) badge.textContent = checked.length + '/' + items.length;
     });
   }
-  document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+
+  document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb) {
     cb.addEventListener('change', function() {
       this.closest('.checklist-item').classList.toggle('done', this.checked);
       updateProgress();
@@ -363,30 +365,40 @@
   updateProgress();
 
   function toggleSection(header) {
-    const body = header.nextElementSibling;
+    var body = header.nextElementSibling;
     body.style.display = body.style.display === 'none' ? 'block' : 'none';
   }
 
-  function addStaffMember(value='') {
-    const list = document.getElementById('staff-list');
-    const row  = document.createElement('div');
+  function addStaffMember(value) {
+    value = value || '';
+    var list = document.getElementById('staff-list');
+    var row  = document.createElement('div');
     row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;';
-    row.innerHTML = '<input type="text" class="staff-input" placeholder="Staff member name..." value="'+value+'" style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.92rem;background:#fdfaf7;"/>'
-      +'<button type="button" onclick="this.parentElement.remove();updateStaffBadge()" style="width:38px;height:38px;background:#c0392b;border:none;border-radius:6px;color:white;font-size:1rem;cursor:pointer;flex-shrink:0;">✕</button>';
-    row.querySelector('input').addEventListener('input', updateStaffBadge);
+    var inp = document.createElement('input');
+    inp.type = 'text'; inp.className = 'staff-input';
+    inp.placeholder = 'Staff member name...'; inp.value = value;
+    inp.style.cssText = 'flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.92rem;background:#fdfaf7;';
+    inp.addEventListener('input', updateStaffBadge);
+    var removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.textContent = 'x';
+    removeBtn.style.cssText = 'width:38px;height:38px;background:#c0392b;border:none;border-radius:6px;color:white;font-size:1rem;cursor:pointer;flex-shrink:0;';
+    removeBtn.addEventListener('click', function() { row.remove(); updateStaffBadge(); });
+    row.appendChild(inp); row.appendChild(removeBtn);
     list.appendChild(row);
     updateStaffBadge();
   }
+
   function updateStaffBadge() {
-    const inputs = document.querySelectorAll('.staff-input');
-    const filled = [...inputs].filter(i => i.value.trim()!=='').length;
-    const badge  = document.getElementById('badge-staff');
-    if (badge) badge.textContent = filled+' staff';
+    var inputs = document.querySelectorAll('.staff-input');
+    var filled = Array.from(inputs).filter(function(i) { return i.value.trim() !== ''; }).length;
+    var badge  = document.getElementById('badge-staff');
+    if (badge) badge.textContent = filled + ' staff';
   }
 
   function resetAll() {
-    if (!confirm('Reset all checkboxes? Saved data in Firebase will not be affected.')) return;
-    document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+    if (!confirm('Reset all checkboxes?')) return;
+    document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb) {
       cb.checked = false;
       cb.closest('.checklist-item').classList.remove('done');
     });
