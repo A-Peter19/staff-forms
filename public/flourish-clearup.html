@@ -213,14 +213,18 @@
 <div class="actions">
   <button id="btn-reset" onclick="resetAll()">🔄 Reset</button>
 </div>
-<script>
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY", authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID", storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID", appId: "YOUR_APP_ID"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
+ <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBa9zA9-RlT5SVAaOb208_KE644zY8dvUE",
+            authDomain: "staff-forms-42a6f.firebaseapp.com",
+            databaseURL: "https://staff-forms-42a6f-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "staff-forms-42a6f",
+            storageBucket: "staff-forms-42a6f.firebasestorage.app",
+            messagingSenderId: "977408765626",
+            appId: "1:977408765626:web:809d5ad1eea80470b99c83"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
   function updateProgress() {
     const all  = document.querySelectorAll('.checklist-item input[type="checkbox"]');
