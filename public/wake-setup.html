@@ -361,6 +361,10 @@
     <div class="header">
         <h1>🏛️ Wake Setup Checklist</h1>
         <p>Select guest count below to see required quantities</p>
+        <div id="staffBanner" style="margin-top:12px;padding:10px 14px;background:rgba(32,128,141,0.1);border-radius:8px;font-size:14px;display:flex;justify-content:space-between;align-items:center;">
+            <span>👤 Ticking as: <strong id="staffInitialsDisplay">Not set</strong></span>
+            <button onclick="changeInitials()" style="background:none;border:1px solid #20808D;color:#20808D;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">Change</button>
+        </div>
         <div class="guest-selector">
             <button class="guest-btn active" data-count="60">60 Guests</button>
             <button class="guest-btn" data-count="80">80 Guests</button>
