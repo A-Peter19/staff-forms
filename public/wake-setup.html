@@ -786,15 +786,29 @@
 
                 updateQuantities();
 
-                // Update all checkboxes to match Firebase state
                 document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                     const key = `${cb.dataset.section}-${cb.dataset.task}`;
-                    const shouldBeChecked = !!(state.tasks && state.tasks[key]);
+                    const taskData = state.tasks && state.tasks[key];
+                    const shouldBeChecked = !!(taskData && taskData.checked);
                     cb.checked = shouldBeChecked;
                     cb.closest('.task').classList.toggle('completed', shouldBeChecked);
+
+                    // Show or clear initials/time
+                    let meta = cb.closest('.task').querySelector('.task-meta');
+                    if (!meta) {
+                        meta = document.createElement('div');
+                        meta.className = 'task-meta';
+                        cb.closest('.task').querySelector('.task-content').appendChild(meta);
+                    }
+                    if (shouldBeChecked && taskData.initials) {
+                        meta.innerHTML = `<span class="task-initials">${taskData.initials}</span><span class="task-time">${taskData.time || ''}</span>`;
+                    } else {
+                        meta.innerHTML = '';
+                    }
                 });
 
                 updateAllProgress();
+                saveProgress();
             });
         }
 
