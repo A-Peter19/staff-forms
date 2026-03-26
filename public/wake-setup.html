@@ -801,15 +801,21 @@
 
         // Save state
         function saveState() {
+            if (!currentEventId) return;
             const tasks = {};
             document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
                 const key = `${cb.dataset.section}-${cb.dataset.task}`;
-                tasks[key] = true;
+                tasks[key] = {
+                    checked: true,
+                    initials: staffInitials || '?',
+                    time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+                };
             });
 
-            db.ref('wakeSetup').set({
+            db.ref(`events/${currentEventId}/wakeSetup`).set({
                 guests: currentGuests,
                 tasks: tasks,
+                eventName: currentEventName,
                 timestamp: new Date().toISOString()
             });
         }
