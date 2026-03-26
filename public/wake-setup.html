@@ -773,7 +773,7 @@
         let currentGuests = 60;
 
         function loadState() {
-            db.ref('wakeSetup').on('value', (snapshot) => {
+            db.ref(`events/${currentEventId}/wakeSetup`).on('value', (snapshot) => {
                 const state = snapshot.val();
                 if (!state) return;
 
@@ -808,7 +808,6 @@
                 });
 
                 updateAllProgress();
-                saveProgress();
             });
         }
 
