@@ -21,11 +21,7 @@
             --color-error: #C0152F;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -45,324 +41,148 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .header h1 {
-            font-size: 24px;
-            margin-bottom: 16px;
-            color: var(--color-primary);
-        }
+        .header h1 { font-size: 24px; margin-bottom: 16px; color: var(--color-primary); }
 
-        .guest-selector {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 16px;
-        }
+        .guest-selector { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
 
         .guest-btn {
-            flex: 1;
-            min-width: 80px;
-            padding: 12px 16px;
+            flex: 1; min-width: 80px; padding: 12px 16px;
             border: 2px solid var(--color-border);
             background: var(--color-surface);
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            transition: all 0.2s;
+            border-radius: 8px; cursor: pointer;
+            font-size: 16px; font-weight: 500; transition: all 0.2s;
         }
 
-        .guest-btn:hover {
-            border-color: var(--color-primary);
-        }
-
-        .guest-btn.active {
-            background: var(--color-primary);
-            color: white;
-            border-color: var(--color-primary);
-        }
+        .guest-btn:hover { border-color: var(--color-primary); }
+        .guest-btn.active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
 
         .quick-ref {
-            background: var(--color-surface);
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 16px;
+            background: var(--color-surface); padding: 16px;
+            border-radius: 12px; margin-bottom: 16px;
             border-left: 4px solid var(--color-warning);
         }
 
-        .quick-ref h3 {
-            font-size: 16px;
-            margin-bottom: 12px;
-        }
+        .quick-ref h3 { font-size: 16px; margin-bottom: 12px; }
 
         .quick-ref-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 12px;
-            font-size: 14px;
+            gap: 12px; font-size: 14px;
         }
 
         .quick-ref-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px;
-            background: rgba(94, 82, 64, 0.05);
-            border-radius: 6px;
+            display: flex; justify-content: space-between;
+            padding: 8px; background: rgba(94, 82, 64, 0.05); border-radius: 6px;
         }
 
-        .quick-ref-item strong {
-            color: var(--color-primary);
-        }
+        .quick-ref-item strong { color: var(--color-primary); }
 
         .section {
-            background: var(--color-surface);
-            border-radius: 12px;
-            margin-bottom: 16px;
-            overflow: hidden;
+            background: var(--color-surface); border-radius: 12px;
+            margin-bottom: 16px; overflow: hidden;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .section-header {
             padding: 16px;
             background: linear-gradient(135deg, var(--color-primary) 0%, #1A6873 100%);
-            color: white;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            color: white; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
             user-select: none;
         }
 
-        .section-header h2 {
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .progress {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .section-content {
-            padding: 16px;
-        }
-
-        .section-content.collapsed {
-            display: none;
-        }
-
-        .subsection {
-            margin-bottom: 20px;
-        }
+        .section-header h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; }
+        .progress { font-size: 14px; opacity: 0.9; }
+        .section-content { padding: 16px; }
+        .section-content.collapsed { display: none; }
+        .subsection { margin-bottom: 20px; }
 
         .subsection h3 {
-            font-size: 16px;
-            margin-bottom: 12px;
+            font-size: 16px; margin-bottom: 12px;
             color: var(--color-primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            display: flex; align-items: center; gap: 8px;
         }
 
         .task {
-            display: flex;
-            gap: 12px;
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            border: 1px solid var(--color-border);
-            transition: all 0.2s;
-            background: var(--color-surface);
+            display: flex; gap: 12px; padding: 12px; margin-bottom: 8px;
+            border-radius: 8px; border: 1px solid var(--color-border);
+            transition: all 0.2s; background: var(--color-surface);
         }
 
-        .task:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-
-        .task.completed {
-            background: rgba(32, 128, 141, 0.05);
-            border-color: var(--color-success);
-        }
-
-        .task input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            margin-top: 2px;
-            flex-shrink: 0;
-        }
-
-        .task-content {
-            flex: 1;
-        }
-
-        .task-title {
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-
-        .task.completed .task-title {
-            text-decoration: line-through;
-            opacity: 0.6;
-        }
-
-        .task-details {
-            font-size: 14px;
-            color: var(--color-text-secondary);
-            margin-top: 4px;
-        }
+        .task:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .task.completed { background: rgba(32, 128, 141, 0.05); border-color: var(--color-success); }
+        .task input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; margin-top: 2px; flex-shrink: 0; }
+        .task-content { flex: 1; }
+        .task-title { font-weight: 500; margin-bottom: 4px; }
+        .task.completed .task-title { text-decoration: line-through; opacity: 0.6; }
+        .task-details { font-size: 14px; color: var(--color-text-secondary); margin-top: 4px; }
 
         .task-location {
-            display: inline-block;
-            background: rgba(32, 128, 141, 0.1);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 13px;
-            margin-top: 4px;
+            display: inline-block; background: rgba(32, 128, 141, 0.1);
+            padding: 2px 8px; border-radius: 4px; font-size: 13px; margin-top: 4px;
         }
 
         .task-warning {
-            display: inline-block;
-            background: rgba(230, 129, 97, 0.15);
-            color: var(--color-warning);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 13px;
-            font-weight: 500;
-            margin-top: 4px;
+            display: inline-block; background: rgba(230, 129, 97, 0.15);
+            color: var(--color-warning); padding: 4px 8px; border-radius: 4px;
+            font-size: 13px; font-weight: 500; margin-top: 4px;
         }
 
         .quantity-badge {
-            display: inline-block;
-            background: var(--color-primary);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 500;
-            margin-top: 4px;
+            display: inline-block; background: var(--color-primary); color: white;
+            padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 500; margin-top: 4px;
         }
 
         .controls {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            display: flex;
-            gap: 12px;
-            z-index: 1000;
+            position: fixed; bottom: 20px; right: 20px;
+            display: flex; gap: 12px; z-index: 1000;
         }
 
         .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 12px 20px; border: none; border-radius: 8px;
+            font-size: 14px; font-weight: 500; cursor: pointer;
+            transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        .btn-primary {
-            background: var(--color-primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--color-primary-hover);
-        }
-
-        .btn-secondary {
-            background: white;
-            color: var(--color-text);
-            border: 1px solid var(--color-border);
-        }
-
-        .btn-secondary:hover {
-            background: var(--color-bg);
-        }
+        .btn-primary { background: var(--color-primary); color: white; }
+        .btn-primary:hover { background: var(--color-primary-hover); }
+        .btn-secondary { background: white; color: var(--color-text); border: 1px solid var(--color-border); }
+        .btn-secondary:hover { background: var(--color-bg); }
 
         .progress-bar {
-            height: 8px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 8px;
+            height: 8px; background: rgba(255,255,255,0.3);
+            border-radius: 4px; overflow: hidden; margin-top: 8px;
         }
 
-        .progress-fill {
-            height: 100%;
-            background: white;
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
+        .progress-fill { height: 100%; background: white; border-radius: 4px; transition: width 0.3s ease; }
 
-                .task-meta {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 6px;
-        }
+        .task-meta { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; }
 
         .task-initials {
-            display: inline-block;
-            background: #20808D;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            display: inline-block; background: #20808D; color: white;
+            padding: 2px 8px; border-radius: 12px;
+            font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
         }
 
-        .task-time {
-            font-size: 12px;
-            color: #626C71;
-        }
+        .task-time { font-size: 12px; color: #626C71; }
 
         @media (max-width: 600px) {
-            body {
-                padding: 12px;
-            }
-
-            .header h1 {
-                font-size: 20px;
-            }
-
-            .guest-selector {
-                gap: 8px;
-            }
-
-            .guest-btn {
-                min-width: 60px;
-                padding: 10px 12px;
-                font-size: 14px;
-            }
-
-            .section-header h2 {
-                font-size: 16px;
-            }
-
-            .controls {
-                bottom: 12px;
-                right: 12px;
-                flex-direction: column;
-            }
-
-            .btn {
-                padding: 10px 16px;
-                font-size: 13px;
-            }
+            body { padding: 12px; }
+            .header h1 { font-size: 20px; }
+            .guest-selector { gap: 8px; }
+            .guest-btn { min-width: 60px; padding: 10px 12px; font-size: 14px; }
+            .section-header h2 { font-size: 16px; }
+            .controls { bottom: 12px; right: 12px; flex-direction: column; }
+            .btn { padding: 10px 16px; font-size: 13px; }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🏛️ Wake Setup Checklist</h1>
+        <h1>&#127963;&#65039; Wake Setup Checklist</h1>
         <p>Select guest count below to see required quantities</p>
         <div id="staffBanner" style="margin-top:12px;padding:10px 14px;background:rgba(32,128,141,0.1);border-radius:8px;font-size:14px;display:flex;justify-content:space-between;align-items:center;">
-            <span>👤 Ticking as: <strong id="staffInitialsDisplay">Not set</strong></span>
+            <span>&#128100; Ticking as: <strong id="staffInitialsDisplay">Not set</strong></span>
             <button onclick="changeInitials()" style="background:none;border:1px solid #20808D;color:#20808D;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">Change</button>
         </div>
         <div class="guest-selector">
@@ -374,38 +194,20 @@
     </div>
 
     <div class="quick-ref">
-        <h3>📋 Quick Reference - <span id="currentGuests">60</span> Guests</h3>
+        <h3>&#128203; Quick Reference - <span id="currentGuests">60</span> Guests</h3>
         <div class="quick-ref-grid">
-            <div class="quick-ref-item">
-                <span>Round tables:</span>
-                <strong id="tables">6</strong>
-            </div>
-            <div class="quick-ref-item">
-                <span>Chairs:</span>
-                <strong id="chairs">60</strong>
-            </div>
-            <div class="quick-ref-item">
-                <span>Wooden trays:</span>
-                <strong id="woodenTrays">4</strong>
-            </div>
-            <div class="quick-ref-item">
-                <span>White trays:</span>
-                <strong id="whiteTrays">4</strong>
-            </div>
-            <div class="quick-ref-item">
-                <span>Milk jugs:</span>
-                <strong id="milkJugs">12</strong>
-            </div>
-            <div class="quick-ref-item">
-                <span>Table runners:</span>
-                <strong>6</strong>
-            </div>
+            <div class="quick-ref-item"><span>Round tables:</span><strong id="tables">6</strong></div>
+            <div class="quick-ref-item"><span>Chairs:</span><strong id="chairs">60</strong></div>
+            <div class="quick-ref-item"><span>Wooden trays:</span><strong id="woodenTrays">4</strong></div>
+            <div class="quick-ref-item"><span>White trays:</span><strong id="whiteTrays">4</strong></div>
+            <div class="quick-ref-item"><span>Milk jugs:</span><strong id="milkJugs">12</strong></div>
+            <div class="quick-ref-item"><span>Table runners:</span><strong>6</strong></div>
         </div>
     </div>
 
     <div class="section">
         <div class="section-header" onclick="toggleSection('hall')">
-            <h2>🏛️ Hall Setup</h2>
+            <h2>&#127963;&#65039; Hall Setup</h2>
             <div>
                 <span class="progress" id="hallProgress">0/26</span>
                 <div class="progress-bar" style="width: 150px;">
@@ -415,227 +217,60 @@
         </div>
         <div class="section-content" id="hallContent">
             <div class="subsection">
-                <h3>🍽️ Buffet Tables (2 rectangular)</h3>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="buffet-1">
-                    <div class="task-content">
-                        <div class="task-title">Position tables</div>
-                        <div class="task-location">📍 Between radiators at bar wall</div>
-                        <div class="task-details">2 rectangular tables - check tables are stable and level</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="buffet-2">
-                    <div class="task-content">
-                        <div class="task-title">Add tablecloths</div>
-                        <div class="task-details">Black or navy cloths - ensure cloths sit properly with no wrinkles</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="buffet-3">
-                    <div class="task-content">
-                        <div class="task-title">Arrange side plates</div>
-                        <div class="task-details">One side of table, stacked neatly and clean</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="buffet-4">
-                    <div class="task-content">
-                        <div class="task-title">Place crockery basket</div>
-                        <div class="task-details">Other side of table - crockery wrapped with napkins in basket</div>
-                    </div>
-                </div>
+                <h3>&#127869;&#65039; Buffet Tables (2 rectangular)</h3>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="buffet-1"><div class="task-content"><div class="task-title">Position tables</div><div class="task-location">&#128205; Between radiators at bar wall</div><div class="task-details">2 rectangular tables - check tables are stable and level</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="buffet-2"><div class="task-content"><div class="task-title">Add tablecloths</div><div class="task-details">Black or navy cloths - ensure cloths sit properly with no wrinkles</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="buffet-3"><div class="task-content"><div class="task-title">Arrange side plates</div><div class="task-details">One side of table, stacked neatly and clean</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="buffet-4"><div class="task-content"><div class="task-title">Place crockery basket</div><div class="task-details">Other side of table - crockery wrapped with napkins in basket</div></div></div>
             </div>
 
             <div class="subsection">
-                <h3>☕ Coffee Station (1 rectangular table)</h3>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="coffee-1">
-                    <div class="task-content">
-                        <div class="task-title">Position table</div>
-                        <div class="task-location">📍 Near furniture cupboard</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="coffee-2">
-                    <div class="task-content">
-                        <div class="task-title">Add tablecloth</div>
-                        <div class="task-details">Black or navy cloth</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="coffee-3">
-                    <div class="task-content">
-                        <div class="task-title">Fill urn with water</div>
-                        <div class="task-warning">⚠️ CHECK BEFORE EVENT - Urn must be working</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="coffee-4">
-                    <div class="task-content">
-                        <div class="task-title">Arrange supplies</div>
-                        <div class="task-details">Teas, coffees put in basket and place on the side of the table</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="coffee-5">
-                    <div class="task-content">
-                        <div class="task-title">Add bowl for used tea bags</div>
-                        <div class="task-details">Bowl must be clean</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="coffee-6">
-                    <div class="task-content">
-                        <div class="task-title">Set out sugar</div>
-                        <div class="task-details"> Place in small ramekin with teaspoon, then place onto table</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="coffee-7">
-                    <div class="task-content">
-                        <div class="task-title">Stack cups & saucers</div>
-                        <div class="quantity-badge">60 cups & saucers stacked on top of each other, all ears facing the same way. (max height 3) </div>
-                        <div class="task-details">Near coffee station - all clean and ready with a teaspoon</div>
-                    </div>
-                </div>
+                <h3>&#9749; Coffee Station (1 rectangular table)</h3>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-1"><div class="task-content"><div class="task-title">Position table</div><div class="task-location">&#128205; Near furniture cupboard</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-2"><div class="task-content"><div class="task-title">Add tablecloth</div><div class="task-details">Black or navy cloth</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-3"><div class="task-content"><div class="task-title">Fill urn with water</div><div class="task-warning">&#9888;&#65039; CHECK BEFORE EVENT - Urn must be working</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-4"><div class="task-content"><div class="task-title">Arrange supplies</div><div class="task-details">Teas, coffees put in basket and place on the side of the table</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-5"><div class="task-content"><div class="task-title">Add bowl for used tea bags</div><div class="task-details">Bowl must be clean</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-6"><div class="task-content"><div class="task-title">Set out sugar</div><div class="task-details">Place in small ramekin with teaspoon, then place onto table</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-7"><div class="task-content"><div class="task-title">Stack cups &amp; saucers</div><div class="quantity-badge">60 cups &amp; saucers stacked on top of each other, all ears facing the same way. (max height 3)</div><div class="task-details">Near coffee station - all clean and ready with a teaspoon</div></div></div>
             </div>
 
             <div class="subsection">
-                <h3>⚪ Guest Tables (Round, White)</h3>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="tables-1">
-                    <div class="task-content">
-                        <div class="task-title">Position round tables</div>
-                        <div class="quantity-badge"><span id="tablesQty">6</span> tables</div>
-                        <div class="task-details">Evenly spaced in hall - all tables must be stable</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="tables-2">
-                    <div class="task-content">
-                        <div class="task-title">Add white tablecloths</div>
-                        <div class="task-details">White cloth on each table - centered and smooth</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="tables-3">
-                    <div class="task-content">
-                        <div class="task-title">Place table runners</div>
-                        <div class="quantity-badge">6 runners (fixed)</div>
-                        <div class="task-details">Runners positioned across center of tables</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="tables-4">
-                    <div class="task-content">
-                        <div class="task-title">Add centerpiece base</div>
-                        <div class="task-warning">⚠️ CLEAN MIRRORS</div>
-                        <div class="task-details">Mirror or wooden log - mirrors must be clean</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="tables-5">
-                    <div class="task-content">
-                        <div class="task-title">Place candles</div>
-                        <div class="task-warning">⚠️ TEST CANDLES WORKING</div>
-                        <div class="task-details">1 candle per table - check all are working before event</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="tables-6">
-                    <div class="task-content">
-                        <div class="task-title">Add small vases</div>
-                        <div class="task-details">Small vase with water for flowers on each table</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="tables-7">
-                    <div class="task-content">
-                        <div class="task-title">Place sugar on each table</div>
-                        <div class="task-details">Sugar container on every table</div>
-                    </div>
-                </div>
+                <h3>&#9898; Guest Tables (Round, White)</h3>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-1"><div class="task-content"><div class="task-title">Position round tables</div><div class="quantity-badge"><span id="tablesQty">6</span> tables</div><div class="task-details">Evenly spaced in hall - all tables must be stable</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-2"><div class="task-content"><div class="task-title">Add white tablecloths</div><div class="task-details">White cloth on each table - centered and smooth</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-3"><div class="task-content"><div class="task-title">Place table runners</div><div class="quantity-badge">6 runners (fixed)</div><div class="task-details">Runners positioned across center of tables</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-4"><div class="task-content"><div class="task-title">Add centerpiece base</div><div class="task-warning">&#9888;&#65039; CLEAN MIRRORS</div><div class="task-details">Mirror or wooden log - mirrors must be clean</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-5"><div class="task-content"><div class="task-title">Place candles</div><div class="task-warning">&#9888;&#65039; TEST CANDLES WORKING</div><div class="task-details">1 candle per table - check all are working before event</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-6"><div class="task-content"><div class="task-title">Add small vases</div><div class="task-details">Small vase with water for flowers on each table</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-7"><div class="task-content"><div class="task-title">Place sugar on each table</div><div class="task-details">Sugar container on every table</div></div></div>
             </div>
 
             <div class="subsection">
-                <h3>🪑 Chairs with Covers</h3>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="chairs-1">
-                    <div class="task-content">
-                        <div class="task-title">Position chairs</div>
-                        <div class="quantity-badge"><span id="chairsQty">60</span> chairs total</div>
-                        <div class="task-details">Around tables (10 per table) - all chairs must be stable</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="chairs-2">
-                    <div class="task-content">
-                        <div class="task-title">Add chair covers</div>
-                        <div class="task-warning">⚠️ CRITICAL - Check legs positioned properly</div>
-                        <div class="task-details">NO LEGS STICKING OUT - check every chair carefully</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="chairs-3">
-                    <div class="task-content">
-                        <div class="task-title">Fix problem covers</div>
-                        <div class="task-details">If legs sticking out: remove and use different cover - don't use damaged</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="chairs-4">
-                    <div class="task-content">
-                        <div class="task-title">Add sashes</div>
-                        <div class="task-details">Sash on every chair - check bow looks nice and make bows uniform</div>
-                    </div>
-                </div>
+                <h3>&#129681; Chairs with Covers</h3>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="chairs-1"><div class="task-content"><div class="task-title">Position chairs</div><div class="quantity-badge"><span id="chairsQty">60</span> chairs total</div><div class="task-details">Around tables (10 per table) - all chairs must be stable</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="chairs-2"><div class="task-content"><div class="task-title">Add chair covers</div><div class="task-warning">&#9888;&#65039; CRITICAL - Check legs positioned properly</div><div class="task-details">NO LEGS STICKING OUT - check every chair carefully</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="chairs-3"><div class="task-content"><div class="task-title">Fix problem covers</div><div class="task-details">If legs sticking out: remove and use different cover - don't use damaged</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="chairs-4"><div class="task-content"><div class="task-title">Add sashes</div><div class="task-details">Sash on every chair - check bow looks nice and make bows uniform</div></div></div>
             </div>
 
             <div class="subsection">
-                <h3>🖼️ Picture Table</h3>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="picture-1">
-                    <div class="task-content">
-                        <div class="task-title">Position Round table</div>
-                        <div class="task-location">📍 Next to the stage</div>
-                        <div class="task-details">1 round table - check stable</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="picture-2">
-                    <div class="task-content">
-                        <div class="task-title">Add white tablecloth</div>
-                        <div class="task-details">Cloth centered</div>
-                    </div>
-                </div>
+                <h3>&#128444;&#65039; Picture Table</h3>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="picture-1"><div class="task-content"><div class="task-title">Position Round table</div><div class="task-location">&#128205; Next to the stage</div><div class="task-details">1 round table - check stable</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="picture-2"><div class="task-content"><div class="task-title">Add white tablecloth</div><div class="task-details">Cloth centered</div></div></div>
             </div>
 
             <div class="subsection">
-                <h3>📽️ Projector</h3>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="projector-1">
-                    <div class="task-content">
-                        <div class="task-title">Retrieve projector</div>
-                        <div class="task-location">📍 From cellar</div>
-                        <div class="task-details">Projector in bag - check bag contains all cables</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="hall" data-task="projector-2">
-                    <div class="task-content">
-                        <div class="task-title">Set up on stage</div>
-                        <div class="task-warning">⚠️ TEST BEFORE EVENT</div>
-                        <div class="task-details">Position and connect all cables - ensure working</div>
-                    </div>
-                </div>
+                <h3>&#128253;&#65039; Projector</h3>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="projector-1"><div class="task-content"><div class="task-title">Retrieve projector</div><div class="task-location">&#128205; From cellar</div><div class="task-details">Projector in bag - check bag contains all cables</div></div></div>
+                <div class="task"><input type="checkbox" data-section="hall" data-task="projector-2"><div class="task-content"><div class="task-title">Set up on stage</div><div class="task-warning">&#9888;&#65039; TEST BEFORE EVENT</div><div class="task-details">Position and connect all cables - ensure working</div></div></div>
             </div>
         </div>
     </div>
 
     <div class="section">
         <div class="section-header" onclick="toggleSection('kitchen')">
-            <h2>🍴 Kitchen Prep</h2>
+            <h2>&#127860; Kitchen Prep</h2>
             <div>
                 <span class="progress" id="kitchenProgress">0/5</span>
                 <div class="progress-bar" style="width: 150px;">
@@ -645,61 +280,23 @@
         </div>
         <div class="section-content" id="kitchenContent">
             <div class="subsection">
-                <h3>📦 Serving Trays</h3>
-                <div class="task">
-                    <input type="checkbox" data-section="kitchen" data-task="kitchen-1">
-                    <div class="task-content">
-                        <div class="task-title">Position narrow table</div>
-                        <div class="task-location">📍 Next to radiator in kitchen</div>
-                        <div class="task-details">1 rectangular table (narrow, not white)</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="kitchen" data-task="kitchen-2">
-                    <div class="task-content">
-                        <div class="task-title">Get wooden trays</div>
-                        <div class="quantity-badge"><span id="woodenTraysQty">4</span> trays</div>
-                        <div class="task-location">📍 From balcony</div>
-                        <div class="task-details">Erect wooden serving trays - must be clean and stable</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="kitchen" data-task="kitchen-3">
-                    <div class="task-content">
-                        <div class="task-title">Get white trays</div>
-                        <div class="quantity-badge"><span id="whiteTraysQty">4</span> trays</div>
-                        <div class="task-location">📍 From bar area</div>
-                        <div class="task-details">Long white serving trays - must be clean</div>
-                    </div>
-                </div>
+                <h3>&#128230; Serving Trays</h3>
+                <div class="task"><input type="checkbox" data-section="kitchen" data-task="kitchen-1"><div class="task-content"><div class="task-title">Position narrow table</div><div class="task-location">&#128205; Next to radiator in kitchen</div><div class="task-details">1 rectangular table (narrow, not white)</div></div></div>
+                <div class="task"><input type="checkbox" data-section="kitchen" data-task="kitchen-2"><div class="task-content"><div class="task-title">Get wooden trays</div><div class="quantity-badge"><span id="woodenTraysQty">4</span> trays</div><div class="task-location">&#128205; From balcony</div><div class="task-details">Erect wooden serving trays - must be clean and stable</div></div></div>
+                <div class="task"><input type="checkbox" data-section="kitchen" data-task="kitchen-3"><div class="task-content"><div class="task-title">Get white trays</div><div class="quantity-badge"><span id="whiteTraysQty">4</span> trays</div><div class="task-location">&#128205; From bar area</div><div class="task-details">Long white serving trays - must be clean</div></div></div>
             </div>
 
             <div class="subsection">
-                <h3>🥛 Milk Preparation</h3>
-                <div class="task">
-                    <input type="checkbox" data-section="kitchen" data-task="kitchen-4">
-                    <div class="task-content">
-                        <div class="task-title">Get milk jugs</div>
-                        <div class="quantity-badge"><span id="milkJugsQty">12</span> jugs</div>
-                        <div class="task-location">📍 From bar area to kitchen</div>
-                        <div class="task-details">Place on tray next to microwave</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="kitchen" data-task="kitchen-5">
-                    <div class="task-content">
-                        <div class="task-title">Get milk flask</div>
-                        <div class="task-location">📍 From bar area</div>
-                        <div class="task-details">Flask marked 'Milk' - place next to microwave</div>
-                    </div>
-                </div>
+                <h3>&#129371; Milk Preparation</h3>
+                <div class="task"><input type="checkbox" data-section="kitchen" data-task="kitchen-4"><div class="task-content"><div class="task-title">Get milk jugs</div><div class="quantity-badge"><span id="milkJugsQty">12</span> jugs</div><div class="task-location">&#128205; From bar area to kitchen</div><div class="task-details">Place on tray next to microwave</div></div></div>
+                <div class="task"><input type="checkbox" data-section="kitchen" data-task="kitchen-5"><div class="task-content"><div class="task-title">Get milk flask</div><div class="task-location">&#128205; From bar area</div><div class="task-details">Flask marked 'Milk' - place next to microwave</div></div></div>
             </div>
         </div>
     </div>
 
     <div class="section">
         <div class="section-header" onclick="toggleSection('bar')">
-            <h2>🍷 Bar Area</h2>
+            <h2>&#127863; Bar Area</h2>
             <div>
                 <span class="progress" id="barProgress">0/4</span>
                 <div class="progress-bar" style="width: 150px;">
@@ -709,36 +306,11 @@
         </div>
         <div class="section-content" id="barContent">
             <div class="subsection">
-                <h3>☕ Flask Preparation</h3>
-                <div class="task">
-                    <input type="checkbox" data-section="bar" data-task="bar-1">
-                    <div class="task-content">
-                        <div class="task-title">Retrieve flasks</div>
-                        <div class="task-warning">⚠️ CHECK FLASKS ARE CLEAN INSIDE</div>
-                        <div class="task-details">Get tea and coffee flasks</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="bar" data-task="bar-2">
-                    <div class="task-content">
-                        <div class="task-title">Add tea bags</div>
-                        <div class="task-details">Put tea bags in tea flask (sufficient quantity)</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="bar" data-task="bar-3">
-                    <div class="task-content">
-                        <div class="task-title">Add coffee</div>
-                        <div class="task-details">Put coffee in coffee flask (sufficient quantity)</div>
-                    </div>
-                </div>
-                <div class="task">
-                    <input type="checkbox" data-section="bar" data-task="bar-4">
-                    <div class="task-content">
-                        <div class="task-title">Get urn from kitchen</div>
-                        <div class="task-details">Bring urn with water - must be filled and working</div>
-                    </div>
-                </div>
+                <h3>&#9749; Flask Preparation</h3>
+                <div class="task"><input type="checkbox" data-section="bar" data-task="bar-1"><div class="task-content"><div class="task-title">Retrieve flasks</div><div class="task-warning">&#9888;&#65039; CHECK FLASKS ARE CLEAN INSIDE</div><div class="task-details">Get tea and coffee flasks</div></div></div>
+                <div class="task"><input type="checkbox" data-section="bar" data-task="bar-2"><div class="task-content"><div class="task-title">Add tea bags</div><div class="task-details">Put tea bags in tea flask (sufficient quantity)</div></div></div>
+                <div class="task"><input type="checkbox" data-section="bar" data-task="bar-3"><div class="task-content"><div class="task-title">Add coffee</div><div class="task-details">Put coffee in coffee flask (sufficient quantity)</div></div></div>
+                <div class="task"><input type="checkbox" data-section="bar" data-task="bar-4"><div class="task-content"><div class="task-title">Get urn from kitchen</div><div class="task-details">Bring urn with water - must be filled and working</div></div></div>
             </div>
         </div>
     </div>
@@ -773,13 +345,12 @@
         let currentGuests = 60;
 
         function loadState() {
-            db.ref(`events/${currentEventId}/wakeSetup`).on('value', (snapshot) => {
+            db.ref('wakeSetup').on('value', (snapshot) => {
                 const state = snapshot.val();
                 if (!state) return;
 
                 currentGuests = state.guests || 60;
 
-                // Keep guest buttons in sync across devices
                 document.querySelectorAll('.guest-btn').forEach(b => b.classList.remove('active'));
                 const activeBtn = document.querySelector(`.guest-btn[data-count="${currentGuests}"]`);
                 if (activeBtn) activeBtn.classList.add('active');
@@ -793,7 +364,6 @@
                     cb.checked = shouldBeChecked;
                     cb.closest('.task').classList.toggle('completed', shouldBeChecked);
 
-                    // Show or clear initials/time
                     let meta = cb.closest('.task').querySelector('.task-meta');
                     if (!meta) {
                         meta = document.createElement('div');
@@ -811,10 +381,7 @@
             });
         }
 
-
-        // Save state
         function saveState() {
-            if (!currentEventId) return;
             const tasks = {};
             document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
                 const key = `${cb.dataset.section}-${cb.dataset.task}`;
@@ -825,15 +392,13 @@
                 };
             });
 
-            db.ref(`events/${currentEventId}/wakeSetup`).set({
+            db.ref('wakeSetup').set({
                 guests: currentGuests,
                 tasks: tasks,
-                eventName: currentEventName,
                 timestamp: new Date().toISOString()
             });
         }
 
-        // Guest count selection
         document.querySelectorAll('.guest-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.querySelectorAll('.guest-btn').forEach(b => b.classList.remove('active'));
@@ -852,7 +417,6 @@
             document.getElementById('woodenTrays').textContent = qty.woodenTrays;
             document.getElementById('whiteTrays').textContent = qty.whiteTrays;
             document.getElementById('milkJugs').textContent = qty.milkJugs;
-            
             document.getElementById('tablesQty').textContent = qty.tables;
             document.getElementById('chairsQty').textContent = qty.chairs;
             document.getElementById('woodenTraysQty').textContent = qty.woodenTrays;
@@ -860,7 +424,6 @@
             document.getElementById('milkJugsQty').textContent = qty.milkJugs;
         }
 
-        // Checkbox handling
         document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const task = this.closest('.task');
@@ -878,7 +441,6 @@
             const total = document.querySelectorAll(`input[data-section="${section}"]`).length;
             const checked = document.querySelectorAll(`input[data-section="${section}"]:checked`).length;
             const percent = Math.round((checked / total) * 100);
-            
             document.getElementById(`${section}Progress`).textContent = `${checked}/${total}`;
             document.getElementById(`${section}ProgressBar`).style.width = `${percent}%`;
         }
@@ -906,10 +468,9 @@
         }
 
         function saveProgress() {
-            alert('✅ All changes save automatically in real time');
+            alert('\u2705 All changes save automatically in real time');
         }
 
-                // Staff initials setup
         let staffInitials = localStorage.getItem('staffInitials');
 
         function promptInitials() {
@@ -930,15 +491,12 @@
         } else {
             document.getElementById('staffInitialsDisplay').textContent = staffInitials;
         }
-        
+
         // Initialize
         loadState();
         updateQuantities();
         updateAllProgress();
-
-        // Set initial guest count button
         document.querySelector(`.guest-btn[data-count="${currentGuests}"]`).classList.add('active');
     </script>
 </body>
 </html>
-
