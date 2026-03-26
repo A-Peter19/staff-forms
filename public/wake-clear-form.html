@@ -855,30 +855,6 @@
         function saveProgress() {
             alert('✅ All changes save automatically in real time.');
         }
-        
-                // Admin/Viewer role check
-        const urlParams = new URLSearchParams(window.location.search);
-        const isAdmin = urlParams.get('role') === 'admin';
-
-        if (!isAdmin) {
-            // Disable all checkboxes for viewers
-            document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                cb.disabled = true;
-            });
-            // Hide Reset and Save buttons
-            document.querySelector('.controls').style.display = 'none';
-            // Hide guest count buttons
-            document.querySelectorAll('.guest-btn').forEach(btn => {
-                btn.style.pointerEvents = 'none';
-                btn.style.opacity = '0.6';
-            });
-            // Add viewer banner
-            const banner = document.createElement('div');
-            banner.style.cssText = 'background:#E68161;color:white;text-align:center;padding:10px;font-weight:500;font-size:14px;position:fixed;top:0;left:0;right:0;z-index:9999;';
-            banner.textContent = '👁️ Viewer Mode — Live updates only. Contact supervisor to make changes.';
-            document.body.prepend(banner);
-            document.body.style.paddingTop = '40px';
-        }
 
         // Initialize
         loadState();
