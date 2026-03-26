@@ -910,6 +910,28 @@
             alert('✅ All changes save automatically in real time');
         }
 
+                // Staff initials setup
+        let staffInitials = localStorage.getItem('staffInitials');
+
+        function promptInitials() {
+            const input = prompt('Enter your initials (e.g. JS):');
+            if (input && input.trim()) {
+                staffInitials = input.trim().toUpperCase().slice(0, 4);
+                localStorage.setItem('staffInitials', staffInitials);
+                document.getElementById('staffInitialsDisplay').textContent = staffInitials;
+            }
+        }
+
+        function changeInitials() {
+            promptInitials();
+        }
+
+        if (!staffInitials) {
+            promptInitials();
+        } else {
+            document.getElementById('staffInitialsDisplay').textContent = staffInitials;
+        }
+        
         // Initialize
         loadState();
         updateQuantities();
