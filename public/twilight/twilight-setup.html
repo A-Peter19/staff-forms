@@ -499,7 +499,7 @@
   if (!EVENT_ID) {
     var nb = document.createElement("div");
     nb.style.cssText = "background:#fff3cd;color:#856404;padding:14px 20px;border-radius:10px;margin-bottom:20px;font-weight:600;font-size:0.92rem;";
-    nb.innerHTML = 'No event selected. <a href="index.html" style="color:#2c3e6b;">Go to the dashboard</a> and open this form from there.';
+    nb.innerHTML = 'No event selected. <a href="../index.html" style="color:#2c3e6b;">Go to the dashboard</a> and open this form from there.';
     document.body.insertBefore(nb, document.body.children[1]);
   } else {
     db.collection("events").doc(EVENT_ID).get().then(function(snap) {
