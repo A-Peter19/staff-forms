@@ -54,6 +54,10 @@
     .checklist-item.custom-task{border-left:3px solid #7a5ca0;background:#faf7ff}
     .checklist-item.custom-task:hover{background:#f3eeff}
     .custom-badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:.7rem;font-weight:700;background:#e8dff5;color:#4a3f6b;margin-left:8px;vertical-align:middle}
+  
+    .task-meta{display:inline-flex;align-items:center;gap:6px;margin-top:6px}
+    .task-initials{display:inline-block;background:#20808D;color:white;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600;letter-spacing:.5px}
+    .task-time{font-size:12px;color:#626C71}
   </style>
 </head>
 <body>
@@ -62,6 +66,8 @@
   <h1>🌙 Twilight Package — Clear Up</h1>
   <p id="event-sub">Loading event details...</p>
 </header>
+<div style="margin-top:12px;padding:10px 14px;background:rgba(32,128,141,0.12);border-radius:8px;font-size:14px;display:flex;justify-content:space-between;align-items:center;"><span>&#128100; Ticking as: <strong id="staffInitialsDisplay">Not set</strong></span><button onclick="changeInitials()" style="background:none;border:1px solid #20808D;color:#20808D;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">Change</button></div>
+
 
 <!-- Event Meta -->
 <div class="card">
@@ -137,11 +143,74 @@
   </div>
 </div>
 
-
-<!-- SECTION 2: Dancefloor & Entertainment -->
+<!-- SECTION 2: Bar Closedown -->
 <div class="section">
   <div class="section-header" onclick="toggleSection(this)">
-    <span class="section-title">2 · Dancefloor & Entertainment Pack Down</span>
+    <span class="section-title">2 · Bar Closedown</span>
+    <span class="badge" id="badge-s2">0/0</span>
+  </div>
+  <div class="section-body">
+    <div class="checklist-item" data-section="s2" data-task-id="clearup_s2_5">
+      <input type="checkbox"/>
+      <div class="item-content">
+        <div class="item-label">Bar till / cash drawer closed and secured</div>
+        <div class="item-note">Cash counted and locked away; card terminal returned to base</div>
+      </div>
+    </div>
+    <div class="checklist-item" data-section="s2" data-task-id="clearup_s2_6">
+      <input type="checkbox"/>
+      <div class="item-content">
+        <div class="item-label">All open bottles labelled and stored securely</div>
+        <div class="item-note">Opened stock stored in locked bar area or designated storage room</div>
+      </div>
+    </div>
+    <div class="checklist-item" data-section="s2" data-task-id="clearup_s2_7">
+      <input type="checkbox"/>
+      <div class="item-content">
+        <div class="item-label">Glassware collected from all areas of hall</div>
+        <div class="item-note">Check tables, windowsills, toilets, outdoor areas</div>
+        <input class="item-input" placeholder="Glasses collected: "/>
+      </div>
+    </div>
+    <div class="checklist-item" data-section="s2" data-task-id="clearup_s2_8">
+      <input type="checkbox"/>
+      <div class="item-content">
+        <div class="item-label">Glassware washed, dried, and stacked</div>
+        <div class="item-note">Return to correct storage; no glassware left on bar surface</div>
+      </div>
+    </div>
+    <div class="checklist-item" data-section="s2" data-task-id="clearup_s2_9">
+      <input type="checkbox"/>
+      <div class="item-content">
+        <div class="item-label">Bar surfaces wiped down</div>
+        <div class="item-note">Include top of bar, shelving, drip trays, and taps</div>
+      </div>
+    </div>
+    <div class="checklist-item" data-section="s2" data-task-id="clearup_s2_10">
+      <input type="checkbox"/>
+      <div class="item-content">
+        <div class="item-label">Bar fridge emptied or restocked as required</div>
+        <div class="item-note">Check with venue manager whether remaining stock stays or is removed</div>
+      </div>
+    </div>
+    <div class="checklist-item" data-section="s2" data-task-id="clearup_s2_11">
+      <input type="checkbox"/>
+      <div class="item-content">
+        <div class="item-label">Bar bin bags tied and taken to waste area</div>
+        <div class="item-note">Replace liners; leave bar area clean</div>
+      </div>
+    </div>
+    <div class="notes-row">
+      <label>Section Notes</label>
+      <textarea placeholder="Any notes for this section..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: Dancefloor & Entertainment -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)">
+    <span class="section-title">3 · Dancefloor & Entertainment Pack Down</span>
     <span class="badge" id="badge-s3">0/0</span>
   </div>
   <div class="section-body">
@@ -194,10 +263,10 @@
   </div>
 </div>
 
-<!-- SECTION 3: Décor & Personal Items -->
+<!-- SECTION 4: Décor & Personal Items -->
 <div class="section">
   <div class="section-header" onclick="toggleSection(this)">
-    <span class="section-title">3 · Décor & Personal Items</span>
+    <span class="section-title">4 · Décor & Personal Items</span>
     <span class="badge" id="badge-s4">0/0</span>
   </div>
   <div class="section-body">
@@ -250,10 +319,10 @@
   </div>
 </div>
 
-<!-- SECTION 4: Tables & Chairs -->
+<!-- SECTION 5: Tables & Chairs -->
 <div class="section">
   <div class="section-header" onclick="toggleSection(this)">
-    <span class="section-title">4 · Tables & Chairs</span>
+    <span class="section-title">5 · Tables & Chairs</span>
     <span class="badge" id="badge-s5">0/0</span>
   </div>
   <div class="section-body">
@@ -301,10 +370,10 @@
   </div>
 </div>
 
-<!-- SECTION 5: Hall Clean -->
+<!-- SECTION 6: Hall Clean -->
 <div class="section">
   <div class="section-header" onclick="toggleSection(this)">
-    <span class="section-title">5 · Hall Clean</span>
+    <span class="section-title">6 · Hall Clean</span>
     <span class="badge" id="badge-s6">0/0</span>
   </div>
   <div class="section-body">
@@ -357,10 +426,10 @@
   </div>
 </div>
 
-<!-- SECTION 6: Lock Up & Handover -->
+<!-- SECTION 7: Lock Up & Handover -->
 <div class="section">
   <div class="section-header" onclick="toggleSection(this)">
-    <span class="section-title">6 · Lock Up & Handover</span>
+    <span class="section-title">7 · Lock Up & Handover</span>
     <span class="badge" id="badge-s7">0/0</span>
   </div>
   <div class="section-body">
@@ -445,6 +514,18 @@
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+  var staffInitials = localStorage.getItem('staffInitials');
+  function promptInitials() {
+    var inp = prompt('Enter your initials (e.g. JS):');
+    if (inp && inp.trim()) {
+      staffInitials = inp.trim().toUpperCase().slice(0,4);
+      localStorage.setItem('staffInitials', staffInitials);
+      var d = document.getElementById('staffInitialsDisplay');
+      if (d) d.textContent = staffInitials;
+    }
+  }
+  function changeInitials() { promptInitials(); }
+
 
   const EVENT_ID = new URLSearchParams(window.location.search).get('event');
   const FORM_KEY = 'clearup';
@@ -523,6 +604,10 @@
         cbs.forEach(function(cb, i) {
           cb.checked = !!(saved.checkboxes && saved.checkboxes['cb_' + i]);
           cb.closest('.checklist-item').classList.toggle('done', cb.checked);
+          var meta = cb.closest('.checklist-item').querySelector('.task-meta');
+          if (!meta) { meta = document.createElement('div'); meta.className = 'task-meta'; cb.closest('.checklist-item').querySelector('.item-content').appendChild(meta); }
+          var td = saved.initialsData && saved.initialsData['cb_'+i];
+          if (cb.checked && td) { meta.innerHTML = '<span class="task-initials">'+td.initials+'</span><span class="task-time">'+(td.time||'')+'</span>'; } else { meta.innerHTML = ''; }
         });
         updateProgress();
       } else {
@@ -534,8 +619,13 @@
   async function saveForm() {
     if (!EVENT_ID) { alert('No event selected.'); return; }
     var checkboxes = {};
+    var initialsData = {};
     document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb, i) {
       checkboxes['cb_' + i] = cb.checked;
+      if (cb.checked) {
+        var m = cb.closest('.checklist-item').querySelector('.task-meta');
+        initialsData['cb_'+i] = { initials: staffInitials||'?', time: m&&m.querySelector('.task-time')?m.querySelector('.task-time').textContent:'' };
+      }
     });
     var data = {};
     data[FORM_KEY] = {
@@ -574,10 +664,20 @@
 
   document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb) {
     cb.addEventListener('change', function() {
-      this.closest('.checklist-item').classList.toggle('done', this.checked);
+      var item = this.closest('.checklist-item');
+      item.classList.toggle('done', this.checked);
+      var meta = item.querySelector('.task-meta');
+      if (!meta) { meta = document.createElement('div'); meta.className = 'task-meta'; item.querySelector('.item-content').appendChild(meta); }
+      if (this.checked) {
+        var t = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+        meta.innerHTML = '<span class="task-initials">'+(staffInitials||'?')+'</span><span class="task-time">'+t+'</span>';
+      } else { meta.innerHTML = ''; }
       updateProgress();
     });
   });
+
+  if (!staffInitials) { promptInitials(); }
+  else { var d2 = document.getElementById('staffInitialsDisplay'); if (d2) d2.textContent = staffInitials; }
   updateProgress();
 
   function toggleSection(header) {
