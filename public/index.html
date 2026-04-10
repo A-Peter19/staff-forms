@@ -448,12 +448,15 @@
         }
         secMap[t.section].push(t);
       });
+      var secCounter = 0;
       sections.forEach(function(sid) {
         var sectionTasks = secMap[sid];
         // Section header
         var sh = document.createElement('div');
         sh.className = 'mt-section-header';
-        sh.textContent = sectionTasks[0].section_name;
+        secCounter++;
+        var namePart = sectionTasks[0].section_name.replace(/^[0-9]+\s*[·\-]\s*/, '');
+        sh.textContent = secCounter + ' · ' + namePart;
         container.appendChild(sh);
         // Tasks
         sectionTasks.forEach(function(task) {
