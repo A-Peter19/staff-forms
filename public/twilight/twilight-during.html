@@ -455,6 +455,16 @@
     rtdb.ref('events/' + EVENT_ID + '/during').set(tasks);
   }
 
+
+
+  function applyEventTypeTaskIds(eventType) {
+    document.querySelectorAll('.checklist-item[data-task-id]').forEach(function(row) {
+      var baseTaskId = row.getAttribute('data-base-task-id') || row.getAttribute('data-task-id');
+      row.setAttribute('data-base-task-id', baseTaskId);
+      row.setAttribute('data-task-id', eventType + '_' + baseTaskId);
+    });
+  }
+
   // ── Firestore: load event data ────────────────────────────────────────────────
   if (!EVENT_ID) {
     var banner = document.createElement('div');
@@ -466,8 +476,11 @@
       if (!snap.exists) return;
       var ev = snap.data();
 
+      var eventType = ev.eventType || 'wedding';
+      applyEventTypeTaskIds(eventType);
       (ev.hiddenTasks || []).forEach(function(tid) {
-        var el = document.querySelector('[data-task-id="' + tid + '"]');
+        var scopedTaskId = tid.indexOf(eventType + '_') === 0 ? tid : (eventType + '_' + tid);
+        var el = document.querySelector('[data-task-id="' + scopedTaskId + '"]');
         if (el) el.style.display = 'none';
       });
 
