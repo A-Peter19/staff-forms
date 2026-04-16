@@ -38,6 +38,7 @@
     .event-info p{font-size:.82rem;color:#888;margin-top:3px}
     .pkg-badge{display:inline-block;margin-top:6px;padding:2px 10px;border-radius:20px;font-size:.75rem;font-weight:600;background:#f0ebe5;color:#6b4c3b}
     .custom-count{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:700;background:#fff3cd;color:#856404}
+    .route-warning{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:12px;font-size:.72rem;font-weight:700;background:#f8d7da;color:#721c24}
     .event-actions{display:flex;gap:8px;flex-wrap:wrap}
     .event-actions a,.event-actions button{padding:8px 14px;border-radius:7px;text-decoration:none;font-size:.82rem;font-weight:600;cursor:pointer;border:none}
     .btn-setup{background:#6b4c3b;color:white}
@@ -155,16 +156,32 @@
     clearup: {s1:"Guest Departure",s2:"Dancefloor & Entertainment Pack Down",s3:"Decor & Personal Items",s4:"Tables & Chairs",s5:"Hall Clean",s6:"Hall Clean",s7:"Lock Up & Handover"}
   };
 
-  const PACKAGE_FORMS = {
-    flourish:   {setup:"flourish/flourish-setup.html",     during:"flourish/flourish-during.html",     clearup:"flourish/flourish-clearup.html"},
-    feast:      {setup:"feast/feast-flourish-setup.html",  during:"feast/feast-during.html",           clearup:"feast/feast-clearup.html"},
-    foundation: {setup:"foundation/foundation-setup.html", during:"foundation/foundation-during.html", clearup:"foundation/foundation-clearup.html"},
-    twilight:   {setup:"twilight/twilight-setup.html",     during:"twilight/twilight-during.html",     clearup:"twilight/twilight-clearup.html"}
+  const FORM_ROUTES = {
+    wedding: {
+      default: {},
+      byPackage: {
+        flourish:   {setup:"flourish/flourish-setup.html",     during:"flourish/flourish-during.html",     clearup:"flourish/flourish-clearup.html"},
+        feast:      {setup:"feast/feast-flourish-setup.html",  during:"feast/feast-during.html",           clearup:"feast/feast-clearup.html"},
+        foundation: {setup:"foundation/foundation-setup.html", during:"foundation/foundation-during.html", clearup:"foundation/foundation-clearup.html"},
+        twilight:   {setup:"twilight/twilight-setup.html",     during:"twilight/twilight-during.html",     clearup:"twilight/twilight-clearup.html"}
+      }
+    }
   };
 
   const PACKAGE_LABELS = {
     flourish:"Flourish", feast:"Feast & Flourish", foundation:"Foundation", twilight:"Twilight"
   };
+
+  function resolveForms(eventDoc) {
+    var eventType = (eventDoc && eventDoc.eventType) || 'wedding';
+    var pkg = eventDoc && eventDoc.package;
+    var typeRoutes = FORM_ROUTES[eventType] || {};
+    var resolved = Object.assign({setup:null,during:null,clearup:null}, typeRoutes.default || {});
+    if (pkg && typeRoutes.byPackage && typeRoutes.byPackage[pkg]) {
+      resolved = Object.assign(resolved, typeRoutes.byPackage[pkg]);
+    }
+    return resolved;
+  }
 
   // ── Section options helper ─────────────────────────────────────────────────
   function buildSectionOptions(formVal) {
@@ -309,7 +326,14 @@
     empty.style.display = 'none';
     events.sort(function(a,b) { return a.date.localeCompare(b.date); });
     events.forEach(function(ev) {
-      var forms    = PACKAGE_FORMS[ev.package] || {};
+      var forms    = resolveForms(ev);
+      var missingRoutes = ['setup', 'during', 'clearup'].filter(function(formKey) { return !forms[formKey]; });
+      var hasMissingRoutes = missingRoutes.length > 0;
+      var missingRouteNames = missingRoutes.map(function(formKey) {
+        if (formKey === 'setup') return 'Setup';
+        if (formKey === 'during') return 'During';
+        return 'Clear Up';
+      });
       var label    = PACKAGE_LABELS[ev.package] || ev.package;
       var taskCnt  = ev.customTasks.length;
       var dateFmt  = ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : 'No date';
@@ -321,7 +345,8 @@
       infoDiv.innerHTML = '<h3>' + ev.displayName + '</h3>'
         + '<p>' + dateFmt + ' &nbsp;·&nbsp; ' + (ev.guests || '?') + ' guests</p>'
         + (label ? '<span class="pkg-badge">' + label + '</span>' : '')
-        + (taskCnt ? '<span class="custom-count">+' + taskCnt + ' custom task' + (taskCnt > 1 ? 's' : '') + '</span>' : '');
+        + (taskCnt ? '<span class="custom-count">+' + taskCnt + ' custom task' + (taskCnt > 1 ? 's' : '') + '</span>' : '')
+        + (hasMissingRoutes ? '<span class="route-warning" title="Missing routes: ' + missingRouteNames.join(', ') + '">Missing route</span>' : '');
       var actDiv = document.createElement('div');
       actDiv.className = 'event-actions';
       if (forms.setup) {
