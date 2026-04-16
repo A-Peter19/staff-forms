@@ -6,6 +6,7 @@
     <title>Wake During Event Checklist</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <style>
         :root {
@@ -575,9 +576,12 @@
             appId: "1:977408765626:web:809d5ad1eea80470b99c83"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        const rtdb = firebase.database();
+        const db = firebase.firestore();
+        const FORM_KEY = "during";
     </script>
 
+    <script src="/js/form-shared.js"></script>
 
     <script>
         const staffCount = {
@@ -589,9 +593,38 @@
 
         let currentGuests = 60;
 
+        function getEventId() {
+            return StaffFormSync.getEventId();
+        }
+
+        function loadEventMetaAndApplyHiddenTasks() {
+            return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY);
+        }
+
+        function injectCustomTasks(formKey, eventMeta) {
+            return StaffFormSync.injectCustomTasks(formKey || FORM_KEY, eventMeta);
+        }
+
+        function loadRealtimeChecklist(formKey) {
+            return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY);
+        }
+
+        function saveRealtimeChecklist(formKey) {
+            return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY);
+        }
+
+        function saveStaffSection(formKey) {
+            return StaffFormSync.saveStaffSection(formKey || FORM_KEY);
+        }
+
+        function bindCheckboxMeta() {
+            return StaffFormSync.bindCheckboxMeta();
+        }
+
+
         // Load saved state
         function loadState() {
-            db.ref('wakeDuring').on('value', (snapshot) => {
+            rtdb.ref('events/' + getEventId() + '/' + FORM_KEY).on('value', (snapshot) => {
                 const state = snapshot.val();
                 if (!state) return;
 
@@ -653,7 +686,7 @@
             const staffNames = Array.from(document.querySelectorAll('.staff-name-input'))
                 .map(input => input.value);
 
-            db.ref('wakeDuring').set({
+            rtdb.ref('events/' + getEventId() + '/' + FORM_KEY).set({
                 guests: currentGuests,
                 tasks: tasks,
                 teamLeader: document.getElementById('teamLeader').value,
@@ -670,6 +703,7 @@
                 currentGuests = parseInt(this.dataset.count);
                 updateStaffCount();
                 saveState();
+                saveRealtimeChecklist(FORM_KEY);
             });
         });
 
@@ -692,6 +726,7 @@
                 }
                 updateProgress(this.dataset.section);
                 saveState();
+                saveRealtimeChecklist(FORM_KEY);
             });
         });
 
@@ -731,6 +766,7 @@
             if (list.children.length > 1) {
                 btn.closest('.staff-entry').remove();
                 saveState();
+                saveRealtimeChecklist(FORM_KEY);
             }
         }
 
@@ -742,6 +778,7 @@
                 });
                 updateAllProgress();
                 saveState();
+                saveRealtimeChecklist(FORM_KEY);
             }
         }
 
@@ -750,7 +787,10 @@
         }
 
         // Initialize
+        bindCheckboxMeta();
+        loadEventMetaAndApplyHiddenTasks().then(function(ev){ injectCustomTasks(FORM_KEY, ev); });
         loadState();
+        loadRealtimeChecklist(FORM_KEY);
         updateStaffCount();
         updateAllProgress();
 

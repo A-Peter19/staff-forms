@@ -856,6 +856,7 @@
   <button id="btn-reset" onclick="resetAll()" style="background:#e05c5c;color:white;">Reset</button>
 </div>
 
+<script src="/js/form-shared.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyBa9zA9-RlT5SVAaOb208_KE644zY8dvUE",
@@ -868,8 +869,19 @@
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+  const rtdb = firebase.database();
 
   const EVENT_ID = new URLSearchParams(window.location.search).get('event');
+  
+
+  function getEventId() { return StaffFormSync.getEventId(); }
+  function loadEventMetaAndApplyHiddenTasks() { return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY); }
+  function injectCustomTasks(formKey, eventMeta) { return StaffFormSync.injectCustomTasks(formKey || FORM_KEY, eventMeta); }
+  function loadRealtimeChecklist(formKey) { return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY); }
+  function saveRealtimeChecklist(formKey) { return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY); }
+  function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
+  function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
+
   const FORM_KEY = 'setup';
 
   // No event warning
@@ -922,6 +934,7 @@
           cb.addEventListener('change', function() {
             item.classList.toggle('done', this.checked);
             updateProgress();
+            saveRealtimeChecklist(FORM_KEY);
           });
           var notesRow = body.querySelector('.notes-row');
           if (notesRow) body.insertBefore(item, notesRow);
@@ -989,6 +1002,7 @@
     var btn = document.getElementById('btn-save');
     btn.textContent = 'Saving...';
     try {
+      await saveStaffSection(FORM_KEY);
       await db.collection('events').doc(EVENT_ID).set(data, { merge: true });
       btn.textContent = 'Saved!';
       setTimeout(function() { btn.textContent = 'Save'; }, 2500);
@@ -1035,6 +1049,7 @@
         meta.innerHTML = '';
       }
       updateProgress();
+      saveRealtimeChecklist(FORM_KEY);
     });
   });
 
@@ -1060,6 +1075,8 @@
   // ── End initials feature ─────────────────────────────────────────────────
 
   updateProgress();
+  bindCheckboxMeta();
+  loadRealtimeChecklist(FORM_KEY);
 
   function toggleSection(header) {
     var body = header.nextElementSibling;

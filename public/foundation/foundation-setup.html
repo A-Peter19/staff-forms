@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Foundation Package – Venue Setup Checklist</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', sans-serif; background: #f5f0eb; color: #2c2c2c; min-height: 100vh; padding: 20px; }
@@ -478,6 +481,7 @@
   <button id="btn-reset" onclick="resetAll()">🔄 Reset</button>
 </div>
 
+<script src="/js/form-shared.js"></script>
 <script>
   // ── Firebase config ─────────────────────────────────────────────────────────
   const firebaseConfig = {
@@ -491,6 +495,17 @@
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+  const rtdb = firebase.database();
+  const FORM_KEY = "setup";
+
+  function getEventId() { return StaffFormSync.getEventId(); }
+  function loadEventMetaAndApplyHiddenTasks() { return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY); }
+  function injectCustomTasks(formKey, eventMeta) { return StaffFormSync.injectCustomTasks(formKey || FORM_KEY, eventMeta); }
+  function loadRealtimeChecklist(formKey) { return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY); }
+  function saveRealtimeChecklist(formKey) { return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY); }
+  function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
+  function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
+
 
   // ── Progress tracking ────────────────────────────────────────────────────────
   function updateProgress() {
@@ -515,10 +530,16 @@
     cb.addEventListener('change', function () {
       this.closest('.checklist-item').classList.toggle('done', this.checked);
       updateProgress();
+      saveRealtimeChecklist(FORM_KEY);
     });
   });
 
   updateProgress();
+  bindCheckboxMeta();
+  loadEventMetaAndApplyHiddenTasks().then(function(ev){
+    injectCustomTasks(FORM_KEY, ev);
+    loadRealtimeChecklist(FORM_KEY);
+  });
 
   // ── Collapsible sections ─────────────────────────────────────────────────────
   function toggleSection(header) {
@@ -560,6 +581,7 @@
       cb.closest('.checklist-item').classList.remove('done');
     });
     updateProgress();
+    saveRealtimeChecklist(FORM_KEY);
   }
 </script>
 </body>
