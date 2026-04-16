@@ -55,6 +55,10 @@
     .btn-delete{background:#e05c5c;color:white}
     .search-bar{margin-bottom:16px}
     .search-bar input{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:7px;font-size:.92rem;background:#fdfaf7}
+    .dashboard-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+    .filter-tab{padding:7px 12px;border:1px solid #d9cec3;border-radius:999px;background:#fff;color:#6b4c3b;font-size:.8rem;font-weight:600;cursor:pointer}
+    .filter-tab.active{background:#6b4c3b;color:#fff;border-color:#6b4c3b}
+    .is-hidden{display:none!important}
     #loading-events{text-align:center;padding:24px;color:#aaa;font-size:.9rem}
     .empty-state{text-align:center;padding:40px 20px;color:#aaa;font-size:.95rem}
     .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
@@ -85,15 +89,23 @@
 
 <header>
   <h1>Waddesdon Hall - Event Dashboard</h1>
-  <p>Create and manage wedding events. Open setup, during, and clear-up checklists per event.</p>
+  <p>Create and manage events. Open setup, during, and clear-up checklists per event.</p>
 </header>
 
 <div class="card">
   <h2>Create New Event</h2>
   <div class="form-grid">
-    <div class="field"><label>Couple Names</label><input type="text" id="f-couple" placeholder="e.g. Sophie and James"/></div>
-    <div class="field"><label>Wedding Date</label><input type="date" id="f-date"/></div>
-    <div class="field"><label>Package</label>
+    <div class="field"><label>Host / Event Name</label><input type="text" id="f-couple" placeholder="e.g. Sophie and James"/></div>
+    <div class="field"><label>Event Date</label><input type="date" id="f-date"/></div>
+    <div class="field"><label>Event Type</label>
+      <select id="f-event-type">
+        <option value="wedding">Wedding</option>
+        <option value="wake">Wake</option>
+        <option value="party">Party</option>
+        <option value="baby-shower">Baby Shower</option>
+      </select>
+    </div>
+    <div class="field" id="f-package-wrap"><label>Package</label>
       <select id="f-package">
         <option value="">Select...</option>
         <option value="flourish">The Flourish Package</option>
@@ -119,7 +131,14 @@
 
 <div class="card">
   <h2>All Events</h2>
-  <div class="search-bar"><input type="text" id="search-input" placeholder="Search by couple name or date..."/></div>
+  <div class="dashboard-filters" id="event-type-filters">
+    <button class="filter-tab active" data-filter="all" type="button">All</button>
+    <button class="filter-tab" data-filter="wedding" type="button">Weddings</button>
+    <button class="filter-tab" data-filter="wake" type="button">Wakes</button>
+    <button class="filter-tab" data-filter="party" type="button">Parties</button>
+    <button class="filter-tab" data-filter="baby-shower" type="button">Baby Showers</button>
+  </div>
+  <div class="search-bar"><input type="text" id="search-input" placeholder="Search by event name or date..."/></div>
   <div id="loading-events">Loading events...</div>
   <div class="events-list" id="events-list"></div>
   <div class="empty-state" id="empty-state" style="display:none">No events found. Create one above.</div>
@@ -188,6 +207,7 @@
   };
 
   const KNOWN_PACKAGES = Object.keys(PACKAGE_LABELS);
+  const EVENT_TYPE_LABELS = { wedding: 'Wedding', wake: 'Wake', party: 'Party', 'baby-shower': 'Baby Shower' };
 
   function isKnownPackage(pkg) {
     return !!(pkg && KNOWN_PACKAGES.indexOf(pkg) !== -1);
@@ -231,6 +251,26 @@
   function inferDisplayName(eventDoc) {
     if (!eventDoc || typeof eventDoc !== 'object') return 'Untitled Event';
     return eventDoc.displayName || eventDoc.coupleOrHost || eventDoc.couple || eventDoc.host || eventDoc.name || 'Untitled Event';
+  }
+
+  function normalizeEventType(value) {
+    var raw = (value || '').toString().trim().toLowerCase();
+    if (!raw) return 'wedding';
+    if (raw === 'babyshower' || raw === 'baby_shower') return 'baby-shower';
+    return raw;
+  }
+
+  function shouldShowPackageForType(eventType) {
+    return normalizeEventType(eventType) === 'wedding';
+  }
+
+  function syncPackageVisibility() {
+    var type = document.getElementById('f-event-type').value;
+    var packageWrap = document.getElementById('f-package-wrap');
+    var packageSelect = document.getElementById('f-package');
+    var showPackage = shouldShowPackageForType(type);
+    packageWrap.classList.toggle('is-hidden', !showPackage);
+    if (!showPackage) packageSelect.value = '';
   }
 
   function resolveForms(eventDoc) {
@@ -317,6 +357,8 @@
   document.getElementById('btn-add-create-task').addEventListener('click', function() {
     document.getElementById('create-tasks-list').appendChild(buildTaskRow({}));
   });
+  document.getElementById('f-event-type').addEventListener('change', syncPackageVisibility);
+  syncPackageVisibility();
 
   // ── Create event ───────────────────────────────────────────────────────────
   function makeEventId(couple, date) {
@@ -326,11 +368,12 @@
   document.getElementById('btn-create-event').addEventListener('click', async function() {
     var couple  = document.getElementById('f-couple').value.trim();
     var date    = document.getElementById('f-date').value;
+    var eventType = normalizeEventType(document.getElementById('f-event-type').value);
     var pkg     = document.getElementById('f-package').value;
     var status  = document.getElementById('status-create');
     if (!couple || !date) {
       status.className = 'error';
-      status.textContent = 'Please fill in couple names and date.';
+      status.textContent = 'Please fill in event name and date.';
       return;
     }
     var eventId = makeEventId(couple, date);
@@ -340,7 +383,7 @@
         couple:      couple,
         coupleOrHost: couple,
         displayName: couple,
-        eventType:   'wedding',
+        eventType:   eventType,
         date:        date,
         guests:      parseInt(document.getElementById('f-guests').value) || 0,
         sash:        document.getElementById('f-sash').value.trim(),
@@ -349,13 +392,15 @@
         customTasks: tasks,
         createdAt:   new Date().toISOString()
       };
-      if (pkg) eventData.package = pkg;
+      if (shouldShowPackageForType(eventType) && pkg) eventData.package = pkg;
       await db.collection('events').doc(eventId).set(eventData);
       status.className = 'success';
       status.textContent = 'Event created: ' + couple + ' (' + date + ')' + (tasks.length ? ' with ' + tasks.length + ' custom task(s)' : '');
-      ['f-couple','f-date','f-package','f-guests','f-sash','f-runner'].forEach(function(id) {
+      ['f-couple','f-date','f-event-type','f-package','f-guests','f-sash','f-runner'].forEach(function(id) {
         document.getElementById(id).value = '';
       });
+      document.getElementById('f-event-type').value = 'wedding';
+      syncPackageVisibility();
       document.getElementById('create-tasks-list').innerHTML = '';
     } catch(e) {
       status.className = 'error';
@@ -365,6 +410,20 @@
 
   // ── Event list ─────────────────────────────────────────────────────────────
   var allEvents = [];
+  var activeTypeFilter = 'all';
+
+  function getVisibleEvents() {
+    var q = document.getElementById('search-input').value.toLowerCase();
+    return allEvents.filter(function(ev) {
+      var passesSearch = (ev.displayName + ' ' + ev.coupleOrHost + ' ' + (ev.date || '')).toLowerCase().includes(q);
+      var passesType = activeTypeFilter === 'all' || normalizeEventType(ev.eventType) === activeTypeFilter;
+      return passesSearch && passesType;
+    });
+  }
+
+  function applyEventFilters() {
+    renderEvents(getVisibleEvents());
+  }
 
   function normalizeEventData(raw, docId) {
     var data = raw || {};
@@ -372,7 +431,7 @@
     var inferredPackage = inferPackageFromLegacyFields(data);
     return Object.assign({}, data, {
       id:           docId,
-      eventType:    data.eventType || 'wedding',
+      eventType:    normalizeEventType(data.eventType || 'wedding'),
       displayName:  data.displayName || fallbackName,
       coupleOrHost: data.coupleOrHost || fallbackName,
       package:      data.package || inferredPackage || '',
@@ -400,13 +459,14 @@
       var label    = PACKAGE_LABELS[ev.package] || ev.package;
       var taskCnt  = ev.customTasks.length;
       var dateFmt  = ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : 'No date';
+      var eventTypeLabel = EVENT_TYPE_LABELS[ev.eventType] || 'Event';
       var card = document.createElement('div');
       card.className = 'event-card';
       card.dataset.search = (ev.displayName + ' ' + ev.coupleOrHost + ' ' + (ev.date || '')).toLowerCase();
       var infoDiv = document.createElement('div');
       infoDiv.className = 'event-info';
       infoDiv.innerHTML = '<h3>' + ev.displayName + '</h3>'
-        + '<p>' + dateFmt + ' &nbsp;·&nbsp; ' + (ev.guests || '?') + ' guests</p>'
+        + '<p>' + dateFmt + ' &nbsp;·&nbsp; ' + eventTypeLabel + ' &nbsp;·&nbsp; ' + (ev.guests || '?') + ' guests</p>'
         + (label ? '<span class="pkg-badge">' + label + '</span>' : '')
         + (taskCnt ? '<span class="custom-count">+' + taskCnt + ' custom task' + (taskCnt > 1 ? 's' : '') + '</span>' : '')
         + (hasMissingRoutes ? '<span class="route-warning" title="Missing routes: ' + missingRouteNames.join(', ') + '">Missing route</span>' : '');
@@ -444,17 +504,23 @@
   }
 
   document.getElementById('search-input').addEventListener('input', function() {
-    var q = this.value.toLowerCase();
-    var filtered = allEvents.filter(function(ev) {
-      return (ev.displayName + ' ' + ev.coupleOrHost + ' ' + (ev.date || '')).toLowerCase().includes(q);
+    applyEventFilters();
+  });
+
+  document.querySelectorAll('#event-type-filters .filter-tab').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      activeTypeFilter = this.dataset.filter;
+      document.querySelectorAll('#event-type-filters .filter-tab').forEach(function(tab) {
+        tab.classList.toggle('active', tab === btn);
+      });
+      applyEventFilters();
     });
-    renderEvents(filtered);
   });
 
   db.collection('events').onSnapshot(function(snap) {
     document.getElementById('loading-events').style.display = 'none';
     allEvents = snap.docs.map(function(d) { return normalizeEventData(d.data(), d.id); });
-    renderEvents(allEvents);
+    applyEventFilters();
   }, function(err) {
     document.getElementById('loading-events').textContent = 'Could not load events: ' + err.message;
   });
