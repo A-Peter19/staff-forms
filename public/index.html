@@ -250,24 +250,29 @@
     var date    = document.getElementById('f-date').value;
     var pkg     = document.getElementById('f-package').value;
     var status  = document.getElementById('status-create');
-    if (!couple || !date || !pkg) {
+    if (!couple || !date) {
       status.className = 'error';
-      status.textContent = 'Please fill in couple names, date and package.';
+      status.textContent = 'Please fill in couple names and date.';
       return;
     }
     var eventId = makeEventId(couple, date);
     var tasks   = collectTasksFrom('create-tasks-list');
     try {
-      await db.collection('events').doc(eventId).set({
+      var eventData = {
         couple:      couple,
+        coupleOrHost: couple,
+        displayName: couple,
+        eventType:   'wedding',
         date:        date,
-        package:     pkg,
         guests:      parseInt(document.getElementById('f-guests').value) || 0,
         sash:        document.getElementById('f-sash').value.trim(),
         runner:      document.getElementById('f-runner').value.trim(),
+        hiddenTasks: [],
         customTasks: tasks,
         createdAt:   new Date().toISOString()
-      });
+      };
+      if (pkg) eventData.package = pkg;
+      await db.collection('events').doc(eventId).set(eventData);
       status.className = 'success';
       status.textContent = 'Event created: ' + couple + ' (' + date + ')' + (tasks.length ? ' with ' + tasks.length + ' custom task(s)' : '');
       ['f-couple','f-date','f-package','f-guests','f-sash','f-runner'].forEach(function(id) {
@@ -283,6 +288,19 @@
   // ── Event list ─────────────────────────────────────────────────────────────
   var allEvents = [];
 
+  function normalizeEventData(raw, docId) {
+    var data = raw || {};
+    var fallbackName = data.couple || data.host || data.name || 'Untitled Event';
+    return Object.assign({}, data, {
+      id:           docId,
+      eventType:    data.eventType || 'wedding',
+      displayName:  data.displayName || fallbackName,
+      coupleOrHost: data.coupleOrHost || fallbackName,
+      hiddenTasks:  Array.isArray(data.hiddenTasks) ? data.hiddenTasks : [],
+      customTasks:  Array.isArray(data.customTasks) ? data.customTasks : []
+    });
+  }
+
   function renderEvents(events) {
     var list  = document.getElementById('events-list');
     var empty = document.getElementById('empty-state');
@@ -293,16 +311,16 @@
     events.forEach(function(ev) {
       var forms    = PACKAGE_FORMS[ev.package] || {};
       var label    = PACKAGE_LABELS[ev.package] || ev.package;
-      var taskCnt  = (ev.customTasks || []).length;
+      var taskCnt  = ev.customTasks.length;
       var dateFmt  = ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : 'No date';
       var card = document.createElement('div');
       card.className = 'event-card';
-      card.dataset.search = (ev.couple + ' ' + ev.date).toLowerCase();
+      card.dataset.search = (ev.displayName + ' ' + ev.coupleOrHost + ' ' + (ev.date || '')).toLowerCase();
       var infoDiv = document.createElement('div');
       infoDiv.className = 'event-info';
-      infoDiv.innerHTML = '<h3>' + ev.couple + '</h3>'
+      infoDiv.innerHTML = '<h3>' + ev.displayName + '</h3>'
         + '<p>' + dateFmt + ' &nbsp;·&nbsp; ' + (ev.guests || '?') + ' guests</p>'
-        + '<span class="pkg-badge">' + label + '</span>'
+        + (label ? '<span class="pkg-badge">' + label + '</span>' : '')
         + (taskCnt ? '<span class="custom-count">+' + taskCnt + ' custom task' + (taskCnt > 1 ? 's' : '') + '</span>' : '');
       var actDiv = document.createElement('div');
       actDiv.className = 'event-actions';
@@ -340,14 +358,14 @@
   document.getElementById('search-input').addEventListener('input', function() {
     var q = this.value.toLowerCase();
     var filtered = allEvents.filter(function(ev) {
-      return (ev.couple + ' ' + ev.date).toLowerCase().includes(q);
+      return (ev.displayName + ' ' + ev.coupleOrHost + ' ' + (ev.date || '')).toLowerCase().includes(q);
     });
     renderEvents(filtered);
   });
 
   db.collection('events').onSnapshot(function(snap) {
     document.getElementById('loading-events').style.display = 'none';
-    allEvents = snap.docs.map(function(d) { return Object.assign({id: d.id}, d.data()); });
+    allEvents = snap.docs.map(function(d) { return normalizeEventData(d.data(), d.id); });
     renderEvents(allEvents);
   }, function(err) {
     document.getElementById('loading-events').textContent = 'Could not load events: ' + err.message;
@@ -365,10 +383,10 @@
 
   function openEditModal(ev) {
     editingEventId = ev.id;
-    document.getElementById('edit-modal-sub').textContent = ev.couple + '  -  ' + ev.date;
+    document.getElementById('edit-modal-sub').textContent = ev.displayName + '  -  ' + ev.date;
     var list = document.getElementById('edit-tasks-list');
     list.innerHTML = '';
-    (ev.customTasks || []).forEach(function(t) {
+    ev.customTasks.forEach(function(t) {
       list.appendChild(buildTaskRow(t));
     });
     document.getElementById('edit-status').textContent = '';
@@ -411,8 +429,8 @@
 
   function openManageTasks(ev) {
     mtCurrentEventId = ev.id;
-    mtHidden = (ev.hiddenTasks || []).slice();
-    document.getElementById('mt-event-name').textContent = ev.couple + '  ·  ' + (ev.date || '');
+    mtHidden = ev.hiddenTasks.slice();
+    document.getElementById('mt-event-name').textContent = ev.displayName + '  ·  ' + (ev.date || '');
     renderManageTasksList();
     document.getElementById('manage-tasks-overlay').style.display = 'block';
     document.body.style.overflow = 'hidden';
