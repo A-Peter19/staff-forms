@@ -15,12 +15,15 @@
     .card{background:white;border-radius:10px;padding:24px;margin-bottom:24px;box-shadow:0 2px 8px rgba(0,0,0,.07)}
     .card h2{font-size:1.05rem;font-weight:700;color:#6b4c3b;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #f0ebe5}
     .card h3{font-size:.85rem;font-weight:700;color:#7a6050;margin:20px 0 10px;text-transform:uppercase;letter-spacing:.05em}
+    .card p{font-size:.9rem;color:#666;line-height:1.4}
     .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
     .field label{display:block;font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#7a6050;margin-bottom:4px}
     .field input,.field select{width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:6px;font-size:.92rem;background:#fdfaf7}
     .field input:focus,.field select:focus{outline:none;border-color:#c9a96e}
     .btn-primary{padding:11px 24px;background:#6b4c3b;color:white;border:none;border-radius:8px;font-size:.92rem;font-weight:600;cursor:pointer}
     .btn-primary:hover{opacity:.88}
+    .btn-secondary{padding:11px 24px;background:#4a6fa5;color:white;border:none;border-radius:8px;font-size:.92rem;font-weight:600;cursor:pointer}
+    .btn-secondary:hover{opacity:.88}
     .btn-add-task{padding:10px;width:100%;background:transparent;border:2px dashed #c9a96e;border-radius:8px;color:#6b4c3b;font-size:.88rem;font-weight:600;cursor:pointer;margin-top:8px}
     .btn-add-task:hover{background:#fdf5ea}
     .task-col-headers{display:grid;grid-template-columns:130px 1fr 1fr 36px;gap:8px;margin-bottom:6px}
@@ -31,6 +34,10 @@
     #status-create{margin-top:12px;padding:10px 14px;border-radius:6px;font-size:.88rem;display:none}
     #status-create.success{background:#d4edda;color:#1e5c2d;display:block}
     #status-create.error{background:#f8d7da;color:#721c24;display:block}
+    #status-migrate{margin-top:12px;padding:10px 14px;border-radius:6px;font-size:.88rem;display:none}
+    #status-migrate.success{background:#d4edda;color:#1e5c2d;display:block}
+    #status-migrate.error{background:#f8d7da;color:#721c24;display:block}
+    #status-migrate.info{background:#d1ecf1;color:#0c5460;display:block}
     .events-list{display:flex;flex-direction:column;gap:14px}
     .event-card{border:1px solid #e8e0d8;border-radius:10px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
     .event-card:hover{box-shadow:0 4px 14px rgba(0,0,0,.1)}
@@ -118,6 +125,14 @@
   <div class="empty-state" id="empty-state" style="display:none">No events found. Create one above.</div>
 </div>
 
+<div class="card">
+  <h2>Admin Tools</h2>
+  <p>One-time safe migration for legacy records. This can be re-run; it only writes missing/invalid fields.</p>
+  <br/>
+  <button class="btn-secondary" id="btn-run-migration">Run Legacy Backfill</button>
+  <div id="status-migrate"></div>
+</div>
+
 <!-- EDIT TASKS MODAL -->
 <div class="overlay" id="edit-overlay">
   <div class="modal">
@@ -172,9 +187,55 @@
     flourish:"Flourish", feast:"Feast & Flourish", foundation:"Foundation", twilight:"Twilight"
   };
 
+  const KNOWN_PACKAGES = Object.keys(PACKAGE_LABELS);
+
+  function isKnownPackage(pkg) {
+    return !!(pkg && KNOWN_PACKAGES.indexOf(pkg) !== -1);
+  }
+
+  function findPackageInValue(value) {
+    if (!value || typeof value !== 'string') return null;
+    var normalized = value.toLowerCase();
+    for (var i = 0; i < KNOWN_PACKAGES.length; i++) {
+      if (normalized.indexOf(KNOWN_PACKAGES[i]) !== -1) return KNOWN_PACKAGES[i];
+    }
+    return null;
+  }
+
+  function inferPackageFromLegacyFields(eventDoc) {
+    if (!eventDoc || typeof eventDoc !== 'object') return null;
+    if (isKnownPackage(eventDoc.package)) return eventDoc.package;
+    var candidates = [
+      eventDoc.setupRoute, eventDoc.duringRoute, eventDoc.clearupRoute,
+      eventDoc.setupPath, eventDoc.duringPath, eventDoc.clearupPath,
+      eventDoc.setupUrl, eventDoc.duringUrl, eventDoc.clearupUrl,
+      eventDoc.route, eventDoc.routes,
+      eventDoc.setup, eventDoc.during, eventDoc.clearup
+    ];
+    for (var i = 0; i < candidates.length; i++) {
+      var value = candidates[i];
+      if (typeof value === 'string') {
+        var inferred = findPackageInValue(value);
+        if (inferred) return inferred;
+      } else if (value && typeof value === 'object') {
+        var merged = [value.setup, value.during, value.clearup, value.path, value.url];
+        for (var j = 0; j < merged.length; j++) {
+          var nested = findPackageInValue(merged[j]);
+          if (nested) return nested;
+        }
+      }
+    }
+    return null;
+  }
+
+  function inferDisplayName(eventDoc) {
+    if (!eventDoc || typeof eventDoc !== 'object') return 'Untitled Event';
+    return eventDoc.displayName || eventDoc.coupleOrHost || eventDoc.couple || eventDoc.host || eventDoc.name || 'Untitled Event';
+  }
+
   function resolveForms(eventDoc) {
     var eventType = (eventDoc && eventDoc.eventType) || 'wedding';
-    var pkg = eventDoc && eventDoc.package;
+    var pkg = (eventDoc && eventDoc.package) || inferPackageFromLegacyFields(eventDoc);
     var typeRoutes = FORM_ROUTES[eventType] || {};
     var resolved = Object.assign({setup:null,during:null,clearup:null}, typeRoutes.default || {});
     if (pkg && typeRoutes.byPackage && typeRoutes.byPackage[pkg]) {
@@ -307,12 +368,14 @@
 
   function normalizeEventData(raw, docId) {
     var data = raw || {};
-    var fallbackName = data.couple || data.host || data.name || 'Untitled Event';
+    var fallbackName = inferDisplayName(data);
+    var inferredPackage = inferPackageFromLegacyFields(data);
     return Object.assign({}, data, {
       id:           docId,
       eventType:    data.eventType || 'wedding',
       displayName:  data.displayName || fallbackName,
       coupleOrHost: data.coupleOrHost || fallbackName,
+      package:      data.package || inferredPackage || '',
       hiddenTasks:  Array.isArray(data.hiddenTasks) ? data.hiddenTasks : [],
       customTasks:  Array.isArray(data.customTasks) ? data.customTasks : []
     });
@@ -394,6 +457,64 @@
     renderEvents(allEvents);
   }, function(err) {
     document.getElementById('loading-events').textContent = 'Could not load events: ' + err.message;
+  });
+
+  async function runLegacyBackfill() {
+    var status = document.getElementById('status-migrate');
+    var btn = document.getElementById('btn-run-migration');
+    status.className = 'info';
+    status.textContent = 'Scanning events...';
+    btn.disabled = true;
+    try {
+      var snap = await db.collection('events').get();
+      if (snap.empty) {
+        status.className = 'success';
+        status.textContent = 'No events found. Nothing to migrate.';
+        return;
+      }
+      var updates = [];
+      snap.forEach(function(doc) {
+        var data = doc.data() || {};
+        var patch = {};
+        if (!data.eventType) patch.eventType = 'wedding';
+        if (!data.displayName) {
+          var inferredDisplayName = inferDisplayName(data);
+          if (inferredDisplayName) patch.displayName = inferredDisplayName;
+        }
+        if (!Array.isArray(data.hiddenTasks)) patch.hiddenTasks = [];
+        if (!Array.isArray(data.customTasks)) patch.customTasks = [];
+        if (!isKnownPackage(data.package)) {
+          var inferredPackage = inferPackageFromLegacyFields(data);
+          if (inferredPackage) patch.package = inferredPackage;
+        }
+        if (Object.keys(patch).length) updates.push({ ref: doc.ref, patch: patch });
+      });
+      if (!updates.length) {
+        status.className = 'success';
+        status.textContent = 'Migration complete. No legacy records needed changes.';
+        return;
+      }
+      var batchSize = 300;
+      for (var i = 0; i < updates.length; i += batchSize) {
+        var batch = db.batch();
+        updates.slice(i, i + batchSize).forEach(function(change) {
+          batch.set(change.ref, change.patch, { merge: true });
+        });
+        await batch.commit();
+      }
+      status.className = 'success';
+      status.textContent = 'Migration complete. Updated ' + updates.length + ' event(s). Safe to re-run anytime.';
+    } catch (e) {
+      status.className = 'error';
+      status.textContent = 'Migration failed: ' + e.message;
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById('btn-run-migration').addEventListener('click', function() {
+    if (!confirm('Run legacy backfill now? This is idempotent and safe to run multiple times.')) return;
+    runLegacyBackfill();
   });
 
   async function deleteEvent(eventId, btn) {
