@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Flourish Package – During Event Checklist</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="/js/form-shared.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', sans-serif; background: #f5f0eb; color: #2c2c2c; min-height: 100vh; padding: 20px; }
@@ -236,8 +238,19 @@
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+  const rtdb = firebase.database();
 
   const EVENT_ID = new URLSearchParams(window.location.search).get('event');
+  
+
+  function getEventId() { return StaffFormSync.getEventId(); }
+  function loadEventMetaAndApplyHiddenTasks() { return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY); }
+  function injectCustomTasks(formKey, eventMeta) { return StaffFormSync.injectCustomTasks(formKey || FORM_KEY, eventMeta); }
+  function loadRealtimeChecklist(formKey) { return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY); }
+  function saveRealtimeChecklist(formKey) { return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY); }
+  function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
+  function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
+
   const FORM_KEY = 'during';
 
   // No event warning
@@ -290,6 +303,7 @@
           cb.addEventListener('change', function() {
             item.classList.toggle('done', this.checked);
             updateProgress();
+            saveRealtimeChecklist(FORM_KEY);
           });
           var notesRow = body.querySelector('.notes-row');
           if (notesRow) body.insertBefore(item, notesRow);
@@ -357,6 +371,7 @@
     var btn = document.getElementById('btn-save');
     btn.textContent = 'Saving...';
     try {
+      await saveStaffSection(FORM_KEY);
       await db.collection('events').doc(EVENT_ID).set(data, { merge: true });
       btn.textContent = 'Saved!';
       setTimeout(function() { btn.textContent = 'Save'; }, 2500);
@@ -403,6 +418,7 @@
         meta.innerHTML = '';
       }
       updateProgress();
+      saveRealtimeChecklist(FORM_KEY);
     });
   });
 
@@ -428,6 +444,8 @@
   // ── End initials feature ─────────────────────────────────────────────────
 
   updateProgress();
+  bindCheckboxMeta();
+  loadRealtimeChecklist(FORM_KEY);
 
   function toggleSection(header) {
     var body = header.nextElementSibling;
