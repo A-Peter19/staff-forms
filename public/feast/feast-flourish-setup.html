@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Feast & Flourish Package – Venue Setup Checklist</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <style>
     :root {
       --brand: #5a3f99;
@@ -695,18 +698,29 @@
   <button id="btn-reset" onclick="resetAll()">🔄 Reset</button>
 </div>
 
+<script src="/js/form-shared.js"></script>
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBa9zA9-RlT5SVAaOb208_KE644zY8dvUE",
-        authDomain: "staff-forms-42a6f.firebaseapp.com",
-        databaseURL: "https://staff-forms-42a6f-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "staff-forms-42a6f",
-        storageBucket: "staff-forms-42a6f.firebasestorage.app",
-        messagingSenderId: "977408765626",
-        appId: "1:977408765626:web:809d5ad1eea80470b99c83"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+  const firebaseConfig = {
+    apiKey: "AIzaSyBa9zA9-RlT5SVAaOb208_KE644zY8dvUE",
+    authDomain: "staff-forms-42a6f.firebaseapp.com",
+    databaseURL: "https://staff-forms-42a6f-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "staff-forms-42a6f",
+    storageBucket: "staff-forms-42a6f.firebasestorage.app",
+    messagingSenderId: "977408765626",
+    appId: "1:977408765626:web:809d5ad1eea80470b99c83"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const rtdb = firebase.database();
+  const FORM_KEY = "setup";
+
+  function getEventId() { return StaffFormSync.getEventId(); }
+  function loadEventMetaAndApplyHiddenTasks() { return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY); }
+  function injectCustomTasks(formKey, eventMeta) { return StaffFormSync.injectCustomTasks(formKey || FORM_KEY, eventMeta); }
+  function loadRealtimeChecklist(formKey) { return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY); }
+  function saveRealtimeChecklist(formKey) { return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY); }
+  function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
+  function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
 </script>
 
 <script>
@@ -732,10 +746,16 @@
     cb.addEventListener('change', function () {
       this.closest('.checklist-item').classList.toggle('done', this.checked);
       updateProgress();
+      saveRealtimeChecklist(FORM_KEY);
     });
   });
 
   updateProgress();
+  bindCheckboxMeta();
+  loadEventMetaAndApplyHiddenTasks().then(function(ev){
+    injectCustomTasks(FORM_KEY, ev);
+    loadRealtimeChecklist(FORM_KEY);
+  });
 
   function toggleSection(header) {
     const body = header.nextElementSibling;
@@ -774,6 +794,7 @@
       cb.closest('.checklist-item').classList.remove('done');
     });
     updateProgress();
+    saveRealtimeChecklist(FORM_KEY);
   }
 </script>
 </body>

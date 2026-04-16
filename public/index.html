@@ -259,6 +259,22 @@
         clearup: "wake-clear.html"
       },
       byPackage: {}
+    },
+    party: {
+      default: {
+        setup: "wake-setup.html",
+        during: "wake-during.html",
+        clearup: "wake-clear.html"
+      },
+      byPackage: {}
+    },
+    "baby-shower": {
+      default: {
+        setup: "wake-setup.html",
+        during: "wake-during.html",
+        clearup: "wake-clear.html"
+      },
+      byPackage: {}
     }
   };
 
@@ -421,8 +437,8 @@
   syncPackageVisibility();
 
   // ── Create event ───────────────────────────────────────────────────────────
-  function makeEventId(couple, date) {
-    return (couple + '-' + date).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  function makeEventId(eventType, couple, date) {
+    return (normalizeEventType(eventType) + '-' + couple + '-' + date).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   }
 
   document.getElementById('btn-create-event').addEventListener('click', async function() {
@@ -436,7 +452,7 @@
       status.textContent = 'Please fill in event name and date.';
       return;
     }
-    var eventId = makeEventId(couple, date);
+    var eventId = makeEventId(eventType, couple, date);
     var tasks   = collectTasksFrom('create-tasks-list');
     try {
       var eventData = {
