@@ -29,7 +29,7 @@
     .btn-add-task:hover{background:#f3f7ff}
     .task-col-headers{display:grid;grid-template-columns:130px 1fr 1fr 36px;gap:var(--space-1);margin-bottom:6px}
     .task-col-headers span{font-size:.72rem;font-weight:700;text-transform:uppercase;color:#aaa;letter-spacing:.04em}
-    .task-row{display:grid;grid-template-columns:130px 1fr 1fr 36px;gap:var(--space-1);margin-bottom:var(--space-1);align-items:center}
+    .task-row{display:grid;grid-template-columns:130px 1fr 1fr 36px;gap:10px;margin-bottom:12px;align-items:center}
     .task-row select,.task-row input{padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;background:var(--surface-muted);width:100%}
     .task-row .btn-remove{width:36px;height:36px;background:#c0392b;border:none;border-radius:var(--radius-sm);color:white;font-size:1rem;cursor:pointer}
     #status-create{margin-top:var(--space-2);padding:10px 14px;border-radius:var(--radius-sm);font-size:.88rem;display:none}
@@ -79,13 +79,18 @@
     .is-hidden{display:none!important}
     #loading-events{text-align:center;padding:24px;color:#aaa;font-size:.9rem}
     .empty-state{text-align:center;padding:40px 20px;color:#aaa;font-size:.95rem}
-    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+    .overlay{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(2px);z-index:1000;align-items:center;justify-content:center;padding:24px 16px}
     .overlay.open{display:flex}
-    .modal{background:white;border-radius:12px;padding:28px;max-width:680px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.2)}
-    .modal h2{color:#6b4c3b;margin-bottom:6px;font-size:1.1rem}
-    .modal-sub{font-size:.85rem;color:#888;margin-bottom:18px}
+    .modal{background:white;border-radius:22px;padding:30px;max-width:700px;width:min(700px,100%);max-height:85vh;overflow-y:auto;box-shadow:0 24px 48px rgba(2,6,23,.24)}
+    .modal h2{color:#1d355d;margin-bottom:8px;font-size:1.4rem;line-height:1.25}
+    .modal-sub{font-size:.92rem;color:#667085;margin-bottom:22px}
+    .modal-actions{display:flex;gap:10px;margin-top:22px;justify-content:flex-end}
+    .btn-cancel{padding:11px 20px;background:#f7f8fb;color:#475467;border:1px solid #d0d5dd;border-radius:10px;font-weight:600;cursor:pointer}
+    .btn-cancel:hover{background:#eef1f6}
+    .btn-modal-primary{padding:11px 22px;background:var(--brand);color:#fff;border:1px solid var(--brand);border-radius:10px;font-weight:700;cursor:pointer;box-shadow:0 6px 16px rgba(47,111,237,.28)}
+    .btn-modal-primary:hover{background:var(--brand-strong);border-color:var(--brand-strong)}
     #edit-status{margin-top:10px;font-size:.85rem}
-  
+
     @media (max-width:900px){
       .event-card{flex-direction:column;align-items:stretch}
       .event-actions{align-items:flex-start}
@@ -94,19 +99,28 @@
       .search-wrap,.sort-control{width:100%}
       .sort-control select{flex:1}
     }
-    .mt-form-header{padding:10px 28px 6px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#5a4fcf;background:#f7f6ff;border-bottom:1px solid #ebebf5;margin-top:4px;}
-    .mt-section-header{padding:7px 28px;font-size:.8rem;font-weight:600;color:#2c3e6b;background:#f5f7ff;border-bottom:1px solid #ebebf5;}
-    .mt-task-row{display:flex;align-items:center;justify-content:space-between;padding:9px 28px;border-bottom:1px solid #f0f0f8;transition:background .15s;}
+    .mt-form-header{padding:11px 28px 7px;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#5a4fcf;background:#f2f4ff;border-bottom:1px solid #e7eaf3;margin-top:6px;}
+    .mt-section-header{padding:9px 28px;font-size:.8rem;font-weight:600;color:#2c3e6b;background:#f7f8fc;border-bottom:1px solid #e7eaf3;}
+    .mt-task-row{display:flex;align-items:center;justify-content:space-between;padding:12px 28px;border-bottom:1px solid #eef1f6;transition:background .15s;}
     .mt-task-row:hover{background:#fafafe;}
     .mt-task-row.hidden-task .mt-label{color:#bbb;text-decoration:line-through;}
     .mt-label{font-size:.88rem;color:#333;flex:1;padding-right:12px;}
     /* Toggle switch */
     .toggle-wrap{flex-shrink:0}
     .toggle-wrap input{display:none}
-    .toggle-wrap label{display:inline-block;width:40px;height:22px;background:#ccc;border-radius:11px;cursor:pointer;position:relative;transition:background .2s;}
+    .toggle-wrap label{display:inline-block;width:42px;height:24px;background:#cfd4dc;border-radius:12px;cursor:pointer;position:relative;transition:background .2s;}
     .toggle-wrap input:checked + label{background:#3a9f5f;}
-    .toggle-wrap label::after{content:"";position:absolute;width:18px;height:18px;background:white;border-radius:50%;top:2px;left:2px;transition:left .2s;}
+    .toggle-wrap label::after{content:"";position:absolute;width:20px;height:20px;background:white;border-radius:50%;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(16,24,40,.24);}
     .toggle-wrap input:checked + label::after{left:20px;}
+    .mt-modal{background:white;border-radius:22px;max-width:720px;margin:0 auto;padding:0;box-shadow:0 24px 48px rgba(2,6,23,.3);overflow:hidden}
+    .mt-modal-header{background:linear-gradient(135deg,#2c3e6b,#7b8fcb);padding:22px 28px;display:flex;justify-content:space-between;align-items:center}
+    .mt-title{color:#fff;font-size:1.25rem;font-weight:700;line-height:1.2}
+    .mt-subtitle{color:rgba(255,255,255,.84);font-size:.88rem;margin-top:4px}
+    .mt-close{background:rgba(255,255,255,.16);border:none;color:white;width:36px;height:36px;border-radius:50%;font-size:1.1rem;cursor:pointer;line-height:1}
+    .mt-info{background:#f4f6fb;padding:13px 28px;font-size:.86rem;color:#344054;border-bottom:1px solid #e4e7ec}
+    .mt-info-count{font-weight:700;margin-left:6px}
+    .mt-task-list{padding:10px 0;max-height:60vh;overflow-y:auto}
+    .mt-footer{padding:16px 28px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #eaecf0}
 
   </style>
 </head>
@@ -200,9 +214,9 @@
     </div>
     <div id="edit-tasks-list"></div>
     <button class="btn-add-task" id="btn-add-edit-task">+ Add Custom Task</button>
-    <div style="display:flex;gap:10px;margin-top:18px">
-      <button class="btn-primary" id="btn-save-tasks">Save Tasks</button>
-      <button id="btn-close-modal" style="padding:11px 20px;background:#eee;color:#555;border:none;border-radius:8px;font-weight:600;cursor:pointer">Cancel</button>
+    <div class="modal-actions">
+      <button class="btn-modal-primary" id="btn-save-tasks">Save Tasks</button>
+      <button id="btn-close-modal" class="btn-cancel">Cancel</button>
     </div>
     <div id="edit-status"></div>
   </div>
@@ -757,12 +771,12 @@
     mtHidden = normalizeHiddenTaskIds(mtCurrentEventType, ev.hiddenTasks);
     document.getElementById('mt-event-name').textContent = ev.displayName + '  ·  ' + (ev.date || '');
     renderManageTasksList();
-    document.getElementById('manage-tasks-overlay').style.display = 'block';
+    document.getElementById('manage-tasks-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
 
   function closeManageTasks() {
-    document.getElementById('manage-tasks-overlay').style.display = 'none';
+    document.getElementById('manage-tasks-overlay').classList.remove('open');
     document.body.style.overflow = '';
     mtCurrentEventId = null;
     mtCurrentEventType = 'wedding';
@@ -875,27 +889,27 @@
 </script>
 
 <!-- Manage Tasks Modal -->
-<div id="manage-tasks-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;overflow-y:auto;padding:24px 16px;">
-  <div style="background:white;border-radius:14px;max-width:700px;margin:0 auto;padding:0;box-shadow:0 8px 40px rgba(0,0,0,.25);">
+<div id="manage-tasks-overlay" class="overlay" style="overflow-y:auto;">
+  <div class="mt-modal">
     <!-- Header -->
-    <div style="background:linear-gradient(135deg,#2c3e6b,#7b8fcb);border-radius:14px 14px 0 0;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;">
+    <div class="mt-modal-header">
       <div>
-        <div style="color:white;font-size:1.1rem;font-weight:700;">&#128065; Manage Tasks</div>
-        <div id="mt-event-name" style="color:rgba(255,255,255,.8);font-size:.85rem;margin-top:2px;"></div>
+        <div class="mt-title">&#128065; Manage Tasks</div>
+        <div id="mt-event-name" class="mt-subtitle"></div>
       </div>
-      <button onclick="closeManageTasks()" style="background:rgba(255,255,255,.15);border:none;color:white;width:34px;height:34px;border-radius:50%;font-size:1.1rem;cursor:pointer;line-height:1;">&#10005;</button>
+      <button onclick="closeManageTasks()" class="mt-close">&#10005;</button>
     </div>
     <!-- Info bar -->
-    <div style="background:#f0f4ff;padding:12px 28px;font-size:.83rem;color:#2c3e6b;border-bottom:1px solid #e0e4f0;">
+    <div class="mt-info">
       Toggle tasks off to hide them from staff forms. Hidden tasks are never deleted — toggle back on at any time.
-      <span id="mt-hidden-count" style="font-weight:700;margin-left:6px;"></span>
+      <span id="mt-hidden-count" class="mt-info-count"></span>
     </div>
     <!-- Task list -->
-    <div id="mt-task-list" style="padding:8px 0;max-height:60vh;overflow-y:auto;"></div>
+    <div id="mt-task-list" class="mt-task-list"></div>
     <!-- Footer -->
-    <div style="padding:16px 28px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #eee;">
-      <button onclick="closeManageTasks()" style="padding:10px 22px;border-radius:8px;border:1px solid #ddd;background:white;cursor:pointer;font-weight:600;font-size:.9rem;">Cancel</button>
-      <button id="mt-save-btn" onclick="saveHiddenTasks()" style="padding:10px 22px;border-radius:8px;border:none;background:#2c3e6b;color:white;cursor:pointer;font-weight:600;font-size:.9rem;">Save Changes</button>
+    <div class="mt-footer">
+      <button onclick="closeManageTasks()" class="btn-cancel">Cancel</button>
+      <button id="mt-save-btn" onclick="saveHiddenTasks()" class="btn-modal-primary">Save Changes</button>
     </div>
   </div>
 </div>
