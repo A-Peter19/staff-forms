@@ -199,6 +199,14 @@
         foundation: {setup:"foundation/foundation-setup.html", during:"foundation/foundation-during.html", clearup:"foundation/foundation-clearup.html"},
         twilight:   {setup:"twilight/twilight-setup.html",     during:"twilight/twilight-during.html",     clearup:"twilight/twilight-clearup.html"}
       }
+    },
+    wake: {
+      default: {
+        setup: "wake-setup.html",
+        during: "wake-during.html",
+        clearup: "wake-clear.html"
+      },
+      byPackage: {}
     }
   };
 
@@ -276,7 +284,7 @@
   function resolveForms(eventDoc) {
     var eventType = (eventDoc && eventDoc.eventType) || 'wedding';
     var pkg = (eventDoc && eventDoc.package) || inferPackageFromLegacyFields(eventDoc);
-    var typeRoutes = FORM_ROUTES[eventType] || {};
+    var typeRoutes = FORM_ROUTES[normalizeEventType(eventType)] || {};
     var resolved = Object.assign({setup:null,during:null,clearup:null}, typeRoutes.default || {});
     if (pkg && typeRoutes.byPackage && typeRoutes.byPackage[pkg]) {
       resolved = Object.assign(resolved, typeRoutes.byPackage[pkg]);
