@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Feast & Flourish Package – During Event Checklist</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="/js/form-shared.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f4f5fb; color: #2c2c2c; min-height: 100vh; padding: 20px; }
+    header { background: linear-gradient(135deg, #5a3f99, #8b79c9); color: white; border-radius: 12px;
+      padding: 28px 32px; margin-bottom: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+    header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
+    header p  { font-size: 0.95rem; opacity: 0.88; }
+    .event-meta { background: white; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .meta-field label { display: block; font-size: 0.78rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.05em; color: #4f5f83; margin-bottom: 4px; }
+    .meta-field input, .meta-field select { width: 100%; padding: 8px 10px; border: 1px solid #ddd;
+      border-radius: 6px; font-size: 0.92rem; background: #fafbff; }
+    .progress-bar-wrap { background: white; border-radius: 10px; padding: 16px 24px; margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .progress-bar-wrap p { font-size: 0.88rem; color: #666; margin-bottom: 8px; }
+    .bar-bg { background: #e7e2f6; border-radius: 20px; height: 14px; overflow: hidden; }
+    .bar-fill { background: linear-gradient(90deg, #5a3f99, #8b79c9); height: 100%;
+      border-radius: 20px; transition: width 0.4s ease; width: 0%; }
+    .section { background: white; border-radius: 10px; margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07); overflow: hidden; }
+    .section-header { background: #5a3f99; color: white; padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+    .section-header h2 { font-size: 1rem; font-weight: 600; }
+    .section-header .badge { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 2px 10px; font-size: 0.8rem; }
+    .section-body { padding: 6px 0; }
+    .checklist-item { display: flex; align-items: flex-start; gap: 14px; padding: 13px 20px;
+      border-bottom: 1px solid #edf1f7; transition: background 0.15s; }
+    .checklist-item:last-child { border-bottom: none; }
+    .checklist-item:hover { background: #f8f5ff; }
+    .checklist-item.done { background: #f2faf2; }
+    .checklist-item.done .item-label { text-decoration: line-through; color: #999; }
+    .checklist-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: #5a3f99;
+      margin-top: 2px; flex-shrink: 0; cursor: pointer; }
+    .item-content { flex: 1; }
+    .item-label { font-size: 0.93rem; font-weight: 500; }
+    .item-note  { font-size: 0.8rem; color: #999; margin-top: 2px; }
+    .item-qty { display: flex; align-items: center; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .item-qty label { font-size: 0.78rem; color: #4f5f83; font-weight: 600; }
+    .item-qty input[type="number"], .item-qty input[type="text"] { width: 90px; padding: 4px 7px;
+      border: 1px solid #ddd; border-radius: 5px; font-size: 0.85rem; }
+    .item-qty select { padding: 4px 7px; border: 1px solid #ddd; border-radius: 5px; font-size: 0.85rem; }
+    .notes-row { padding: 14px 20px; border-top: 1px dashed #dbe3f0; }
+    .notes-row label { font-size: 0.8rem; font-weight: 600; color: #4f5f83; display: block; margin-bottom: 4px; }
+    .notes-row textarea { width: 100%; min-height: 64px; padding: 8px 10px; border: 1px solid #ddd;
+      border-radius: 6px; font-size: 0.88rem; resize: vertical; background: #fafbff; }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; margin-bottom: 32px; }
+    button { padding: 12px 24px; border: none; border-radius: 8px; font-size: 0.92rem;
+      font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    button:hover { opacity: 0.88; }
+    #btn-reset { background: #e05c5c; color: white; }
+  
+    .checklist-item.custom-task { border-left: 3px solid #8b79c9; background: #fffdf7; }
+    .checklist-item.custom-task:hover { background: #fdf5e0; }
+    .custom-badge { display: inline-block; padding: 1px 7px; border-radius: 10px;
+      font-size: 0.7rem; font-weight: 700; background: #fff3cd; color: #856404;
+      margin-left: 6px; vertical-align: middle; }
+  
+    /* ── Initials feature ─────────────────────────────── */
+    .task-meta { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; }
+    .task-initials {
+      display: inline-block; background: #20808D; color: white;
+      padding: 2px 8px; border-radius: 12px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
+    }
+    .task-time { font-size: 12px; color: #626C71; }
+    /* ── End initials CSS ─────────────────────────────── */
+</style>
+</head>
+<body>
+<header>
+  <h1>🎉 The Feast & Flourish Package – During Event Checklist</h1>
+  <p>Waddesdon Hall &nbsp;|&nbsp; Staff use only &nbsp;|&nbsp; Monitor throughout the event</p>
+</header>
+
+<!-- Initials banner -->
+<div id="staffBanner" style="margin-top:12px;padding:10px 14px;background:rgba(32,128,141,0.12);border-radius:8px;font-size:14px;display:flex;justify-content:space-between;align-items:center;">
+  <span>&#128100; Ticking as: <strong id="staffInitialsDisplay">Not set</strong></span>
+  <button onclick="changeInitials()" style="background:none;border:1px solid #20808D;color:#20808D;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">Change</button>
+</div>
+
+<div class="event-meta">
+  <div class="meta-field">
+    <label>Guest Count</label>
+    <input type="number" id="meta-guests" placeholder="e.g. 80" min="1" max="220" />
+  </div>
+  <div class="meta-field">
+    <label>Day of Week</label>
+    <select id="meta-day">
+      <option value="">Select...</option>
+      <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+      <option>Thursday</option><option>Friday</option><option>Saturday</option>
+    </select>
+  </div>
+  <div class="meta-field">
+    <label>Sash Colour</label>
+    <input type="text" id="meta-sash" placeholder="e.g. Ivory, Dusty Rose..." />
+  </div>
+  <div class="meta-field">
+    <label>Runner Style</label>
+    <input type="text" id="meta-runner" placeholder="e.g. Hessian, Lace..." />
+  </div>
+</div>
+<div class="section" id="staff-section">
+  <div class="section-header" onclick="toggleSection(this)">
+    <h2>👑 Staff on Duty</h2>
+    <span class="badge" id="badge-staff"></span>
+  </div>
+  <div class="section-body">
+    <div style="padding:16px 20px;border-bottom:1px solid #edf1f7;">
+      <label style="display:block;font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#4f5f83;margin-bottom:8px;">👑 Team Leader</label>
+      <input type="text" id="team-leader" placeholder="Team leader name..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.92rem;background:#fafbff;" />
+    </div>
+    <div style="padding:16px 20px;">
+      <label style="display:block;font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#4f5f83;margin-bottom:10px;">👥 Staff on Shift</label>
+      <div id="staff-list"></div>
+      <button type="button" onclick="addStaffMember()" style="width:100%;margin-top:10px;padding:11px;background:transparent;border:2px dashed #8b79c9;border-radius:8px;color:#5a3f99;font-size:0.9rem;font-weight:600;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#fdf5ea'" onmouseout="this.style.background='transparent'">
+        + Add Staff Member
+      </button>
+    </div>
+  </div>
+</div>
+<div class="progress-bar-wrap">
+  <p>Setup Progress: <strong id="progress-text">0 / 0 items complete</strong></p>
+  <div class="bar-bg"><div class="bar-fill" id="bar-fill"></div></div>
+</div>
+<!-- SECTION 1 – GUEST ARRIVAL -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)"><h2>1 · Guest Arrival</h2><span class="badge" id="badge-s1">0/0</span></div>
+  <div class="section-body">
+    <div class="checklist-item" data-section="s1"><input type="checkbox"/><div class="item-content"><div class="item-label">Guests welcomed at entrance</div><div class="item-note">Staff positioned at door, friendly and directed to hall</div></div></div>
+    <div class="checklist-item" data-section="s1"><input type="checkbox"/><div class="item-content"><div class="item-label">Arrival drinks served to guests on entry (if booked)</div><div class="item-note">Trays circulated promptly as guests arrive</div></div></div>
+    <div class="checklist-item" data-section="s1"><input type="checkbox"/><div class="item-content"><div class="item-label">Guests directed to their tables</div><div class="item-note">Table plan visible and accessible near entrance</div></div></div>
+    <div class="checklist-item" data-section="s1"><input type="checkbox"/><div class="item-content"><div class="item-label">Any accessibility needs accommodated</div><div class="item-note">Wheelchair access clear, seating adjustments made as needed</div></div></div>
+    <div class="notes-row"><label>Section Notes</label><textarea placeholder="Guest arrival notes, any issues..."></textarea></div>
+  </div>
+</div>
+
+<!-- SECTION 2 – BAR SERVICE -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)"><h2>2 · Hall & Comfort Checks</h2><span class="badge" id="badge-s2">0/0</span></div>
+  <div class="section-body">
+    <div class="checklist-item" data-section="s2"><input type="checkbox"/><div class="item-content"><div class="item-label">Bar area tidy and service counters clear</div><div class="item-note">Keep queues moving and glassware organised</div></div></div>
+    <div class="checklist-item" data-section="s2"><input type="checkbox"/><div class="item-content"><div class="item-label">Toilets checked and restocked through service</div><div class="item-note">Soap, paper and bins checked regularly</div></div></div>
+    <div class="checklist-item" data-section="s2"><input type="checkbox"/><div class="item-content"><div class="item-label">Spillages/hazards handled immediately</div><div class="item-note">Use wet floor signs and report recurring hazards</div></div></div>
+    <div class="checklist-item" data-section="s2"><input type="checkbox"/><div class="item-content"><div class="item-label">Dining tables reset between courses</div><div class="item-note">Clear crockery and relay for evening food where needed</div></div></div>
+    <div class="checklist-item" data-section="s2"><input type="checkbox"/><div class="item-content"><div class="item-label">Ambient lighting and temperature checked hourly</div><div class="item-note">Adjust for guest comfort and report faults quickly</div></div></div>
+    <div class="notes-row"><label>Section Notes</label><textarea placeholder="Hall comfort notes, guest requests, hazards resolved..."></textarea></div>
+  </div>
+</div>
+
+<!-- SECTION 3 – FOOD SERVICE -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)"><h2>3 · Optional Food Upgrades</h2><span class="badge" id="badge-s3">0/0</span></div>
+  <div class="section-body">
+    <div class="checklist-item" data-section="s3"><input type="checkbox"/><div class="item-content"><div class="item-label">Caterer coordinated and food service on schedule</div><div class="item-note">Confirm food timing with caterer and coordinator</div></div></div>
+    <div class="checklist-item" data-section="s3"><input type="checkbox"/><div class="item-content"><div class="item-label">Dietary requirements and allergen meals delivered correctly</div><div class="item-note">Check special meals reach the right guests</div></div></div>
+    <div class="checklist-item" data-section="s3"><input type="checkbox"/><div class="item-content"><div class="item-label">Used crockery and cutlery cleared between courses</div><div class="item-note">Tables cleared promptly and without disrupting guests</div></div></div>
+    <div class="checklist-item" data-section="s3"><input type="checkbox"/><div class="item-content"><div class="item-label">Cake cutting coordinated with couple</div><div class="item-note">Cake stand and knife in place; confirm timing with coordinator</div></div></div>
+    <div class="notes-row"><label>Section Notes</label><textarea placeholder="Food service notes, caterer updates..."></textarea></div>
+  </div>
+</div>
+
+<!-- SECTION 4 – SPEECHES & TOASTS -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)"><h2>4 · Evening Entertainment</h2><span class="badge" id="badge-s4">0/0</span></div>
+  <div class="section-body">
+    <div class="checklist-item" data-section="s4"><input type="checkbox"/><div class="item-content"><div class="item-label">DJ/band start time confirmed with coordinator</div><div class="item-note">Confirm first dance or opening track cue</div></div></div>
+    <div class="checklist-item" data-section="s4"><input type="checkbox"/><div class="item-content"><div class="item-label">Dancefloor monitored and kept clear of hazards</div><div class="item-note">No loose cables; keep access routes clear</div></div></div>
+    <div class="checklist-item" data-section="s4"><input type="checkbox"/><div class="item-content"><div class="item-label">Photo booth / 360 / extras staffed and tidy (if booked)</div><div class="item-note">Props reset, queue managed, area kept safe</div></div></div>
+    <div class="notes-row"><label>Section Notes</label><textarea placeholder="Entertainment notes, supplier timings, issues..."></textarea></div>
+  </div>
+</div>
+
+<!-- SECTION 5 – ONGOING HALL CHECKS -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)"><h2>5 · Last Orders &amp; Wind Down</h2><span class="badge" id="badge-s5">0/0</span></div>
+  <div class="section-body">
+    <div class="checklist-item" data-section="s5"><input type="checkbox"/><div class="item-content"><div class="item-label">Last orders announced in line with venue timing</div><div class="item-note">Coordinate with bar and DJ for clear announcement</div></div></div>
+    <div class="checklist-item" data-section="s5"><input type="checkbox"/><div class="item-content"><div class="item-label">Late-night food service completed and cleared (if booked)</div><div class="item-note">Check buffet/snack zones are tidy before close</div></div></div>
+    <div class="checklist-item" data-section="s5"><input type="checkbox"/><div class="item-content"><div class="item-label">Guest departures managed and transport support given</div><div class="item-note">Assist taxis/lifts and monitor outdoor noise levels</div></div></div>
+    <div class="checklist-item" data-section="s5"><input type="checkbox"/><div class="item-content"><div class="item-label">Venue returned to calm mode ready for clear-up team</div><div class="item-note">Switch to wind-down playlist/lighting where needed</div></div></div>
+    <div class="notes-row"><label>Section Notes</label><textarea placeholder="Last orders timing, departures and handover notes..."></textarea></div>
+  </div>
+</div>
+
+<!-- SECTION 6 – EVENING TRANSITION -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)"><h2>6 · Catering & Bar Coordination</h2><span class="badge" id="badge-s6">0/0</span></div>
+  <div class="section-body">
+    <div class="checklist-item" data-section="s6"><input type="checkbox"/><div class="item-content"><div class="item-label">Caterer informed of service timings and course changes</div><div class="item-note">Keep kitchen and floor team synced throughout</div></div></div>
+    <div class="checklist-item" data-section="s6"><input type="checkbox"/><div class="item-content"><div class="item-label">Dietary and allergen requests checked before each service</div><div class="item-note">Escalate any mismatch to team leader immediately</div></div></div>
+    <div class="checklist-item" data-section="s6"><input type="checkbox"/><div class="item-content"><div class="item-label">Bar stock count reviewed before evening peak</div><div class="item-note">Top-up bottled water, mixers and glassware</div></div></div>
+    <div class="checklist-item" data-section="s6"><input type="checkbox"/><div class="item-content"><div class="item-label">Cake cutting coordinated and serving station prepared</div><div class="item-note">Knife, plates and napkins set before announced time</div></div></div>
+    <div class="checklist-item" data-section="s6"><input type="checkbox"/><div class="item-content"><div class="item-label">Tea/coffee station reset for dessert window (if used)</div><div class="item-note">Refill cups, sugar/milk and waste bins</div></div></div>
+    <div class="checklist-item" data-section="s6"><input type="checkbox"/><div class="item-content"><div class="item-label">Buffet/graze table refreshed and labelled during service</div><div class="item-note">Refresh platters and replace service utensils</div></div></div>
+    <div class="checklist-item" data-section="s6"><input type="checkbox"/><div class="item-content"><div class="item-label">Bar close checklist started 30 mins before finish</div><div class="item-note">Cash-up prep, bottle return crates and glass collection</div></div></div>
+    <div class="notes-row"><label>Section Notes</label><textarea placeholder="Catering timings, bar coordination, shortages to report..."></textarea></div>
+  </div>
+</div>
+
+<!-- SECTION 7 – LAST ORDERS & CLOSE -->
+<div class="section">
+  <div class="section-header" onclick="toggleSection(this)"><h2>7 · Event Close Checks</h2><span class="badge" id="badge-s7">0/0</span></div>
+  <div class="section-body">
+    <div class="checklist-item" data-section="s7"><input type="checkbox"/><div class="item-content"><div class="item-label">Last orders announced at bar (30 mins before midnight)</div><div class="item-note">Clearly announced to all guests</div></div></div>
+    <div class="checklist-item" data-section="s7"><input type="checkbox"/><div class="item-content"><div class="item-label">Bar closed at agreed time</div><div class="item-note">All tills reconciled and bar physically secured</div></div></div>
+    <div class="checklist-item" data-section="s7"><input type="checkbox"/><div class="item-content"><div class="item-label">Final guest sweep complete (hall, toilets, outside)</div><div class="item-note">No guests left unattended and no items left behind</div></div></div>
+    <div class="checklist-item" data-section="s7"><input type="checkbox"/><div class="item-content"><div class="item-label">Music/AV powered down and handed to clear-up team</div><div class="item-note">Power off checklist completed and noted</div></div></div>
+    <div class="notes-row"><label>Section Notes</label><textarea placeholder="Close notes, incidents and handover comments..."></textarea></div>
+  </div>
+</div>
+<div class="actions">
+  <button id="btn-save" onclick="saveForm()" style="background:#5a3f99;color:white;">Save</button>
+  <button id="btn-reset" onclick="resetAll()" style="background:#e05c5c;color:white;">Reset</button>
+</div>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBa9zA9-RlT5SVAaOb208_KE644zY8dvUE",
+    authDomain: "staff-forms-42a6f.firebaseapp.com",
+    databaseURL: "https://staff-forms-42a6f-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "staff-forms-42a6f",
+    storageBucket: "staff-forms-42a6f.firebasestorage.app",
+    messagingSenderId: "977408765626",
+    appId: "1:977408765626:web:809d5ad1eea80470b99c83"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const rtdb = firebase.database();
+
+  const EVENT_ID = new URLSearchParams(window.location.search).get('event');
+  
+
+  function getEventId() { return StaffFormSync.getEventId(); }
+  function loadEventMetaAndApplyHiddenTasks() { return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY); }
+  function injectCustomTasks(formKey, eventMeta) { return StaffFormSync.injectCustomTasks(formKey || FORM_KEY, eventMeta); }
+  function loadRealtimeChecklist(formKey) { return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY); }
+  function saveRealtimeChecklist(formKey) { return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY); }
+  function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
+  function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
+
+  const FORM_KEY = 'during';
+
+  // No event warning
+  if (!EVENT_ID) {
+    var banner = document.createElement('div');
+    banner.style.cssText = 'background:#fff3cd;color:#856404;padding:14px 20px;border-radius:10px;margin-bottom:20px;font-weight:600;font-size:0.92rem;';
+    banner.innerHTML = 'No event selected. <a href="../index.html" style="color:#5a3f99;">Go to the dashboard</a> and open this form from there.';
+    document.body.insertBefore(banner, document.body.children[2]);
+  } else {
+    db.collection('events').doc(EVENT_ID).get().then(function(snap) {
+      if (!snap.exists) return;
+      var ev = snap.data();
+
+      // Update header subtitle
+      var sub = document.querySelector('header p');
+      if (sub) {
+        var dateFmt = ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'}) : '';
+        sub.textContent = ev.couple + '  -  ' + dateFmt + '  -  ' + (ev.guests || '?') + ' guests';
+      }
+
+      // Pre-fill meta fields
+      var gf = document.getElementById('meta-guests'); if (gf) gf.value = ev.guests || '';
+      var sf = document.getElementById('meta-sash');   if (sf) sf.value = ev.sash   || '';
+      var rf = document.getElementById('meta-runner'); if (rf) rf.value = ev.runner || '';
+
+      // Inject custom tasks for this form
+      var customTasks = (ev.customTasks || []).filter(function(t) { return t.form === FORM_KEY; });
+      customTasks.forEach(function(task) {
+        var sectionBodies = document.querySelectorAll('.section-body');
+        sectionBodies.forEach(function(body) {
+          var sample = body.querySelector('.checklist-item[data-section="' + task.section + '"]');
+          if (!sample) return;
+          var item = document.createElement('div');
+          item.className = 'checklist-item custom-task';
+          item.dataset.section = task.section;
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          var content = document.createElement('div');
+          content.className = 'item-content';
+          var labelDiv = document.createElement('div');
+          labelDiv.className = 'item-label';
+          labelDiv.textContent = task.label;
+          var badge = document.createElement('span');
+          badge.className = 'custom-badge';
+          badge.textContent = 'Custom';
+          labelDiv.appendChild(badge);
+          content.appendChild(labelDiv);
+          item.appendChild(cb);
+          item.appendChild(content);
+          cb.addEventListener('change', function() {
+            item.classList.toggle('done', this.checked);
+            updateProgress();
+            saveRealtimeChecklist(FORM_KEY);
+          });
+          var notesRow = body.querySelector('.notes-row');
+          if (notesRow) body.insertBefore(item, notesRow);
+          else body.appendChild(item);
+        });
+      });
+
+      updateProgress();
+
+      // Load saved form data
+      var saved = ev[FORM_KEY];
+      if (saved) {
+        if (saved.teamLeader) document.getElementById('team-leader').value = saved.teamLeader;
+        document.getElementById('staff-list').innerHTML = '';
+        (saved.staffMembers || []).forEach(function(n) { addStaffMember(n); });
+        updateStaffBadge();
+        var cbs = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+        cbs.forEach(function(cb, i) {
+          cb.checked = !!(saved.checkboxes && saved.checkboxes['cb_' + i]);
+          cb.closest('.checklist-item').classList.toggle('done', cb.checked);
+          var meta = cb.closest('.checklist-item').querySelector('.task-meta');
+          if (!meta) {
+            meta = document.createElement('div');
+            meta.className = 'task-meta';
+            cb.closest('.checklist-item').querySelector('.item-content').appendChild(meta);
+          }
+          var taskData = saved.initialsData && saved.initialsData['cb_' + i];
+          if (cb.checked && taskData) {
+            meta.innerHTML = '<span class="task-initials">' + taskData.initials + '</span>'
+                           + '<span class="task-time">' + (taskData.time || '') + '</span>';
+          } else {
+            meta.innerHTML = '';
+          }
+        });
+        updateProgress();
+      } else {
+        addStaffMember();
+      }
+    });
+  }
+
+  // Save
+  async function saveForm() {
+    if (!EVENT_ID) { alert('No event selected.'); return; }
+    var checkboxes = {};
+    var initialsData = {};
+    document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb, i) {
+      checkboxes['cb_' + i] = cb.checked;
+      if (cb.checked) {
+        var meta = cb.closest('.checklist-item').querySelector('.task-meta');
+        initialsData['cb_' + i] = {
+          initials: staffInitials || '?',
+          time: meta && meta.querySelector('.task-time') ? meta.querySelector('.task-time').textContent : ''
+        };
+      }
+    });
+    var data = {};
+    data[FORM_KEY] = {
+      teamLeader:   document.getElementById('team-leader').value,
+      staffMembers: Array.from(document.querySelectorAll('.staff-input')).map(function(i) { return i.value; }),
+      checkboxes:   checkboxes,
+      initialsData: initialsData,
+      savedAt:      new Date().toISOString()
+    };
+    var btn = document.getElementById('btn-save');
+    btn.textContent = 'Saving...';
+    try {
+      await saveStaffSection(FORM_KEY);
+      await db.collection('events').doc(EVENT_ID).set(data, { merge: true });
+      btn.textContent = 'Saved!';
+      setTimeout(function() { btn.textContent = 'Save'; }, 2500);
+    } catch(e) {
+      btn.textContent = 'Error';
+      alert('Save failed: ' + e.message);
+      setTimeout(function() { btn.textContent = 'Save'; }, 2500);
+    }
+  }
+
+  // Progress
+  function updateProgress() {
+    var all    = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+    var done   = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked');
+    var pct    = all.length ? Math.round((done.length / all.length) * 100) : 0;
+    document.getElementById('progress-text').textContent = done.length + ' / ' + all.length + ' items complete';
+    document.getElementById('bar-fill').style.width = pct + '%';
+    document.querySelectorAll('.section').forEach(function(sec) {
+      var item = sec.querySelector('.checklist-item');
+      if (!item) return;
+      var sid     = item.dataset.section;
+      var items   = sec.querySelectorAll('.checklist-item[data-section="' + sid + '"] input[type="checkbox"]');
+      var checked = sec.querySelectorAll('.checklist-item[data-section="' + sid + '"] input[type="checkbox"]:checked');
+      var badge   = sec.querySelector('.badge');
+      if (badge && sid) badge.textContent = checked.length + '/' + items.length;
+    });
+  }
+
+  document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb) {
+    cb.addEventListener('change', function() {
+      var item = this.closest('.checklist-item');
+      item.classList.toggle('done', this.checked);
+      var meta = item.querySelector('.task-meta');
+      if (!meta) {
+        meta = document.createElement('div');
+        meta.className = 'task-meta';
+        item.querySelector('.item-content').appendChild(meta);
+      }
+      if (this.checked) {
+        var time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        meta.innerHTML = '<span class="task-initials">' + (staffInitials || '?') + '</span>'
+                       + '<span class="task-time">' + time + '</span>';
+      } else {
+        meta.innerHTML = '';
+      }
+      updateProgress();
+      saveRealtimeChecklist(FORM_KEY);
+    });
+  });
+
+  // ── Initials feature ────────────────────────────────────────────────────
+  var staffInitials = localStorage.getItem('staffInitials');
+
+  function promptInitials() {
+    var input = prompt('Enter your initials (e.g. JS):');
+    if (input && input.trim()) {
+      staffInitials = input.trim().toUpperCase().slice(0, 4);
+      localStorage.setItem('staffInitials', staffInitials);
+      document.getElementById('staffInitialsDisplay').textContent = staffInitials;
+    }
+  }
+
+  function changeInitials() { promptInitials(); }
+
+  if (!staffInitials) {
+    promptInitials();
+  } else {
+    document.getElementById('staffInitialsDisplay').textContent = staffInitials;
+  }
+  // ── End initials feature ─────────────────────────────────────────────────
+
+  updateProgress();
+  bindCheckboxMeta();
+  loadRealtimeChecklist(FORM_KEY);
+
+  function toggleSection(header) {
+    var body = header.nextElementSibling;
+    body.style.display = body.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function addStaffMember(value) {
+    value = value || '';
+    var list = document.getElementById('staff-list');
+    var row  = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;';
+    var inp = document.createElement('input');
+    inp.type = 'text'; inp.className = 'staff-input';
+    inp.placeholder = 'Staff member name...'; inp.value = value;
+    inp.style.cssText = 'flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.92rem;background:#fafbff;';
+    inp.addEventListener('input', updateStaffBadge);
+    var removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.textContent = 'x';
+    removeBtn.style.cssText = 'width:38px;height:38px;background:#c0392b;border:none;border-radius:6px;color:white;font-size:1rem;cursor:pointer;flex-shrink:0;';
+    removeBtn.addEventListener('click', function() { row.remove(); updateStaffBadge(); });
+    row.appendChild(inp); row.appendChild(removeBtn);
+    list.appendChild(row);
+    updateStaffBadge();
+  }
+
+  function updateStaffBadge() {
+    var inputs = document.querySelectorAll('.staff-input');
+    var filled = Array.from(inputs).filter(function(i) { return i.value.trim() !== ''; }).length;
+    var badge  = document.getElementById('badge-staff');
+    if (badge) badge.textContent = filled + ' staff';
+  }
+
+  function resetAll() {
+    if (!confirm('Reset all checkboxes?')) return;
+    document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb) {
+      cb.checked = false;
+      cb.closest('.checklist-item').classList.remove('done');
+    });
+    updateProgress();
+  }
+</script>
+</body>
+</html>
