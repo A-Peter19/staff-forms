@@ -528,6 +528,7 @@ function loadRealtimeChecklist(formKey) { return StaffFormSync.loadRealtimeCheck
 function saveRealtimeChecklist(formKey) { return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY); }
 function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
 function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
+function bindRealtimeCheckboxSync(formKey, onCheckboxChanged) { return StaffFormSync.bindRealtimeCheckboxSync(formKey || FORM_KEY, onCheckboxChanged); }
 
 const EVENT_ID = new URLSearchParams(window.location.search).get('event');
 var staffInitials = localStorage.getItem('staffInitials');
@@ -594,12 +595,9 @@ function updateProgress() {
   });
 }
 
-document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
-  cb.addEventListener('change', function() {
-    this.closest('.checklist-item').classList.toggle('done', this.checked);
-    updateProgress();
-    saveRealtimeChecklist(FORM_KEY);
-  });
+bindRealtimeCheckboxSync(FORM_KEY, function(checkbox) {
+  checkbox.closest('.checklist-item').classList.toggle('done', checkbox.checked);
+  updateProgress();
 });
 
 updateProgress();
