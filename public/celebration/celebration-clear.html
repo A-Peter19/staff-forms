@@ -356,8 +356,10 @@ const firebaseConfig = {
   appId: "1:977408765626:web:809d5ad1eea80470b99c83"
 };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const rtdb = firebase.database();
+window.db = firebase.firestore();
+window.rtdb = firebase.database();
+const db = window.db;
+const rtdb = window.rtdb;
 const FORM_KEY = 'clearup';
 
 function getEventId() { return StaffFormSync.getEventId(); }

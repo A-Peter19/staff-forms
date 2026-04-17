@@ -138,6 +138,16 @@ async function run() {
   assert.equal(w2.document.boxes[0].checked, true);
   results.push({ eventType: 'wake', status: 'PASS', detail: 'Realtime checkbox update propagated across two sessions.' });
 
+  const c1 = buildSession({ eventId: 'evt-celebration', rtdb: sharedDb, taskIds: ['celebration_task1', 'celebration_task2'] });
+  const c2 = buildSession({ eventId: 'evt-celebration', rtdb: sharedDb, taskIds: ['celebration_task1', 'celebration_task2'] });
+  c1.window.StaffFormSync.loadRealtimeChecklist('setup');
+  c2.window.StaffFormSync.loadRealtimeChecklist('setup');
+  c2.document.boxes[1].checked = true;
+  await c2.window.StaffFormSync.saveRealtimeChecklist('setup');
+  assert.equal(c1.document.boxes[0].checked, false);
+  assert.equal(c1.document.boxes[1].checked, true);
+  results.push({ eventType: 'celebration', status: 'PASS', detail: 'Realtime checkbox update propagated across two sessions.' });
+
   // Isolation by event id
   const isoA = buildSession({ eventId: 'evt-a', rtdb: sharedDb, taskIds: ['task1'] });
   const isoB = buildSession({ eventId: 'evt-b', rtdb: sharedDb, taskIds: ['task1'] });
@@ -182,6 +192,23 @@ async function run() {
     detail: hasSharedModule && hasRealtimeLoad
       ? 'Realtime shared module wiring found.'
       : 'Feast setup page is missing StaffFormSync wiring, so checkboxes are local-only and not synced.'
+  });
+
+  const celebrationPages = [
+    'public/celebration/celebration-setup.html',
+    'public/celebration/celebration-during.html',
+    'public/celebration/celebration-clear.html'
+  ];
+  const celebrationGlobalDbWiring = celebrationPages.every((path) => {
+    const html = fs.readFileSync(path, 'utf8');
+    return html.includes('window.db = firebase.firestore();') && html.includes('window.rtdb = firebase.database();');
+  });
+  results.push({
+    eventType: 'celebration-global-wiring',
+    status: celebrationGlobalDbWiring ? 'PASS' : 'FAIL',
+    detail: celebrationGlobalDbWiring
+      ? 'Celebration pages expose Firestore/Realtime DB on window for shared realtime sync.'
+      : 'At least one celebration page does not expose db/rtdb on window, so shared realtime sync can no-op.'
   });
 
   console.table(results);
