@@ -138,20 +138,37 @@
   function saveRealtimeChecklist(formKey) {
     var eventId = getEventId();
     if (!eventId || !global.rtdb || !global.rtdb.ref) return Promise.resolve();
-    var payload = {};
-    var boxes = document.querySelectorAll('.checklist-item input[type="checkbox"], .task input[type="checkbox"]');
-    boxes.forEach(function (cb, index) {
-      if (!cb.checked) return;
-      var key = readTaskKey(cb, index);
-      var meta = ensureMetaNode(cb);
-      var timeNode = meta && meta.querySelector('.task-time');
-      payload[key] = {
-        checked: true,
-        initials: (global.staffInitials || localStorage.getItem('staffInitials') || '?').toUpperCase(),
-        time: (timeNode && timeNode.textContent) || new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-      };
+    var ref = global.rtdb.ref('events/' + eventId + '/' + formKey);
+    return ref.once('value').then(function (snapshot) {
+      var remoteState = snapshot.val() || {};
+      var payload = {};
+      var boxes = document.querySelectorAll('.checklist-item input[type="checkbox"], .task input[type="checkbox"]');
+      boxes.forEach(function (cb, index) {
+        var key = readTaskKey(cb, index);
+        if (!cb.checked) {
+          delete payload[key];
+          return;
+        }
+        var remoteTask = remoteState[key];
+        var justCheckedByUser = cb.dataset && cb.dataset.lastActorInitials && cb.dataset.lastCheckedAt;
+        var fallbackInitials = (global.staffInitials || localStorage.getItem('staffInitials') || '?').toUpperCase();
+        var fallbackTime = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        payload[key] = {
+          checked: true,
+          initials: justCheckedByUser
+            ? cb.dataset.lastActorInitials
+            : (remoteTask && remoteTask.initials) || fallbackInitials,
+          time: justCheckedByUser
+            ? cb.dataset.lastCheckedAt
+            : (remoteTask && remoteTask.time) || fallbackTime
+        };
+        if (justCheckedByUser) {
+          delete cb.dataset.lastActorInitials;
+          delete cb.dataset.lastCheckedAt;
+        }
+      });
+      return ref.set(payload);
     });
-    return global.rtdb.ref('events/' + eventId + '/' + formKey).set(payload);
   }
 
   function saveStaffSection(formKey) {
@@ -174,6 +191,13 @@
     document.addEventListener('change', function (event) {
       var target = event.target;
       if (!target || !target.matches || !target.matches('.checklist-item input[type="checkbox"], .task input[type="checkbox"]')) return;
+      if (target.checked) {
+        target.dataset.lastActorInitials = (global.staffInitials || localStorage.getItem('staffInitials') || '?').toUpperCase();
+        target.dataset.lastCheckedAt = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      } else {
+        delete target.dataset.lastActorInitials;
+        delete target.dataset.lastCheckedAt;
+      }
       if (typeof onCheckboxChanged === 'function') onCheckboxChanged(target);
       saveRealtimeChecklist(formKey);
     });
