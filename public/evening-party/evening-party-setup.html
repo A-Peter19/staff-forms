@@ -12,6 +12,8 @@ header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
 header p { font-size: 0.95rem; opacity: 0.88; }
 .back-link { display: inline-block; margin-bottom: 16px; color: #1a3a5c; font-size: 0.88rem; font-weight: 600; text-decoration: none; }
 .back-link:hover { text-decoration: underline; }
+.initials-bar { background: #eef4fb; border: 1px solid #c0d6ee; border-radius: 10px; padding: 10px 16px; margin-bottom: 20px; font-size: 0.88rem; display: flex; align-items: center; gap: 12px; }
+.initials-bar span { font-weight: 700; color: #1a3a5c; }
 .event-meta { background: white; border-radius: 10px; padding: 20px 24px; margin-bottom: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
 .meta-field label { display: block; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #1a3a5c; margin-bottom: 4px; }
 .meta-field input, .meta-field select { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.92rem; background: #f5f8ff; }
@@ -64,6 +66,11 @@ button:hover { opacity: 0.88; }
   <h1>🌙 The Evening Party Package – Venue Setup Checklist</h1>
   <p>Waddesdon Hall &nbsp;|&nbsp; Staff use only &nbsp;|&nbsp; Complete all sections before guest arrival</p>
 </header>
+
+<div class="initials-bar">
+  👤 Ticking as: <span id="staffInitialsDisplay">Not set</span>
+  <button type="button" onclick="changeInitials()" style="padding:5px 12px;background:#1a3a5c;color:white;border:none;border-radius:8px;font-size:0.82rem;cursor:pointer;">Change</button>
+</div>
 
 <!-- Event Meta -->
 <div class="event-meta">
@@ -439,7 +446,7 @@ button:hover { opacity: 0.88; }
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script src="../js/staff-form-sync.js"></script>
+<script src="/js/form-shared.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBa9zA9-RlT5SVAaOb208_KE644zY8dvUE",
@@ -462,6 +469,26 @@ function loadRealtimeChecklist(formKey) { return StaffFormSync.loadRealtimeCheck
 function saveRealtimeChecklist(formKey) { return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY); }
 function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
 function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
+
+var staffInitials = localStorage.getItem('staffInitials');
+window.staffInitials = staffInitials;
+
+function promptInitials() {
+  var input = prompt('Enter your initials (2–4 letters):', staffInitials || '');
+  if (input && input.trim()) {
+    staffInitials = input.trim().toUpperCase().slice(0, 4);
+    window.staffInitials = staffInitials;
+    localStorage.setItem('staffInitials', staffInitials);
+    var display = document.getElementById('staffInitialsDisplay');
+    if (display) display.textContent = staffInitials;
+  }
+}
+
+function changeInitials() { promptInitials(); }
+if (!staffInitials) { promptInitials(); } else {
+  var initialsDisplay = document.getElementById('staffInitialsDisplay');
+  if (initialsDisplay) initialsDisplay.textContent = staffInitials;
+}
 
 const EVENT_ID = new URLSearchParams(window.location.search).get('event');
 
