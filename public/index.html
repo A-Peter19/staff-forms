@@ -748,19 +748,19 @@
     var doc = parser.parseFromString(html, 'text/html');
     var sectionCounters = {};
     var tasks = [];
-    doc.querySelectorAll('.checklist-item').forEach(function(row) {
+    doc.querySelectorAll('.checklist-item, .task').forEach(function(row) {
       var cb = row.querySelector('input[type="checkbox"]');
       if (!cb) return;
-      var section = row.getAttribute('data-section') || 's0';
-      var labelEl = row.querySelector('.item-label');
+      var section = row.getAttribute('data-section') || cb.getAttribute('data-section') || 's0';
+      var labelEl = row.querySelector('.item-label, .task-title');
       var label = labelEl ? labelEl.textContent.trim() : '';
       if (!label) return;
       var currentCount = sectionCounters[section] || 0;
       sectionCounters[section] = currentCount + 1;
       var sectionWrap = row.closest('.section');
-      var sectionHeader = sectionWrap ? sectionWrap.querySelector('.section-header h2, .section-header .section-title') : null;
+      var sectionHeader = sectionWrap ? sectionWrap.querySelector('.section-header h2, .section-title') : null;
       var sectionName = sectionHeader ? sectionHeader.textContent.trim() : section;
-      var taskId = row.getAttribute('data-task-id') || (formKey + '_' + section + '_' + currentCount);
+      var taskId = row.getAttribute('data-task-id') || cb.getAttribute('data-task-id') || (formKey + '_' + section + '_' + currentCount);
       tasks.push({
         id: taskId,
         form: formKey,
