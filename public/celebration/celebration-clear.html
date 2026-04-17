@@ -319,4 +319,165 @@ button:hover { transform:translateY(-1px); }
       <input type="checkbox"/>
       <div class="item-content">
         <div class="item-label">Kitchen and bar bins emptied and relined</div>
-        <div class="item-note">Food and drink waste ba
+        <div class="item-note">Food and drink waste bagged and moved to external bins</div>
+      </div>
+    </div>
+    <div class="checklist-item" data-section="s5">
+      <input type="checkbox"/>
+      <div class="item-content">
+        <div class="item-label">Fridges checked and leftover perishables removed</div>
+        <div class="item-note">Record any stock issues for the next shift</div>
+      </div>
+    </div>
+    <div class="notes-row">
+      <label>Section Notes</label>
+      <textarea placeholder="Kitchen/bar clear-down notes, damages, missing stock..."></textarea>
+    </div>
+  </div>
+</div>
+
+<div class="actions">
+  <button id="btn-save" onclick="saveForm()">💾 Save</button>
+  <button id="btn-reset" onclick="resetAll()">Reset</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script src="../js/form-shared.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBa9zA9-RlT5SVAaOb208_KE644zY8dvUE",
+  authDomain: "staff-forms-42a6f.firebaseapp.com",
+  databaseURL: "https://staff-forms-42a6f-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "staff-forms-42a6f",
+  storageBucket: "staff-forms-42a6f.firebasestorage.app",
+  messagingSenderId: "977408765626",
+  appId: "1:977408765626:web:809d5ad1eea80470b99c83"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const rtdb = firebase.database();
+const FORM_KEY = 'clearup';
+
+function getEventId() { return StaffFormSync.getEventId(); }
+function loadEventMetaAndApplyHiddenTasks() { return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY); }
+function injectCustomTasks(formKey, eventMeta) { return StaffFormSync.injectCustomTasks(formKey || FORM_KEY, eventMeta); }
+function loadRealtimeChecklist(formKey) { return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY); }
+function saveRealtimeChecklist(formKey) { return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY); }
+function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
+function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
+
+const EVENT_ID = new URLSearchParams(window.location.search).get('event');
+var staffInitials = localStorage.getItem('staffInitials');
+
+function promptInitials() {
+  var input = prompt('Enter your initials (e.g. JS):');
+  if (input && input.trim()) {
+    staffInitials = input.trim().toUpperCase().slice(0, 4);
+    localStorage.setItem('staffInitials', staffInitials);
+    document.getElementById('staffInitialsDisplay').textContent = staffInitials;
+  }
+}
+
+function changeInitials() { promptInitials(); }
+if (!staffInitials) { promptInitials(); } else { document.getElementById('staffInitialsDisplay').textContent = staffInitials; }
+
+function updateProgress() {
+  const all = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+  const done = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked');
+  const pct = all.length ? Math.round((done.length / all.length) * 100) : 0;
+  document.getElementById('progress-text').textContent = `${done.length} / ${all.length} items complete`;
+  document.getElementById('bar-fill').style.width = pct + '%';
+  document.querySelectorAll('.section').forEach(sec => {
+    const item = sec.querySelector('.checklist-item');
+    if (!item) return;
+    const sid = item.dataset.section;
+    const items = sec.querySelectorAll(`.checklist-item[data-section="${sid}"] input[type="checkbox"]`);
+    const checked = sec.querySelectorAll(`.checklist-item[data-section="${sid}"] input[type="checkbox"]:checked`);
+    const badge = sec.querySelector('.badge');
+    if (badge && sid) badge.textContent = `${checked.length}/${items.length}`;
+  });
+}
+
+document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+  cb.addEventListener('change', function() {
+    this.closest('.checklist-item').classList.toggle('done', this.checked);
+    updateProgress();
+    saveRealtimeChecklist(FORM_KEY);
+  });
+});
+
+function toggleSection(header) {
+  const body = header.nextElementSibling;
+  body.style.display = body.style.display === 'none' ? 'block' : 'none';
+}
+
+function addStaffMember(value = '') {
+  const list = document.getElementById('staff-list');
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;';
+  row.innerHTML = `
+    <input type="text" class="staff-input" placeholder="Staff member name..." value="${value}"
+      style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.92rem;background:#fdf7ff;"/>
+    <button type="button" onclick="this.parentElement.remove();updateStaffBadge()"
+      style="width:38px;height:38px;background:#c0392b;border:none;border-radius:6px;color:white;font-size:1rem;cursor:pointer;flex-shrink:0;">✕</button>`;
+  row.querySelector('input').addEventListener('input', updateStaffBadge);
+  list.appendChild(row);
+  updateStaffBadge();
+}
+
+function updateStaffBadge() {
+  const inputs = document.querySelectorAll('.staff-input');
+  const filled = [...inputs].filter(i => i.value.trim() !== '').length;
+  const badge = document.getElementById('badge-staff');
+  if (badge) badge.textContent = filled + ' staff';
+}
+
+async function saveForm() {
+  if (!EVENT_ID) { alert('No event selected.'); return; }
+  const btn = document.getElementById('btn-save');
+  btn.textContent = 'Saving...';
+  try {
+    await saveStaffSection(FORM_KEY);
+    await db.collection('events').doc(EVENT_ID).set({
+      [FORM_KEY]: { savedAt: new Date().toISOString() }
+    }, { merge: true });
+    btn.textContent = 'Saved!';
+    setTimeout(() => btn.textContent = '💾 Save', 2500);
+  } catch (e) {
+    btn.textContent = 'Error';
+    alert('Save failed: ' + e.message);
+    setTimeout(() => btn.textContent = '💾 Save', 2500);
+  }
+}
+
+function resetAll() {
+  if (!confirm('Reset all checkboxes? This cannot be undone.')) return;
+  document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+    cb.closest('.checklist-item').classList.remove('done');
+    const meta = cb.closest('.checklist-item').querySelector('.task-meta');
+    if (meta) meta.innerHTML = '';
+  });
+  updateProgress();
+  saveRealtimeChecklist(FORM_KEY);
+}
+
+if (!EVENT_ID) {
+  var banner = document.createElement('div');
+  banner.style.cssText = 'background:#fff3cd;color:#856404;padding:14px 20px;border-radius:10px;margin-bottom:20px;font-weight:600;font-size:0.92rem;';
+  banner.innerHTML = 'No event selected. <a href="../index.html" style="color:#c0392b;">Go to the dashboard</a> and open this form from there.';
+  document.body.insertBefore(banner, document.body.children[2]);
+}
+
+updateProgress();
+bindCheckboxMeta();
+loadEventMetaAndApplyHiddenTasks().then(function(ev) {
+  injectCustomTasks(FORM_KEY, ev);
+  loadRealtimeChecklist(FORM_KEY);
+});
+addStaffMember();
+</script>
+</body>
+</html>
