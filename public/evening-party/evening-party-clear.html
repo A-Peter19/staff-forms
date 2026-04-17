@@ -545,31 +545,25 @@ function updateProgress() {
   });
 }
 
-document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb) {
-  cb.addEventListener('change', function() {
-    var item = this.closest('.checklist-item');
-    item.classList.toggle('done', this.checked);
-    var meta = item.querySelector('.task-meta');
-    if (!meta) {
-      meta = document.createElement('div');
-      meta.className = 'task-meta';
-      item.querySelector('.item-content').appendChild(meta);
-    }
-    if (this.checked) {
-      var time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-      meta.innerHTML = '<span class="task-initials">' + (staffInitials || '?') + '</span><span class="task-time">' + time + '</span>';
-    } else {
-      meta.innerHTML = '';
-    }
-    updateProgress();
-    saveRealtimeChecklist(FORM_KEY);
+function bindRealtimeCheckboxes() {
+  document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb) {
+    if (cb.dataset.realtimeBound === '1') return;
+    cb.dataset.realtimeBound = '1';
+    cb.addEventListener('change', function() {
+      var item = this.closest('.checklist-item');
+      if (item) item.classList.toggle('done', this.checked);
+      updateProgress();
+      saveRealtimeChecklist(FORM_KEY);
+    });
   });
-});
+}
 
+bindRealtimeCheckboxes();
 updateProgress();
 bindCheckboxMeta();
 loadEventMetaAndApplyHiddenTasks().then(function(ev) {
   injectCustomTasks(FORM_KEY, ev);
+  bindRealtimeCheckboxes();
   loadRealtimeChecklist(FORM_KEY);
 });
 
