@@ -24,6 +24,21 @@
     return meta;
   }
 
+
+  function assignMissingTaskIds(formKey) {
+    var sectionCounters = {};
+    document.querySelectorAll('.checklist-item, .task').forEach(function (row) {
+      if (row.dataset && row.dataset.taskId) return;
+      var section = (row.dataset && row.dataset.section) || 's0';
+      var counter = sectionCounters[section] || 0;
+      sectionCounters[section] = counter + 1;
+      var generatedId = (formKey || 'form') + '_' + section + '_' + counter;
+      row.setAttribute('data-task-id', generatedId);
+      var cb = row.querySelector('input[type="checkbox"]');
+      if (cb && cb.dataset && !cb.dataset.taskId) cb.dataset.taskId = generatedId;
+    });
+  }
+
   function bindCheckboxMeta() {
     document.querySelectorAll('.checklist-item input[type="checkbox"], .task input[type="checkbox"]').forEach(function (cb) {
       if (cb.dataset.metaBound === '1') return;
@@ -48,6 +63,7 @@
   }
 
   function loadEventMetaAndApplyHiddenTasks(formKey) {
+    assignMissingTaskIds(formKey);
     var eventId = getEventId();
     if (!eventId || !global.db || !global.db.collection) return Promise.resolve(null);
     return global.db.collection('events').doc(eventId).get().then(function (snap) {
@@ -108,6 +124,7 @@
   }
 
   function loadRealtimeChecklist(formKey) {
+    assignMissingTaskIds(formKey);
     var eventId = getEventId();
     if (!eventId || !global.rtdb || !global.rtdb.ref) return;
     global.rtdb.ref('events/' + eventId + '/' + formKey).on('value', function (snapshot) {
@@ -136,6 +153,7 @@
   }
 
   function saveRealtimeChecklist(formKey) {
+    assignMissingTaskIds(formKey);
     var eventId = getEventId();
     if (!eventId || !global.rtdb || !global.rtdb.ref) return Promise.resolve();
     var ref = global.rtdb.ref('events/' + eventId + '/' + formKey);
