@@ -153,6 +153,12 @@
         <option value="twilight">The Twilight Package</option>
       </select>
     </div>
+    <div class="field is-hidden" id="f-party-type-wrap"><label>Party Type</label>
+      <select id="f-party-type">
+        <option value="celebration">Celebration</option>
+        <option value="evening-party">Evening Party</option>
+      </select>
+    </div>
     <div class="field"><label>Guest Count</label><input type="number" id="f-guests" placeholder="e.g. 80" min="1"/></div>
     <div class="field"><label>Sash Colour</label><input type="text" id="f-sash" placeholder="e.g. Ivory"/></div>
     <div class="field"><label>Runner Style</label><input type="text" id="f-runner" placeholder="e.g. Hessian"/></div>
@@ -266,6 +272,18 @@
         during: "wake-during.html",
         clearup: "wake-clear.html"
       },
+      byPartyType: {
+        celebration: {
+          setup: "celebration/celebration-setup.html",
+          during: "celebration/celebration-during.html",
+          clearup: "celebration/celebration-clear.html"
+        },
+        "evening-party": {
+          setup: "evening-party/evening-party-setup.html",
+          during: "evening-party/evening-party-during.html",
+          clearup: "evening-party/evening-party-clear.html"
+        }
+      },
       byPackage: {}
     },
     "baby-shower": {
@@ -281,6 +299,7 @@
   const PACKAGE_LABELS = {
     flourish:"Flourish", feast:"Feast & Flourish", foundation:"Foundation", twilight:"Twilight"
   };
+  const PARTY_TYPE_LABELS = { celebration: "Celebration", "evening-party": "Evening Party" };
 
   const KNOWN_PACKAGES = Object.keys(PACKAGE_LABELS);
   const EVENT_TYPE_LABELS = { wedding: 'Wedding', wake: 'Wake', party: 'Party', 'baby-shower': 'Baby Shower' };
@@ -340,22 +359,35 @@
     return normalizeEventType(eventType) === 'wedding';
   }
 
+  function shouldShowPartyTypeForEvent(eventType) {
+    return normalizeEventType(eventType) === 'party';
+  }
+
   function syncPackageVisibility() {
     var type = document.getElementById('f-event-type').value;
     var packageWrap = document.getElementById('f-package-wrap');
     var packageSelect = document.getElementById('f-package');
+    var partyTypeWrap = document.getElementById('f-party-type-wrap');
+    var partyTypeSelect = document.getElementById('f-party-type');
     var showPackage = shouldShowPackageForType(type);
+    var showPartyType = shouldShowPartyTypeForEvent(type);
     packageWrap.classList.toggle('is-hidden', !showPackage);
+    partyTypeWrap.classList.toggle('is-hidden', !showPartyType);
     if (!showPackage) packageSelect.value = '';
+    if (!showPartyType) partyTypeSelect.value = 'celebration';
   }
 
   function resolveForms(eventDoc) {
     var eventType = (eventDoc && eventDoc.eventType) || 'wedding';
     var pkg = (eventDoc && eventDoc.package) || inferPackageFromLegacyFields(eventDoc);
+    var partyType = (eventDoc && eventDoc.partyType) || '';
     var typeRoutes = FORM_ROUTES[normalizeEventType(eventType)] || {};
     var resolved = Object.assign({setup:null,during:null,clearup:null}, typeRoutes.default || {});
     if (pkg && typeRoutes.byPackage && typeRoutes.byPackage[pkg]) {
       resolved = Object.assign(resolved, typeRoutes.byPackage[pkg]);
+    }
+    if (partyType && typeRoutes.byPartyType && typeRoutes.byPartyType[partyType]) {
+      resolved = Object.assign(resolved, typeRoutes.byPartyType[partyType]);
     }
     return resolved;
   }
@@ -446,6 +478,7 @@
     var date    = document.getElementById('f-date').value;
     var eventType = normalizeEventType(document.getElementById('f-event-type').value);
     var pkg     = document.getElementById('f-package').value;
+    var partyType = document.getElementById('f-party-type').value;
     var status  = document.getElementById('status-create');
     if (!couple || !date) {
       status.className = 'error';
@@ -469,10 +502,11 @@
         createdAt:   new Date().toISOString()
       };
       if (shouldShowPackageForType(eventType) && pkg) eventData.package = pkg;
+      if (shouldShowPartyTypeForEvent(eventType) && partyType) eventData.partyType = partyType;
       await db.collection('events').doc(eventId).set(eventData);
       status.className = 'success';
       status.textContent = 'Event created: ' + couple + ' (' + date + ')' + (tasks.length ? ' with ' + tasks.length + ' custom task(s)' : '');
-      ['f-couple','f-date','f-event-type','f-package','f-guests','f-sash','f-runner'].forEach(function(id) {
+      ['f-couple','f-date','f-event-type','f-package','f-party-type','f-guests','f-sash','f-runner'].forEach(function(id) {
         document.getElementById(id).value = '';
       });
       document.getElementById('f-event-type').value = 'wedding';
@@ -529,6 +563,7 @@
     return Object.assign({}, data, {
       id:           docId,
       eventType:    normalizeEventType(data.eventType || 'wedding'),
+      partyType:    data.partyType || '',
       displayName:  data.displayName || fallbackName,
       coupleOrHost: data.coupleOrHost || fallbackName,
       package:      data.package || inferredPackage || '',
@@ -547,6 +582,7 @@
       var forms    = resolveForms(ev);
       var label    = PACKAGE_LABELS[ev.package] || ev.package;
       var taskCnt  = ev.customTasks.length;
+      var partyTypeLabel = PARTY_TYPE_LABELS[ev.partyType] || ev.partyType;
       var dateFmt  = ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : 'No date';
       var eventTypeLabel = EVENT_TYPE_LABELS[ev.eventType] || 'Event';
       var progressOrder = ['setup', 'during', 'clearup'];
@@ -558,7 +594,10 @@
       var infoDiv = document.createElement('div');
       infoDiv.className = 'event-info';
       infoDiv.innerHTML = '<div class="event-line"><span class="event-name">' + ev.displayName + '</span><span class="event-type-chip">' + eventTypeLabel + '</span></div>'
-        + '<div class="event-line event-meta"><span>' + dateFmt + '</span><span>•</span><span>' + (ev.guests || '?') + ' guests</span>' + (label ? '<span>•</span><span class="pkg-badge">' + label + '</span>' : '') + '</div>';
+        + '<div class="event-line event-meta"><span>' + dateFmt + '</span><span>•</span><span>' + (ev.guests || '?') + ' guests</span>'
+        + (label ? '<span>•</span><span class="pkg-badge">' + label + '</span>' : '')
+        + (partyTypeLabel ? '<span>•</span><span class="pkg-badge">' + partyTypeLabel + '</span>' : '')
+        + '</div>';
 
       var progressRow = document.createElement('div');
       progressRow.className = 'progress-row';
