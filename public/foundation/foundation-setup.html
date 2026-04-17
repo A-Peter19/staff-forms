@@ -494,8 +494,10 @@
   };
 
   firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const rtdb = firebase.database();
+window.db = firebase.firestore();
+window.rtdb = firebase.database();
+const db = window.db;
+const rtdb = window.rtdb;
   const FORM_KEY = "setup";
 
   function getEventId() { return StaffFormSync.getEventId(); }
