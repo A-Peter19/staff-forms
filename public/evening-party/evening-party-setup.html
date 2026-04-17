@@ -458,8 +458,10 @@ const firebaseConfig = {
   appId: "1:977408765626:web:809d5ad1eea80470b99c83"
 };
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const rtdb = firebase.database();
+window.db = firebase.firestore();
+window.rtdb = firebase.database();
+const db = window.db;
+const rtdb = window.rtdb;
 const FORM_KEY = 'setup';
 
 function getEventId() { return StaffFormSync.getEventId(); }
@@ -469,6 +471,7 @@ function loadRealtimeChecklist(formKey) { return StaffFormSync.loadRealtimeCheck
 function saveRealtimeChecklist(formKey) { return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY); }
 function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
 function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
+function bindRealtimeCheckboxSync(formKey, onCheckboxChanged) { return StaffFormSync.bindRealtimeCheckboxSync(formKey || FORM_KEY, onCheckboxChanged); }
 
 var staffInitials = localStorage.getItem('staffInitials');
 window.staffInitials = staffInitials;
@@ -542,25 +545,17 @@ function updateProgress() {
   });
 }
 
-function bindRealtimeCheckboxes() {
-  document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb) {
-    if (cb.dataset.realtimeBound === '1') return;
-    cb.dataset.realtimeBound = '1';
-    cb.addEventListener('change', function() {
-      var item = this.closest('.checklist-item');
-      if (item) item.classList.toggle('done', this.checked);
-      updateProgress();
-      saveRealtimeChecklist(FORM_KEY);
-    });
-  });
-}
 
-bindRealtimeCheckboxes();
+bindRealtimeCheckboxSync(FORM_KEY, function(checkbox) {
+  var item = checkbox.closest('.checklist-item');
+  if (item) item.classList.toggle('done', checkbox.checked);
+  updateProgress();
+});
+
 updateProgress();
 bindCheckboxMeta();
 loadEventMetaAndApplyHiddenTasks().then(function(ev) {
   injectCustomTasks(FORM_KEY, ev);
-  bindRealtimeCheckboxes();
   loadRealtimeChecklist(FORM_KEY);
 });
 
