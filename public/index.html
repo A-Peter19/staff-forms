@@ -231,7 +231,7 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  const SECTION_MAPS = {
+  const DEFAULT_SECTION_MAPS = {
     setup:   {s1:"Hall Access",s2:"Tables & Chairs",s3:"Gift Table",s4:"Optional Upgrades",s5:"Final Pre-Guest Checks"},
     during:  {s1:"Guest Arrival",s2:"Hall & Comfort Checks",s3:"Optional Food Upgrades",s4:"Evening Entertainment",s5:"Last Orders & Wind down"},
     clearup: {s1:"Guest Departure",s2:"Dancefloor & Entertainment Pack Down",s3:"Decor & Personal Items",s4:"Tables & Chairs",s5:"Hall Clean",s6:"Hall Clean",s7:"Lock Up & Handover"}
@@ -382,15 +382,16 @@
   }
 
   // ── Section options helper ─────────────────────────────────────────────────
-  function buildSectionOptions(formVal) {
-    const map = SECTION_MAPS[formVal] || SECTION_MAPS.setup;
+  function buildSectionOptions(formVal, sectionMaps) {
+    const maps = sectionMaps || DEFAULT_SECTION_MAPS;
+    const map = maps[formVal] || DEFAULT_SECTION_MAPS[formVal] || DEFAULT_SECTION_MAPS.setup;
     return Object.entries(map).map(function(entry) {
       return '<option value="' + entry[0] + '">' + entry[1] + '</option>';
     }).join('');
   }
 
   // ── Build a task row element ───────────────────────────────────────────────
-  function buildTaskRow(task) {
+  function buildTaskRow(task, sectionMaps) {
     task = task || {};
     var fVal = task.form || 'setup';
     var row = document.createElement('div');
@@ -407,13 +408,22 @@
       formSel.appendChild(opt);
     });
     formSel.addEventListener('change', function() {
-      secSel.innerHTML = buildSectionOptions(this.value);
+      secSel.innerHTML = buildSectionOptions(this.value, sectionMaps);
     });
 
     var secSel = document.createElement('select');
     secSel.className = 'task-section';
-    secSel.innerHTML = buildSectionOptions(fVal);
-    if (task.section) secSel.value = task.section;
+    secSel.innerHTML = buildSectionOptions(fVal, sectionMaps);
+    if (task.section) {
+      var hasOption = Array.from(secSel.options).some(function(opt) { return opt.value === task.section; });
+      if (!hasOption) {
+        var legacyOption = document.createElement('option');
+        legacyOption.value = task.section;
+        legacyOption.textContent = task.section;
+        secSel.appendChild(legacyOption);
+      }
+      secSel.value = task.section;
+    }
 
     var labelIn = document.createElement('input');
     labelIn.type = 'text';
@@ -450,11 +460,69 @@
     return result;
   }
 
+  function buildSectionMapsFromManifest(manifest) {
+    var map = { setup: {}, during: {}, clearup: {} };
+    (manifest || []).forEach(function(task) {
+      if (!task || !task.form || !task.section) return;
+      if (!map[task.form]) map[task.form] = {};
+      if (!map[task.form][task.section]) {
+        var title = (task.section_name || task.section).replace(/^[0-9]+\s*[·\-]\s*/, '').trim();
+        map[task.form][task.section] = title || task.section;
+      }
+    });
+    ['setup', 'during', 'clearup'].forEach(function(form) {
+      if (!Object.keys(map[form] || {}).length) map[form] = DEFAULT_SECTION_MAPS[form] || {};
+    });
+    return map;
+  }
+
+  var createSectionMaps = DEFAULT_SECTION_MAPS;
+  var editSectionMaps = DEFAULT_SECTION_MAPS;
+
+  function getDraftEventForCreateForm() {
+    return {
+      eventType: normalizeEventType(document.getElementById('f-event-type').value || 'wedding'),
+      package: document.getElementById('f-package').value || '',
+      partyType: document.getElementById('f-party-type').value || ''
+    };
+  }
+
+  function refreshTaskRowSectionOptions(containerId, sectionMaps) {
+    document.getElementById(containerId).querySelectorAll('.task-row').forEach(function(row) {
+      var formSel = row.querySelector('.task-form');
+      var secSel = row.querySelector('.task-section');
+      if (!formSel || !secSel) return;
+      var previous = secSel.value;
+      secSel.innerHTML = buildSectionOptions(formSel.value, sectionMaps);
+      var hasPrevious = Array.from(secSel.options).some(function(opt) { return opt.value === previous; });
+      if (!hasPrevious && previous) {
+        var opt = document.createElement('option');
+        opt.value = previous;
+        opt.textContent = previous;
+        secSel.appendChild(opt);
+      }
+      if (previous) secSel.value = previous;
+    });
+  }
+
+  async function refreshCreateTaskSectionOptions() {
+    try {
+      var manifest = await getTaskManifestForEvent(getDraftEventForCreateForm());
+      createSectionMaps = buildSectionMapsFromManifest(manifest);
+    } catch (err) {
+      createSectionMaps = DEFAULT_SECTION_MAPS;
+    }
+    refreshTaskRowSectionOptions('create-tasks-list', createSectionMaps);
+  }
+
   // ── Create form: Add Task button ───────────────────────────────────────────
   document.getElementById('btn-add-create-task').addEventListener('click', function() {
-    document.getElementById('create-tasks-list').appendChild(buildTaskRow({}));
+    document.getElementById('create-tasks-list').appendChild(buildTaskRow({}, createSectionMaps));
   });
   document.getElementById('f-event-type').addEventListener('change', syncPackageVisibility);
+  document.getElementById('f-event-type').addEventListener('change', refreshCreateTaskSectionOptions);
+  document.getElementById('f-package').addEventListener('change', refreshCreateTaskSectionOptions);
+  document.getElementById('f-party-type').addEventListener('change', refreshCreateTaskSectionOptions);
   syncPackageVisibility();
 
   // ── Create event ───────────────────────────────────────────────────────────
@@ -695,13 +763,19 @@
   // ── Edit Tasks Modal ───────────────────────────────────────────────────────
   var editingEventId = null;
 
-  function openEditModal(ev) {
+  async function openEditModal(ev) {
     editingEventId = ev.id;
     document.getElementById('edit-modal-sub').textContent = ev.displayName + '  -  ' + ev.date;
     var list = document.getElementById('edit-tasks-list');
     list.innerHTML = '';
+    try {
+      var manifest = await getTaskManifestForEvent(ev);
+      editSectionMaps = buildSectionMapsFromManifest(manifest);
+    } catch (err) {
+      editSectionMaps = DEFAULT_SECTION_MAPS;
+    }
     ev.customTasks.forEach(function(t) {
-      list.appendChild(buildTaskRow(t));
+      list.appendChild(buildTaskRow(t, editSectionMaps));
     });
     document.getElementById('edit-status').textContent = '';
     document.getElementById('edit-overlay').classList.add('open');
@@ -713,7 +787,7 @@
   });
 
   document.getElementById('btn-add-edit-task').addEventListener('click', function() {
-    document.getElementById('edit-tasks-list').appendChild(buildTaskRow({}));
+    document.getElementById('edit-tasks-list').appendChild(buildTaskRow({}, editSectionMaps));
   });
 
   document.getElementById('btn-save-tasks').addEventListener('click', async function() {
@@ -794,6 +868,8 @@
     manifestCache[cacheKey] = manifest;
     return manifest;
   }
+
+  refreshCreateTaskSectionOptions();
 
   // ── Manage Tasks ────────────────────────────────────────────────────────────
   var mtCurrentEventId = null;
