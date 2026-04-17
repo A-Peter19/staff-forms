@@ -58,7 +58,112 @@
     .task-meta{display:inline-flex;align-items:center;gap:6px;margin-top:6px}
     .task-initials{display:inline-block;background:#20808D;color:white;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600;letter-spacing:.5px}
     .task-time{font-size:12px;color:#626C71}
-  </style>
+  
+
+    :root {
+      --ui-space-1: 4px;
+      --ui-space-2: 8px;
+      --ui-space-3: 12px;
+      --ui-space-4: 16px;
+      --ui-space-5: 20px;
+      --ui-radius-sm: 6px;
+      --ui-radius-md: 8px;
+      --ui-focus-ring: 0 0 0 3px rgba(32,128,141,0.28);
+      --ui-font-sm: 0.82rem;
+      --ui-font-md: 0.92rem;
+    }
+
+    .staff-banner {
+      margin-top: var(--ui-space-3);
+      padding: 10px 14px;
+      background: rgba(32,128,141,0.12);
+      border-radius: var(--ui-radius-md);
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--ui-space-3);
+      flex-wrap: wrap;
+    }
+
+    .btn-initials-change {
+      background: none;
+      border: 1px solid #20808D;
+      color: #20808D;
+      padding: 4px 10px;
+      border-radius: var(--ui-radius-sm);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .staff-control-block {
+      padding: 16px 20px;
+    }
+
+    .staff-control-block--bordered {
+      border-bottom: 1px solid #f0ebe5;
+    }
+
+    .staff-control-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #7a6050;
+      margin-bottom: 8px;
+    }
+
+    .staff-control-label--spaced {
+      margin-bottom: 10px;
+    }
+
+    .staff-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: var(--ui-font-md);
+      background: #fdfaf7;
+    }
+
+    .btn-add-staff {
+      width: 100%;
+      margin-top: 10px;
+      padding: 11px;
+      background: transparent;
+      border: 2px dashed currentColor;
+      border-radius: var(--ui-radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-add-staff:hover {
+      background: rgba(0,0,0,0.04);
+    }
+
+    .btn-remove-staff {
+      padding: 2px 8px;
+      font-size: var(--ui-font-sm);
+    }
+
+    .actions { gap: var(--ui-space-3); }
+
+    .section-header:focus-visible,
+    button:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    .btn-add-staff:focus-visible,
+    .btn-initials-change:focus-visible {
+      outline: none;
+      box-shadow: var(--ui-focus-ring);
+    }
+
+</style>
 </head>
 <body>
 
@@ -66,7 +171,7 @@
   <h1>🌙 Twilight Package — Clear Up</h1>
   <p id="event-sub">Loading event details...</p>
 </header>
-<div style="margin-top:12px;padding:10px 14px;background:rgba(32,128,141,0.12);border-radius:8px;font-size:14px;display:flex;justify-content:space-between;align-items:center;"><span>&#128100; Ticking as: <strong id="staffInitialsDisplay">Not set</strong></span><button onclick="changeInitials()" style="background:none;border:1px solid #20808D;color:#20808D;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">Change</button></div>
+<div id="staffBanner" class="staff-banner"><span>&#128100; Ticking as: <strong id="staffInitialsDisplay">Not set</strong></span><button  class="btn-initials-change js-change-initials" >Change</button></div>
 
 <div class="card">
   <div class="meta-grid">
@@ -82,7 +187,7 @@
     </div>
     <h3 style="margin-bottom:8px">👥 Staff on Shift <span class="badge-pill" id="badge-staff">0 staff</span></h3>
     <div id="staff-list"></div>
-    <button class="btn-add-staff" onclick="addStaffMember()">+ Add Staff Member</button>
+    <button class="btn-add-staff btn-add-staff js-add-staff">+ Add Staff Member</button>
   </div>
 </div>
 
@@ -93,7 +198,7 @@
 
 <!-- SECTION 1: Guest Departure -->
 <div class="section">
-  <div class="section-header" onclick="toggleSection(this)">
+  <div class="section-header js-section-toggle">
     <span class="section-title">1 · Guest Departure</span>
     <span class="badge" id="badge-s1">0/0</span>
   </div>
@@ -139,7 +244,7 @@
 
 <!-- SECTION 2: Dancefloor & Entertainment -->
 <div class="section">
-  <div class="section-header" onclick="toggleSection(this)">
+  <div class="section-header js-section-toggle">
     <span class="section-title">2 · Dancefloor &amp; Entertainment Pack Down</span>
     <span class="badge" id="badge-s3">0/0</span>
   </div>
@@ -192,7 +297,7 @@
 
 <!-- SECTION 3: Décor & Personal Items -->
 <div class="section">
-  <div class="section-header" onclick="toggleSection(this)">
+  <div class="section-header js-section-toggle">
     <span class="section-title">3 · Décor &amp; Personal Items</span>
     <span class="badge" id="badge-s4">0/0</span>
   </div>
@@ -245,7 +350,7 @@
 
 <!-- SECTION 4: Tables & Chairs -->
 <div class="section">
-  <div class="section-header" onclick="toggleSection(this)">
+  <div class="section-header js-section-toggle">
     <span class="section-title">4 · Tables &amp; Chairs</span>
     <span class="badge" id="badge-s5">0/0</span>
   </div>
@@ -293,7 +398,7 @@
 
 <!-- SECTION 5: Hall Clean -->
 <div class="section">
-  <div class="section-header" onclick="toggleSection(this)">
+  <div class="section-header js-section-toggle">
     <span class="section-title">5 · Hall Clean</span>
     <span class="badge" id="badge-s6">0/0</span>
   </div>
@@ -346,7 +451,7 @@
 
 <!-- SECTION 6: Lock Up & Handover -->
 <div class="section">
-  <div class="section-header" onclick="toggleSection(this)">
+  <div class="section-header js-section-toggle">
     <span class="section-title">6 · Lock Up &amp; Handover</span>
     <span class="badge" id="badge-s7">0/0</span>
   </div>
@@ -412,8 +517,8 @@
 </div>
 
 <div class="actions">
-  <button id="btn-save" onclick="saveForm()" style="background:#4a3f6b;color:white;">💾 Save Staff &amp; Notes</button>
-  <button id="btn-reset" onclick="resetAll()" style="background:#e05c5c;color:white;">🔄 Reset</button>
+  <button id="btn-save" data-action="save" style="background:#4a3f6b;color:white;">💾 Save Staff &amp; Notes</button>
+  <button id="btn-reset" data-action="reset" style="background:#e05c5c;color:white;">🔄 Reset</button>
 </div>
 
 <script>
@@ -676,5 +781,71 @@ const rtdb = window.rtdb;
     saveRealtime();
   }
 </script>
+
+<script>
+(function () {
+  function wireSharedUiControls() {
+    document.querySelectorAll('.js-section-toggle').forEach(function (header) {
+      if (header.dataset.wiredToggle === '1') return;
+      header.dataset.wiredToggle = '1';
+      header.setAttribute('tabindex', '0');
+      header.setAttribute('role', 'button');
+      header.addEventListener('click', function () { if (typeof toggleSection === 'function') toggleSection(header); });
+      header.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          if (typeof toggleSection === 'function') toggleSection(header);
+        }
+      });
+    });
+
+    var initialsBtn = document.querySelector('.js-change-initials');
+    if (initialsBtn && !initialsBtn.dataset.wired) {
+      initialsBtn.dataset.wired = '1';
+      initialsBtn.addEventListener('click', function () { if (typeof changeInitials === 'function') changeInitials(); });
+    }
+
+    document.querySelectorAll('.js-add-staff').forEach(function (btn) {
+      if (btn.dataset.wiredAddStaff === '1') return;
+      btn.dataset.wiredAddStaff = '1';
+      btn.addEventListener('click', function () { if (typeof addStaffMember === 'function') addStaffMember(); else if (typeof addStaff === 'function') addStaff(); });
+    });
+
+    var actionMap = {
+      'save': 'saveForm',
+      'reset': 'resetAll',
+      'load': 'loadForm',
+      'print': 'printChecklist',
+      'save-progress': 'saveProgress'
+    };
+
+    document.querySelectorAll('[data-action]').forEach(function (btn) {
+      if (btn.dataset.wiredAction === '1') return;
+      btn.dataset.wiredAction = '1';
+      btn.addEventListener('click', function () {
+        var action = btn.getAttribute('data-action');
+        var fnName = actionMap[action];
+        if (fnName && typeof window[fnName] === 'function') window[fnName]();
+      });
+    });
+
+    document.addEventListener('click', function (event) {
+      var removeBtn = event.target.closest('.js-remove-staff');
+      if (removeBtn) {
+        var row = removeBtn.closest('.staff-row') || removeBtn.parentElement;
+        if (row) row.remove();
+        if (typeof updateStaffBadge === 'function') updateStaffBadge();
+      }
+    }, { once: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wireSharedUiControls);
+  } else {
+    wireSharedUiControls();
+  }
+})();
+</script>
+
 </body>
 </html>
