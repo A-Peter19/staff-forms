@@ -35,10 +35,6 @@
     #status-create{margin-top:var(--space-2);padding:10px 14px;border-radius:var(--radius-sm);font-size:.88rem;display:none}
     #status-create.success{background:#d4edda;color:#1e5c2d;display:block}
     #status-create.error{background:#f8d7da;color:#721c24;display:block}
-    #status-migrate{margin-top:var(--space-2);padding:10px 14px;border-radius:var(--radius-sm);font-size:.88rem;display:none}
-    #status-migrate.success{background:#d4edda;color:#1e5c2d;display:block}
-    #status-migrate.error{background:#f8d7da;color:#721c24;display:block}
-    #status-migrate.info{background:#d1ecf1;color:#0c5460;display:block}
     .events-list{display:flex;flex-direction:column;gap:var(--space-2)}
     .event-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);box-shadow:0 2px 8px rgba(15,23,42,.04)}
     .event-card:hover{box-shadow:0 10px 20px rgba(15,23,42,.08)}
@@ -200,14 +196,6 @@
   <div id="loading-events">Loading events...</div>
   <div class="events-list" id="events-list"></div>
   <div class="empty-state" id="empty-state" style="display:none">No events found. Create one above.</div>
-</div>
-
-<div class="card">
-  <h2>Admin Tools</h2>
-  <p>One-time safe migration for legacy records. This can be re-run; it only writes missing/invalid fields.</p>
-  <br/>
-  <button class="btn-secondary" id="btn-run-migration">Run Legacy Backfill</button>
-  <div id="status-migrate"></div>
 </div>
 
 <!-- EDIT TASKS MODAL -->
@@ -693,64 +681,6 @@
     applyEventFilters();
   }, function(err) {
     document.getElementById('loading-events').textContent = 'Could not load events: ' + err.message;
-  });
-
-  async function runLegacyBackfill() {
-    var status = document.getElementById('status-migrate');
-    var btn = document.getElementById('btn-run-migration');
-    status.className = 'info';
-    status.textContent = 'Scanning events...';
-    btn.disabled = true;
-    try {
-      var snap = await db.collection('events').get();
-      if (snap.empty) {
-        status.className = 'success';
-        status.textContent = 'No events found. Nothing to migrate.';
-        return;
-      }
-      var updates = [];
-      snap.forEach(function(doc) {
-        var data = doc.data() || {};
-        var patch = {};
-        if (!data.eventType) patch.eventType = 'wedding';
-        if (!data.displayName) {
-          var inferredDisplayName = inferDisplayName(data);
-          if (inferredDisplayName) patch.displayName = inferredDisplayName;
-        }
-        if (!Array.isArray(data.hiddenTasks)) patch.hiddenTasks = [];
-        if (!Array.isArray(data.customTasks)) patch.customTasks = [];
-        if (!isKnownPackage(data.package)) {
-          var inferredPackage = inferPackageFromLegacyFields(data);
-          if (inferredPackage) patch.package = inferredPackage;
-        }
-        if (Object.keys(patch).length) updates.push({ ref: doc.ref, patch: patch });
-      });
-      if (!updates.length) {
-        status.className = 'success';
-        status.textContent = 'Migration complete. No legacy records needed changes.';
-        return;
-      }
-      var batchSize = 300;
-      for (var i = 0; i < updates.length; i += batchSize) {
-        var batch = db.batch();
-        updates.slice(i, i + batchSize).forEach(function(change) {
-          batch.set(change.ref, change.patch, { merge: true });
-        });
-        await batch.commit();
-      }
-      status.className = 'success';
-      status.textContent = 'Migration complete. Updated ' + updates.length + ' event(s). Safe to re-run anytime.';
-    } catch (e) {
-      status.className = 'error';
-      status.textContent = 'Migration failed: ' + e.message;
-    } finally {
-      btn.disabled = false;
-    }
-  }
-
-  document.getElementById('btn-run-migration').addEventListener('click', function() {
-    if (!confirm('Run legacy backfill now? This is idempotent and safe to run multiple times.')) return;
-    runLegacyBackfill();
   });
 
   async function deleteEvent(eventId, btn) {
