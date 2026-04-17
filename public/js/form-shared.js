@@ -166,6 +166,19 @@
     return global.db.collection('events').doc(eventId).set(data, { merge: true });
   }
 
+  function bindRealtimeCheckboxSync(formKey, onCheckboxChanged) {
+    if (!formKey) return;
+    var attr = 'realtimeSyncBound_' + formKey;
+    if (document.body && document.body.dataset && document.body.dataset[attr] === '1') return;
+    if (document.body && document.body.dataset) document.body.dataset[attr] = '1';
+    document.addEventListener('change', function (event) {
+      var target = event.target;
+      if (!target || !target.matches || !target.matches('.checklist-item input[type="checkbox"], .task input[type="checkbox"]')) return;
+      if (typeof onCheckboxChanged === 'function') onCheckboxChanged(target);
+      saveRealtimeChecklist(formKey);
+    });
+  }
+
   global.StaffFormSync = {
     getEventId: getEventId,
     loadEventMetaAndApplyHiddenTasks: loadEventMetaAndApplyHiddenTasks,
@@ -173,6 +186,7 @@
     loadRealtimeChecklist: loadRealtimeChecklist,
     saveRealtimeChecklist: saveRealtimeChecklist,
     saveStaffSection: saveStaffSection,
-    bindCheckboxMeta: bindCheckboxMeta
+    bindCheckboxMeta: bindCheckboxMeta,
+    bindRealtimeCheckboxSync: bindRealtimeCheckboxSync
   };
 })(window);
