@@ -39,6 +39,8 @@ header h1 { font-size: clamp(1.35rem, 1.1rem + 1vw, 2rem); font-weight: 700; mar
 header p { font-size: 0.93rem; opacity: 0.92; }
 .back-link { display: inline-block; margin-bottom: 16px; color: var(--brand); font-size: 0.88rem; font-weight: 600; text-decoration: none; }
 .back-link:hover { text-decoration: underline; }
+.initials-bar { background:#fff5f5; border:1px solid #f0c8c4; border-radius:10px; padding:10px 16px; margin-bottom:20px; font-size:0.88rem; display:flex; align-items:center; gap:12px; }
+.initials-bar span { font-weight:700; color:#9b2335; }
 .event-meta, .progress-bar-wrap, .section {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -108,6 +110,12 @@ button:hover { transform: translateY(-1px); }
   <h1>🎉 The Celebration Package – Venue Setup Checklist</h1>
   <p>Waddesdon Hall &nbsp;|&nbsp; Staff use only &nbsp;|&nbsp; Complete all sections before guest arrival</p>
 </header>
+
+<!-- Initials -->
+<div class="initials-bar">
+  👤 Ticking as: <span id="staffInitialsDisplay">Not set</span>
+  <button type="button" onclick="changeInitials()" style="padding:5px 12px;background:#c0392b;color:white;border:none;border-radius:8px;font-size:0.82rem;cursor:pointer;">Change</button>
+</div>
 
 <!-- Event Meta -->
 <div class="event-meta">
@@ -497,7 +505,7 @@ button:hover { transform: translateY(-1px); }
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script src="../js/staff-form-sync.js"></script>
+<script src="../js/form-shared.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBa9zA9-RlT5SVAaOb208_KE644zY8dvUE",
@@ -512,6 +520,8 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const rtdb = firebase.database();
 const FORM_KEY = 'setup';
+window.db = db;
+window.rtdb = rtdb;
 
 function getEventId() { return StaffFormSync.getEventId(); }
 function loadEventMetaAndApplyHiddenTasks() { return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY); }
@@ -522,6 +532,21 @@ function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formK
 function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
 
 const EVENT_ID = new URLSearchParams(window.location.search).get('event');
+var staffInitials = localStorage.getItem('staffInitials');
+window.staffInitials = staffInitials;
+
+function promptInitials() {
+  var input = prompt('Enter your initials (e.g. JS):');
+  if (input && input.trim()) {
+    staffInitials = input.trim().toUpperCase().slice(0, 4);
+    localStorage.setItem('staffInitials', staffInitials);
+    window.staffInitials = staffInitials;
+    document.getElementById('staffInitialsDisplay').textContent = staffInitials;
+  }
+}
+
+function changeInitials() { promptInitials(); }
+if (!staffInitials) { promptInitials(); } else { document.getElementById('staffInitialsDisplay').textContent = staffInitials; }
 
 if (!EVENT_ID) {
   var banner = document.createElement('div');

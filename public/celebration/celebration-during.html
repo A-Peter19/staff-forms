@@ -414,7 +414,7 @@ button:hover { transform:translateY(-1px); }
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-<script src="../js/staff-form-sync.js"></script>
+<script src="../js/form-shared.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBa9zA9-RlT5SVAaOb208_KE644zY8dvUE",
@@ -429,6 +429,8 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const rtdb = firebase.database();
 const FORM_KEY = 'during';
+window.db = db;
+window.rtdb = rtdb;
 
 function getEventId() { return StaffFormSync.getEventId(); }
 function loadEventMetaAndApplyHiddenTasks() { return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY); }
@@ -441,11 +443,13 @@ function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
 const EVENT_ID = new URLSearchParams(window.location.search).get('event');
 
 var staffInitials = localStorage.getItem('staffInitials');
+window.staffInitials = staffInitials;
 function promptInitials() {
   var input = prompt('Enter your initials (e.g. JS):');
   if (input && input.trim()) {
     staffInitials = input.trim().toUpperCase().slice(0,4);
     localStorage.setItem('staffInitials', staffInitials);
+    window.staffInitials = staffInitials;
     document.getElementById('staffInitialsDisplay').textContent = staffInitials;
   }
 }
