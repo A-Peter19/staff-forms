@@ -361,7 +361,112 @@
                 font-size: 0.8rem;
             }
         }
-    </style>
+    
+
+    :root {
+      --ui-space-1: 4px;
+      --ui-space-2: 8px;
+      --ui-space-3: 12px;
+      --ui-space-4: 16px;
+      --ui-space-5: 20px;
+      --ui-radius-sm: 6px;
+      --ui-radius-md: 8px;
+      --ui-focus-ring: 0 0 0 3px rgba(32,128,141,0.28);
+      --ui-font-sm: 0.82rem;
+      --ui-font-md: 0.92rem;
+    }
+
+    .staff-banner {
+      margin-top: var(--ui-space-3);
+      padding: 10px 14px;
+      background: rgba(32,128,141,0.12);
+      border-radius: var(--ui-radius-md);
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--ui-space-3);
+      flex-wrap: wrap;
+    }
+
+    .btn-initials-change {
+      background: none;
+      border: 1px solid #20808D;
+      color: #20808D;
+      padding: 4px 10px;
+      border-radius: var(--ui-radius-sm);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .staff-control-block {
+      padding: 16px 20px;
+    }
+
+    .staff-control-block--bordered {
+      border-bottom: 1px solid #f0ebe5;
+    }
+
+    .staff-control-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #7a6050;
+      margin-bottom: 8px;
+    }
+
+    .staff-control-label--spaced {
+      margin-bottom: 10px;
+    }
+
+    .staff-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: var(--ui-font-md);
+      background: #fdfaf7;
+    }
+
+    .btn-add-staff {
+      width: 100%;
+      margin-top: 10px;
+      padding: 11px;
+      background: transparent;
+      border: 2px dashed currentColor;
+      border-radius: var(--ui-radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-add-staff:hover {
+      background: rgba(0,0,0,0.04);
+    }
+
+    .btn-remove-staff {
+      padding: 2px 8px;
+      font-size: var(--ui-font-sm);
+    }
+
+    .actions { gap: var(--ui-space-3); }
+
+    .section-header:focus-visible,
+    button:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    .btn-add-staff:focus-visible,
+    .btn-initials-change:focus-visible {
+      outline: none;
+      box-shadow: var(--ui-focus-ring);
+    }
+
+</style>
 
 </head>
 <body>
@@ -389,10 +494,10 @@
             <div id="staffList">
                 <div class="staff-entry">
                     <input type="text" class="staff-name-input" placeholder="Staff member name..." oninput="saveState()">
-                    <button class="remove-staff-btn" onclick="removeStaff(this)">✕</button>
+                    <button class="remove-staff-btn remove-staff-btn js-remove-staff">✕</button>
                 </div>
             </div>
-            <button class="add-staff-btn" onclick="addStaff()">+ Add Staff Member</button>
+            <button class="add-staff-btn add-staff-btn js-add-staff">+ Add Staff Member</button>
         </div>
     </div>
 
@@ -416,7 +521,7 @@
     </div>
 
     <div class="section">
-        <div class="section-header" onclick="toggleSection('bar')">
+        <div class="section-header js-section-toggle" data-toggle-section="bar">
             <h2>🍷 Bar Staff Tasks</h2>
             <div>
                 <span class="progress" id="barProgress">0/8</span>
@@ -486,7 +591,7 @@
     </div>
 
     <div class="section">
-        <div class="section-header" onclick="toggleSection('event')">
+        <div class="section-header js-section-toggle" data-toggle-section="event">
             <h2>🧹 Event Staff Tasks</h2>
             <div>
                 <span class="progress" id="eventProgress">0/13</span>
@@ -591,7 +696,7 @@
     </div>
 
     <div class="section">
-        <div class="section-header" onclick="toggleSection('kitchen')">
+        <div class="section-header js-section-toggle" data-toggle-section="kitchen">
             <h2>🍽️ Kitchen Staff Tasks</h2>
             <div>
                 <span class="progress" id="kitchenProgress">0/5</span>
@@ -640,8 +745,8 @@
     </div>
 
     <div class="controls">
-        <button class="btn btn-secondary" onclick="resetAll()">Reset All</button>
-        <button class="btn btn-primary" onclick="saveProgress()">Save Progress</button>
+        <button class="btn btn-secondary" data-action="reset">Reset All</button>
+        <button class="btn btn-primary" data-action="save-progress">Save Progress</button>
     </div>
 
     <script>
@@ -740,7 +845,7 @@ const rtdb = window.rtdb;
                             entry.className = 'staff-entry';
                             entry.innerHTML = `
                                 <input type="text" class="staff-name-input" placeholder="Staff member name..." oninput="saveState()" value="${name}">
-                                <button class="remove-staff-btn" onclick="removeStaff(this)">✕</button>
+                                <button class="remove-staff-btn remove-staff-btn js-remove-staff">✕</button>
                             `;
                             list.appendChild(entry);
                         });
@@ -844,7 +949,7 @@ const rtdb = window.rtdb;
             entry.className = 'staff-entry';
             entry.innerHTML = `
                 <input type="text" class="staff-name-input" placeholder="Staff member name..." oninput="saveState()">
-                <button class="remove-staff-btn" onclick="removeStaff(this)">✕</button>
+                <button class="remove-staff-btn remove-staff-btn js-remove-staff">✕</button>
             `;
             list.appendChild(entry);
         }
@@ -886,5 +991,71 @@ const rtdb = window.rtdb;
         // Set initial guest count button
         document.querySelector(`.guest-btn[data-count="${currentGuests}"]`).classList.add('active');
     </script>
+
+<script>
+(function () {
+  function wireSharedUiControls() {
+    document.querySelectorAll('.js-section-toggle').forEach(function (header) {
+      if (header.dataset.wiredToggle === '1') return;
+      header.dataset.wiredToggle = '1';
+      header.setAttribute('tabindex', '0');
+      header.setAttribute('role', 'button');
+      header.addEventListener('click', function () { if (typeof toggleSection === 'function') toggleSection(header.dataset.toggleSection || header); });
+      header.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          if (typeof toggleSection === 'function') toggleSection(header.dataset.toggleSection || header);
+        }
+      });
+    });
+
+    var initialsBtn = document.querySelector('.js-change-initials');
+    if (initialsBtn && !initialsBtn.dataset.wired) {
+      initialsBtn.dataset.wired = '1';
+      initialsBtn.addEventListener('click', function () { if (typeof changeInitials === 'function') changeInitials(); });
+    }
+
+    document.querySelectorAll('.js-add-staff').forEach(function (btn) {
+      if (btn.dataset.wiredAddStaff === '1') return;
+      btn.dataset.wiredAddStaff = '1';
+      btn.addEventListener('click', function () { if (typeof addStaffMember === 'function') addStaffMember(); else if (typeof addStaff === 'function') addStaff(); });
+    });
+
+    var actionMap = {
+      'save': 'saveForm',
+      'reset': 'resetAll',
+      'load': 'loadForm',
+      'print': 'printChecklist',
+      'save-progress': 'saveProgress'
+    };
+
+    document.querySelectorAll('[data-action]').forEach(function (btn) {
+      if (btn.dataset.wiredAction === '1') return;
+      btn.dataset.wiredAction = '1';
+      btn.addEventListener('click', function () {
+        var action = btn.getAttribute('data-action');
+        var fnName = actionMap[action];
+        if (fnName && typeof window[fnName] === 'function') window[fnName]();
+      });
+    });
+
+    document.addEventListener('click', function (event) {
+      var removeBtn = event.target.closest('.js-remove-staff');
+      if (removeBtn) {
+        var row = removeBtn.closest('.staff-row') || removeBtn.parentElement;
+        if (row) row.remove();
+        if (typeof updateStaffBadge === 'function') updateStaffBadge();
+      }
+    }, { once: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wireSharedUiControls);
+  } else {
+    wireSharedUiControls();
+  }
+})();
+</script>
+
 </body>
 </html>

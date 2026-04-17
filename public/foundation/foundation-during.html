@@ -61,7 +61,112 @@
     .task-meta { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; }
     .task-initials { display: inline-block; background: #20808D; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; }
     .task-time { font-size: 12px; color: #626C71; }
-  </style>
+  
+
+    :root {
+      --ui-space-1: 4px;
+      --ui-space-2: 8px;
+      --ui-space-3: 12px;
+      --ui-space-4: 16px;
+      --ui-space-5: 20px;
+      --ui-radius-sm: 6px;
+      --ui-radius-md: 8px;
+      --ui-focus-ring: 0 0 0 3px rgba(32,128,141,0.28);
+      --ui-font-sm: 0.82rem;
+      --ui-font-md: 0.92rem;
+    }
+
+    .staff-banner {
+      margin-top: var(--ui-space-3);
+      padding: 10px 14px;
+      background: rgba(32,128,141,0.12);
+      border-radius: var(--ui-radius-md);
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--ui-space-3);
+      flex-wrap: wrap;
+    }
+
+    .btn-initials-change {
+      background: none;
+      border: 1px solid #20808D;
+      color: #20808D;
+      padding: 4px 10px;
+      border-radius: var(--ui-radius-sm);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .staff-control-block {
+      padding: 16px 20px;
+    }
+
+    .staff-control-block--bordered {
+      border-bottom: 1px solid #f0ebe5;
+    }
+
+    .staff-control-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #7a6050;
+      margin-bottom: 8px;
+    }
+
+    .staff-control-label--spaced {
+      margin-bottom: 10px;
+    }
+
+    .staff-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: var(--ui-font-md);
+      background: #fdfaf7;
+    }
+
+    .btn-add-staff {
+      width: 100%;
+      margin-top: 10px;
+      padding: 11px;
+      background: transparent;
+      border: 2px dashed currentColor;
+      border-radius: var(--ui-radius-md);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-add-staff:hover {
+      background: rgba(0,0,0,0.04);
+    }
+
+    .btn-remove-staff {
+      padding: 2px 8px;
+      font-size: var(--ui-font-sm);
+    }
+
+    .actions { gap: var(--ui-space-3); }
+
+    .section-header:focus-visible,
+    button:focus-visible,
+    [role="button"]:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    .btn-add-staff:focus-visible,
+    .btn-initials-change:focus-visible {
+      outline: none;
+      box-shadow: var(--ui-focus-ring);
+    }
+
+</style>
 </head>
 <body>
 <header>
@@ -69,9 +174,9 @@
   <p>Waddesdon Hall &nbsp;|&nbsp; Staff use only &nbsp;|&nbsp; Monitor throughout the event</p>
 </header>
 
-<div id="staffBanner" style="margin-top:12px;padding:10px 14px;background:rgba(32,128,141,0.12);border-radius:8px;font-size:14px;display:flex;justify-content:space-between;align-items:center;">
+<div id="staffBanner" class="staff-banner">
   <span>&#128100; Ticking as: <strong id="staffInitialsDisplay">Not set</strong></span>
-  <button onclick="changeInitials()" style="background:none;border:1px solid #20808D;color:#20808D;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">Change</button>
+  <button  class="btn-initials-change js-change-initials" >Change</button>
 </div>
 
 <div class="event-meta">
@@ -90,7 +195,7 @@
 </div>
 
 <div class="section" id="staff-section">
-  <div class="section-header" onclick="toggleSection(this)">
+  <div class="section-header js-section-toggle">
     <h2>👑 Staff on Duty</h2>
     <span class="badge" id="badge-staff"></span>
   </div>
@@ -99,10 +204,10 @@
       <label style="display:block;font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#3a5a40;margin-bottom:8px;">👑 Team Leader</label>
       <input type="text" id="team-leader" placeholder="Team leader name..." style="width:100%;padding:10px 12px;border:1px solid #d6ded8;border-radius:8px;font-size:0.92rem;background:#fafdfb;" />
     </div>
-    <div style="padding:16px 20px;">
+    <div class="staff-control-block">
       <label style="display:block;font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:#3a5a40;margin-bottom:10px;">👥 Staff on Shift</label>
       <div id="staff-list"></div>
-      <button type="button" onclick="addStaffMember()" style="width:100%;margin-top:10px;padding:11px;background:transparent;border:2px dashed #8aad8f;border-radius:8px;color:#3a5a40;font-size:0.9rem;font-weight:600;cursor:pointer;transition:background 0.15s;" onmouseover="this.style.background='#edf5ee'" onmouseout="this.style.background='transparent'">
+      <button type="button"  class="btn-add-staff js-add-staff">
         + Add Staff Member
       </button>
     </div>
@@ -115,7 +220,7 @@
 </div>
 
 <div class="section">
-  <div class="section-header" onclick="toggleSection(this)"><h2>1 · Guest Arrival & Support</h2><span class="badge" id="badge-s1">0/0</span></div>
+  <div class="section-header js-section-toggle"><h2>1 · Guest Arrival & Support</h2><span class="badge" id="badge-s1">0/0</span></div>
   <div class="section-body">
     <div class="checklist-item" data-section="s1"><input type="checkbox"/><div class="item-content"><div class="item-label">Guests welcomed and directed on arrival</div><div class="item-note">Entrance covered and guest flow managed smoothly</div></div></div>
     <div class="checklist-item" data-section="s1"><input type="checkbox"/><div class="item-content"><div class="item-label">Table plan visible and guests seated with minimal delay</div><div class="item-note">Support elderly and family groups with seating</div></div></div>
@@ -125,7 +230,7 @@
 </div>
 
 <div class="section">
-  <div class="section-header" onclick="toggleSection(this)"><h2>2 · Hall & Comfort Checks</h2><span class="badge" id="badge-s2">0/0</span></div>
+  <div class="section-header js-section-toggle"><h2>2 · Hall & Comfort Checks</h2><span class="badge" id="badge-s2">0/0</span></div>
   <div class="section-body">
     <div class="checklist-item" data-section="s2"><input type="checkbox"/><div class="item-content"><div class="item-label">Hall temperature and ventilation checked hourly</div><div class="item-note">Adjust for guest comfort and report faults quickly</div></div></div>
     <div class="checklist-item" data-section="s2"><input type="checkbox"/><div class="item-content"><div class="item-label">Toilets checked and restocked through service</div><div class="item-note">Soap, paper and bins monitored regularly</div></div></div>
@@ -135,7 +240,7 @@
 </div>
 
 <div class="section">
-  <div class="section-header" onclick="toggleSection(this)"><h2>3 · Service Flow & Coordination</h2><span class="badge" id="badge-s3">0/0</span></div>
+  <div class="section-header js-section-toggle"><h2>3 · Service Flow & Coordination</h2><span class="badge" id="badge-s3">0/0</span></div>
   <div class="section-body">
     <div class="checklist-item" data-section="s3"><input type="checkbox"/><div class="item-content"><div class="item-label">Supplier and coordinator timings reconfirmed</div><div class="item-note">Keep service windows aligned with event schedule</div></div></div>
     <div class="checklist-item" data-section="s3"><input type="checkbox"/><div class="item-content"><div class="item-label">PA/microphone support available for announcements</div><div class="item-note">Audio checked before key moments and speeches</div></div></div>
@@ -145,7 +250,7 @@
 </div>
 
 <div class="section">
-  <div class="section-header" onclick="toggleSection(this)"><h2>4 · Event Experience Monitoring</h2><span class="badge" id="badge-s4">0/0</span></div>
+  <div class="section-header js-section-toggle"><h2>4 · Event Experience Monitoring</h2><span class="badge" id="badge-s4">0/0</span></div>
   <div class="section-body">
     <div class="checklist-item" data-section="s4"><input type="checkbox"/><div class="item-content"><div class="item-label">Guest feedback and ad-hoc requests handled</div><div class="item-note">Escalate recurring issues to team leader</div></div></div>
     <div class="checklist-item" data-section="s4"><input type="checkbox"/><div class="item-content"><div class="item-label">Décor and furniture remain safe and presentable</div><div class="item-note">Reposition moved chairs/tables where needed</div></div></div>
@@ -155,7 +260,7 @@
 </div>
 
 <div class="section">
-  <div class="section-header" onclick="toggleSection(this)"><h2>5 · Last Orders & Handover Prep</h2><span class="badge" id="badge-s5">0/0</span></div>
+  <div class="section-header js-section-toggle"><h2>5 · Last Orders & Handover Prep</h2><span class="badge" id="badge-s5">0/0</span></div>
   <div class="section-body">
     <div class="checklist-item" data-section="s5"><input type="checkbox"/><div class="item-content"><div class="item-label">Last orders / closing announcements made on time</div><div class="item-note">Coordinate messaging with supplier and DJ/host</div></div></div>
     <div class="checklist-item" data-section="s5"><input type="checkbox"/><div class="item-content"><div class="item-label">Guest departures supported safely</div><div class="item-note">Assist taxis and monitor exits</div></div></div>
@@ -165,8 +270,8 @@
 </div>
 
 <div class="actions">
-  <button id="btn-save" onclick="saveForm()" style="background:#3a5a40;color:white;">Save</button>
-  <button id="btn-reset" onclick="resetAll()" style="background:#e05c5c;color:white;">Reset</button>
+  <button id="btn-save" data-action="save" style="background:#3a5a40;color:white;">Save</button>
+  <button id="btn-reset" data-action="reset" style="background:#e05c5c;color:white;">Reset</button>
 </div>
 
 <script>
@@ -313,5 +418,71 @@ const rtdb = window.rtdb;
   function updateStaffBadge() { var inputs = document.querySelectorAll('.staff-input'); var filled = Array.from(inputs).filter(function(i) { return i.value.trim() !== ''; }).length; var badge = document.getElementById('badge-staff'); if (badge) badge.textContent = filled + ' staff'; }
   function resetAll() { if (!confirm('Reset all checkboxes?')) return; document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb) { cb.checked = false; cb.closest('.checklist-item').classList.remove('done'); var meta = cb.closest('.checklist-item').querySelector('.task-meta'); if (meta) meta.innerHTML = ''; }); updateProgress(); }
 </script>
+
+<script>
+(function () {
+  function wireSharedUiControls() {
+    document.querySelectorAll('.js-section-toggle').forEach(function (header) {
+      if (header.dataset.wiredToggle === '1') return;
+      header.dataset.wiredToggle = '1';
+      header.setAttribute('tabindex', '0');
+      header.setAttribute('role', 'button');
+      header.addEventListener('click', function () { if (typeof toggleSection === 'function') toggleSection(header); });
+      header.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          if (typeof toggleSection === 'function') toggleSection(header);
+        }
+      });
+    });
+
+    var initialsBtn = document.querySelector('.js-change-initials');
+    if (initialsBtn && !initialsBtn.dataset.wired) {
+      initialsBtn.dataset.wired = '1';
+      initialsBtn.addEventListener('click', function () { if (typeof changeInitials === 'function') changeInitials(); });
+    }
+
+    document.querySelectorAll('.js-add-staff').forEach(function (btn) {
+      if (btn.dataset.wiredAddStaff === '1') return;
+      btn.dataset.wiredAddStaff = '1';
+      btn.addEventListener('click', function () { if (typeof addStaffMember === 'function') addStaffMember(); else if (typeof addStaff === 'function') addStaff(); });
+    });
+
+    var actionMap = {
+      'save': 'saveForm',
+      'reset': 'resetAll',
+      'load': 'loadForm',
+      'print': 'printChecklist',
+      'save-progress': 'saveProgress'
+    };
+
+    document.querySelectorAll('[data-action]').forEach(function (btn) {
+      if (btn.dataset.wiredAction === '1') return;
+      btn.dataset.wiredAction = '1';
+      btn.addEventListener('click', function () {
+        var action = btn.getAttribute('data-action');
+        var fnName = actionMap[action];
+        if (fnName && typeof window[fnName] === 'function') window[fnName]();
+      });
+    });
+
+    document.addEventListener('click', function (event) {
+      var removeBtn = event.target.closest('.js-remove-staff');
+      if (removeBtn) {
+        var row = removeBtn.closest('.staff-row') || removeBtn.parentElement;
+        if (row) row.remove();
+        if (typeof updateStaffBadge === 'function') updateStaffBadge();
+      }
+    }, { once: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wireSharedUiControls);
+  } else {
+    wireSharedUiControls();
+  }
+})();
+</script>
+
 </body>
 </html>
