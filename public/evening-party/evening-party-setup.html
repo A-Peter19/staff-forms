@@ -615,7 +615,10 @@ if (!EVENT_ID) {
       sub.textContent = (ev.couple || ev.name || '') + (dateFmt ? ' - ' + dateFmt : '') + (ev.guests ? ' - ' + ev.guests + ' guests' : '');
     }
     var gf = document.getElementById('meta-guests'); if (gf && ev.guests) gf.value = ev.guests;
+    var df = document.getElementById('meta-day'); if (df && ev.day) df.value = ev.day;
+    var af = document.getElementById('meta-access'); if (af && ev.accessTime) af.value = ev.accessTime;
     var bf = document.getElementById('meta-bar'); if (bf && ev.barTime) bf.value = ev.barTime;
+    var tf = document.getElementById('meta-tables'); if (tf && ev.tableStyle) tf.value = ev.tableStyle;
     updateProgress();
     var saved = ev[FORM_KEY];
     if (saved) {
@@ -702,6 +705,16 @@ async function saveForm() {
     checkboxes['cb_' + i] = cb.checked;
   });
   var data = {};
+  var guestsField = document.getElementById('meta-guests');
+  var dayField = document.getElementById('meta-day');
+  var accessField = document.getElementById('meta-access');
+  var barField = document.getElementById('meta-bar');
+  var tablesField = document.getElementById('meta-tables');
+  data.guests = guestsField ? guestsField.value : '';
+  data.day = dayField ? dayField.value : '';
+  data.accessTime = accessField ? accessField.value : '';
+  data.barTime = barField ? barField.value : '';
+  data.tableStyle = tablesField ? tablesField.value : '';
   data[FORM_KEY] = {
     teamLeader: document.getElementById('team-leader').value,
     staffMembers: Array.from(document.querySelectorAll('.staff-input')).map(function(i) { return i.value; }),

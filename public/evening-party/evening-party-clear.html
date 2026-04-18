@@ -607,6 +607,7 @@ if (!EVENT_ID) {
       sub.textContent = (ev.couple || ev.name || '') + (dateFmt ? ' - ' + dateFmt : '') + (ev.guests ? ' - ' + ev.guests + ' guests' : '');
     }
     var gf = document.getElementById('meta-guests'); if (gf && ev.guests) gf.value = ev.guests;
+    var df = document.getElementById('meta-day'); if (df && ev.day) df.value = ev.day;
     updateProgress();
     var saved = ev[FORM_KEY];
     if (saved) {
@@ -718,6 +719,10 @@ async function saveForm() {
     }
   });
   var data = {};
+  var guestsField = document.getElementById('meta-guests');
+  var dayField = document.getElementById('meta-day');
+  data.guests = guestsField ? guestsField.value : '';
+  data.day = dayField ? dayField.value : '';
   data[FORM_KEY] = {
     teamLeader: document.getElementById('team-leader').value,
     staffMembers: Array.from(document.querySelectorAll('.staff-input')).map(function(i) { return i.value; }),
