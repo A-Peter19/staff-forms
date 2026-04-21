@@ -255,6 +255,72 @@
     });
   }
 
+  function getItemQuantityKey(field, index) {
+    if (!field || !field.closest) return 'qty_' + index;
+    if (field.dataset && field.dataset.qtyKey) return field.dataset.qtyKey;
+    var row = field.closest('.checklist-item, .task');
+    if (!row) return 'qty_' + index;
+    var checkbox = row.querySelector('input[type="checkbox"]');
+    var rowKey = checkbox ? readTaskKey(checkbox, index) : ('row_' + index);
+    var explicitFieldKey = (field.dataset && field.dataset.qtyField) || field.name || field.id;
+    var siblingFields = row.querySelectorAll('.item-qty input, .item-qty select, .item-qty textarea');
+    var fieldIndex = Array.prototype.indexOf.call(siblingFields, field);
+    var suffix = explicitFieldKey ? explicitFieldKey : ('field_' + Math.max(fieldIndex, 0));
+    var key = rowKey + '__' + suffix;
+    if (field.dataset) field.dataset.qtyKey = key;
+    return key;
+  }
+
+  function loadRealtimeItemQuantities(formKey) {
+    var eventId = getEventId();
+    if (!eventId || !global.rtdb || !global.rtdb.ref) return;
+    global.rtdb.ref('events/' + eventId + '/' + formKey + '_quantities').on('value', function (snapshot) {
+      var state = snapshot.val() || {};
+      var fields = document.querySelectorAll('.checklist-item .item-qty input, .checklist-item .item-qty select, .checklist-item .item-qty textarea, .task .item-qty input, .task .item-qty select, .task .item-qty textarea');
+      fields.forEach(function (field, index) {
+        var key = getItemQuantityKey(field, index);
+        var nextValue = Object.prototype.hasOwnProperty.call(state, key) ? state[key] : '';
+        if (document.activeElement === field && String(field.value || '') === String(nextValue || '')) return;
+        if (String(field.value || '') !== String(nextValue || '')) field.value = nextValue;
+      });
+    });
+  }
+
+  function saveRealtimeItemQuantities(formKey) {
+    var eventId = getEventId();
+    if (!eventId || !global.rtdb || !global.rtdb.ref) return Promise.resolve();
+    var payload = {};
+    var fields = document.querySelectorAll('.checklist-item .item-qty input, .checklist-item .item-qty select, .checklist-item .item-qty textarea, .task .item-qty input, .task .item-qty select, .task .item-qty textarea');
+    fields.forEach(function (field, index) {
+      var key = getItemQuantityKey(field, index);
+      var value = (field.value || '').trim();
+      if (value) payload[key] = value;
+    });
+    return global.rtdb.ref('events/' + eventId + '/' + formKey + '_quantities').set(payload);
+  }
+
+  function bindRealtimeItemQuantitiesSync(formKey) {
+    if (!formKey) return;
+    var attr = 'realtimeQuantitiesBound_' + formKey;
+    if (document.body && document.body.dataset && document.body.dataset[attr] === '1') return;
+    if (document.body && document.body.dataset) document.body.dataset[attr] = '1';
+    var timers = {};
+    document.addEventListener('input', function (event) {
+      var target = event.target;
+      if (!target || !target.matches || !target.matches('.checklist-item .item-qty input, .checklist-item .item-qty textarea, .task .item-qty input, .task .item-qty textarea')) return;
+      var key = getItemQuantityKey(target, 0);
+      if (timers[key]) clearTimeout(timers[key]);
+      timers[key] = setTimeout(function () {
+        saveRealtimeItemQuantities(formKey);
+      }, 200);
+    });
+    document.addEventListener('change', function (event) {
+      var target = event.target;
+      if (!target || !target.matches || !target.matches('.checklist-item .item-qty select, .task .item-qty select')) return;
+      saveRealtimeItemQuantities(formKey);
+    });
+  }
+
   function bindRealtimeCheckboxSync(formKey, onCheckboxChanged) {
     if (!formKey) return;
     var attr = 'realtimeSyncBound_' + formKey;
@@ -285,6 +351,9 @@
     loadRealtimeSectionNotes: loadRealtimeSectionNotes,
     saveRealtimeSectionNotes: saveRealtimeSectionNotes,
     bindRealtimeSectionNotesSync: bindRealtimeSectionNotesSync,
+    loadRealtimeItemQuantities: loadRealtimeItemQuantities,
+    saveRealtimeItemQuantities: saveRealtimeItemQuantities,
+    bindRealtimeItemQuantitiesSync: bindRealtimeItemQuantitiesSync,
     bindCheckboxMeta: bindCheckboxMeta,
     bindRealtimeCheckboxSync: bindRealtimeCheckboxSync
   };

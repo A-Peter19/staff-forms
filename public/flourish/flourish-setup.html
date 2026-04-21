@@ -922,6 +922,8 @@ const rtdb = window.rtdb;
   function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
   function loadRealtimeSectionNotes(formKey) { return StaffFormSync.loadRealtimeSectionNotes(formKey || FORM_KEY); }
   function bindRealtimeSectionNotesSync(formKey) { return StaffFormSync.bindRealtimeSectionNotesSync(formKey || FORM_KEY); }
+  function loadRealtimeItemQuantities(formKey) { return StaffFormSync.loadRealtimeItemQuantities(formKey || FORM_KEY); }
+  function bindRealtimeItemQuantitiesSync(formKey) { return StaffFormSync.bindRealtimeItemQuantitiesSync(formKey || FORM_KEY); }
   function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
 
   const FORM_KEY = 'setup';
@@ -1120,7 +1122,9 @@ const rtdb = window.rtdb;
   bindCheckboxMeta();
   loadRealtimeChecklist(FORM_KEY);
   loadRealtimeSectionNotes(FORM_KEY);
+  loadRealtimeItemQuantities(FORM_KEY);
   bindRealtimeSectionNotesSync(FORM_KEY);
+  bindRealtimeItemQuantitiesSync(FORM_KEY);
 
   function toggleSection(header) {
     var body = header.nextElementSibling;
