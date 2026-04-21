@@ -558,6 +558,9 @@ const rtdb = window.rtdb;
 
   updateProgress();
   bindCheckboxMeta();
+  loadEventMetaAndApplyHiddenTasks().then(function () {
+    updateProgress();
+  });
   loadRealtimeChecklist(FORM_KEY);
   loadRealtimeSectionNotes(FORM_KEY);
   loadRealtimeItemQuantities(FORM_KEY);
