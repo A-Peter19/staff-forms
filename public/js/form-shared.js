@@ -201,6 +201,60 @@
     return global.db.collection('events').doc(eventId).set(data, { merge: true });
   }
 
+  function getSectionNoteKey(textarea, index) {
+    if (textarea.dataset && textarea.dataset.noteKey) return textarea.dataset.noteKey;
+    var section = textarea.closest('.section');
+    var sectionTask = section && section.querySelector('.checklist-item[data-section], .task [data-section]');
+    var sectionId = sectionTask && sectionTask.dataset ? sectionTask.dataset.section : null;
+    var key = sectionId ? ('section_' + sectionId) : ('note_' + index);
+    if (textarea.dataset) textarea.dataset.noteKey = key;
+    return key;
+  }
+
+  function loadRealtimeSectionNotes(formKey) {
+    var eventId = getEventId();
+    if (!eventId || !global.rtdb || !global.rtdb.ref) return;
+    global.rtdb.ref('events/' + eventId + '/' + formKey + '_notes').on('value', function (snapshot) {
+      var state = snapshot.val() || {};
+      var notes = document.querySelectorAll('.notes-row textarea');
+      notes.forEach(function (textarea, index) {
+        var key = getSectionNoteKey(textarea, index);
+        var remoteValue = state[key] || '';
+        if (document.activeElement === textarea && textarea.value === remoteValue) return;
+        if (textarea.value !== remoteValue) textarea.value = remoteValue;
+      });
+    });
+  }
+
+  function saveRealtimeSectionNotes(formKey) {
+    var eventId = getEventId();
+    if (!eventId || !global.rtdb || !global.rtdb.ref) return Promise.resolve();
+    var payload = {};
+    var notes = document.querySelectorAll('.notes-row textarea');
+    notes.forEach(function (textarea, index) {
+      var key = getSectionNoteKey(textarea, index);
+      if (textarea.value && textarea.value.trim()) payload[key] = textarea.value;
+    });
+    return global.rtdb.ref('events/' + eventId + '/' + formKey + '_notes').set(payload);
+  }
+
+  function bindRealtimeSectionNotesSync(formKey) {
+    if (!formKey) return;
+    var attr = 'realtimeNotesBound_' + formKey;
+    if (document.body && document.body.dataset && document.body.dataset[attr] === '1') return;
+    if (document.body && document.body.dataset) document.body.dataset[attr] = '1';
+    var timers = {};
+    document.addEventListener('input', function (event) {
+      var target = event.target;
+      if (!target || !target.matches || !target.matches('.notes-row textarea')) return;
+      var key = getSectionNoteKey(target, 0);
+      if (timers[key]) clearTimeout(timers[key]);
+      timers[key] = setTimeout(function () {
+        saveRealtimeSectionNotes(formKey);
+      }, 250);
+    });
+  }
+
   function bindRealtimeCheckboxSync(formKey, onCheckboxChanged) {
     if (!formKey) return;
     var attr = 'realtimeSyncBound_' + formKey;
@@ -228,6 +282,9 @@
     loadRealtimeChecklist: loadRealtimeChecklist,
     saveRealtimeChecklist: saveRealtimeChecklist,
     saveStaffSection: saveStaffSection,
+    loadRealtimeSectionNotes: loadRealtimeSectionNotes,
+    saveRealtimeSectionNotes: saveRealtimeSectionNotes,
+    bindRealtimeSectionNotesSync: bindRealtimeSectionNotesSync,
     bindCheckboxMeta: bindCheckboxMeta,
     bindRealtimeCheckboxSync: bindRealtimeCheckboxSync
   };
