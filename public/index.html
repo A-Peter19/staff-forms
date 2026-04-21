@@ -850,11 +850,6 @@
     var cacheKey = [ev.eventType || 'wedding', ev.partyType || '', ev.package || ''].join('|');
     if (manifestCache[cacheKey]) return manifestCache[cacheKey];
 
-    if (TASK_MANIFESTS[ev.eventType]) {
-      manifestCache[cacheKey] = TASK_MANIFESTS[ev.eventType];
-      return manifestCache[cacheKey];
-    }
-
     var forms = resolveForms(ev);
     var manifest = [];
     var order = ['setup', 'during', 'clearup'];
@@ -863,6 +858,10 @@
       if (!forms[form]) continue;
       var tasks = await buildTaskManifestFromRoute(forms[form], form);
       manifest = manifest.concat(tasks);
+    }
+
+    if (!manifest.length && TASK_MANIFESTS[ev.eventType]) {
+      manifest = TASK_MANIFESTS[ev.eventType];
     }
 
     manifestCache[cacheKey] = manifest;
