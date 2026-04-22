@@ -14,7 +14,7 @@
     .header-copy{min-width:0}
     header h1{font-size:1.8rem;font-weight:700;margin-bottom:4px}
     header p{font-size:.95rem;color:var(--text-subtle)}
-    .company-logo{width:140px;max-width:32vw;height:auto;object-fit:contain;background:transparent;opacity:1;flex-shrink:0}
+    .company-logo{width:140px;max-width:32vw;height:auto;object-fit:contain;background:transparent;opacity:1;display:block;flex-shrink:0}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:var(--space-4);margin-bottom:var(--space-4);box-shadow:var(--shadow-soft)}
     .card h2{font-size:1.05rem;font-weight:700;color:#1d355d;margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border)}
     .card h3{font-size:.85rem;font-weight:700;color:#3f5680;margin:20px 0 10px;text-transform:uppercase;letter-spacing:.05em}
@@ -133,8 +133,11 @@
   </div>
   <img
     class="company-logo"
-    src="./company-logo.svg"
+    src="./company-logo.png"
     alt="Company logo"
+    loading="eager"
+    decoding="async"
+    onerror="if (this.dataset.fallbackApplied) return; this.dataset.fallbackApplied='true'; this.src='./company-logo.svg';"
   />
 </header>
 
