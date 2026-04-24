@@ -60,6 +60,8 @@
     .btn-muted:hover{background:#f9fafb}
     .btn-delete{background:#fff;color:#b42318;border:1px solid #fecdca}
     .btn-delete:hover{background:#fef3f2}
+    .btn-archive{background:#fff;color:#7a4b00;border:1px solid #f8d39a}
+    .btn-archive:hover{background:#fffaeb}
     .events-toolbar{position:sticky;top:12px;z-index:20;display:flex;gap:var(--space-2);align-items:center;flex-wrap:wrap;margin:0 0 18px;padding:12px;background:rgba(255,255,255,.92);border:1px solid var(--border);border-radius:14px;backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(15,23,42,.08)}
     .segmented-tabs{display:inline-flex;align-items:center;padding:3px;background:#eef3ff;border-radius:999px;gap:3px;flex-wrap:wrap}
     .filter-tab{padding:8px 13px;border:1px solid transparent;border-radius:999px;background:transparent;color:#38527b;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .15s ease}
@@ -194,6 +196,7 @@
       <button class="filter-tab" data-filter="wake" type="button" role="tab" aria-selected="false">Wakes</button>
       <button class="filter-tab" data-filter="party" type="button" role="tab" aria-selected="false">Parties</button>
       <button class="filter-tab" data-filter="baby-shower" type="button" role="tab" aria-selected="false">Baby Showers</button>
+      <button class="filter-tab" data-filter="archived" type="button" role="tab" aria-selected="false">Archived</button>
     </div>
     <div class="search-wrap">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -571,6 +574,7 @@
         runner:      document.getElementById('f-runner').value.trim(),
         hiddenTasks: [],
         customTasks: tasks,
+        archivedAt: null,
         createdAt:   new Date().toISOString()
       };
       if (shouldShowPackageForType(eventType) && pkg) eventData.package = pkg;
@@ -599,7 +603,10 @@
     var q = document.getElementById('search-input').value.toLowerCase();
     return allEvents.filter(function(ev) {
       var passesSearch = (ev.displayName + ' ' + ev.coupleOrHost + ' ' + (ev.date || '')).toLowerCase().includes(q);
-      var passesType = activeTypeFilter === 'all' || normalizeEventType(ev.eventType) === activeTypeFilter;
+      var isArchived = !!ev.archivedAt;
+      var passesType = activeTypeFilter === 'archived'
+        ? isArchived
+        : !isArchived && (activeTypeFilter === 'all' || normalizeEventType(ev.eventType) === activeTypeFilter);
       return passesSearch && passesType;
     });
   }
@@ -640,7 +647,8 @@
       coupleOrHost: data.coupleOrHost || fallbackName,
       package:      data.package || inferredPackage || '',
       hiddenTasks:  Array.isArray(data.hiddenTasks) ? data.hiddenTasks : [],
-      customTasks:  Array.isArray(data.customTasks) ? data.customTasks : []
+      customTasks:  Array.isArray(data.customTasks) ? data.customTasks : [],
+      archivedAt:   data.archivedAt || null
     });
   }
 
@@ -711,6 +719,15 @@
       manageBtn.textContent = '\u{1F441} Tasks';
       manageBtn.addEventListener('click', (function(e) { return function() { openManageTasks(e); }; })(ev));
       secondaryDiv.appendChild(manageBtn);
+
+      var archiveBtn = document.createElement('button');
+      archiveBtn.className = 'btn-archive';
+      archiveBtn.textContent = ev.archivedAt ? 'Unarchive' : 'Archive';
+      archiveBtn.addEventListener('click', (function(eventDocId, isArchived, btn) {
+        return function() { toggleArchiveEvent(eventDocId, isArchived, btn); };
+      })(ev.id, !!ev.archivedAt, archiveBtn));
+      secondaryDiv.appendChild(archiveBtn);
+
       var delBtn = document.createElement('button');
       delBtn.className = 'btn-delete';
       delBtn.textContent = 'Delete';
@@ -772,6 +789,20 @@
     btn.disabled = true;
     try { await db.collection('events').doc(eventId).delete(); }
     catch(e) { alert('Error: ' + e.message); btn.disabled = false; }
+  }
+
+  async function toggleArchiveEvent(eventId, currentlyArchived, btn) {
+    var action = currentlyArchived ? 'unarchive' : 'archive';
+    if (!confirm('Are you sure you want to ' + action + ' this event?')) return;
+    btn.disabled = true;
+    try {
+      await db.collection('events').doc(eventId).update({
+        archivedAt: currentlyArchived ? null : new Date().toISOString()
+      });
+    } catch (e) {
+      alert('Error: ' + e.message);
+      btn.disabled = false;
+    }
   }
 
   // ── Edit Tasks Modal ───────────────────────────────────────────────────────
