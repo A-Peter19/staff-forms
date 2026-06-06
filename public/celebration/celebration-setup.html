@@ -230,10 +230,10 @@ button:hover { transform: translateY(-1px); }
   </div>
   <div class="meta-field">
     <label>Day of Week</label>
-    <select id="meta-day">
+    <select id="meta-day" disabled>
       <option value="">Select...</option>
       <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
-      <option>Thursday</option><option>Friday</option><option>Saturday</option>
+      <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
     </select>
   </div>
   <div class="meta-field">
@@ -666,6 +666,7 @@ if (!EVENT_ID) {
       sub.textContent = (ev.couple || ev.name || '') + (dateFmt ? ' - ' + dateFmt : '') + (ev.guests ? ' - ' + ev.guests + ' guests' : '');
     }
     var gf = document.getElementById('meta-guests'); if (gf && ev.guests) gf.value = ev.guests;
+    var df = document.getElementById('meta-day'); if (df && ev.date) df.value = new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB', {weekday:'long'});
     var bf = document.getElementById('meta-bar'); if (bf && ev.barTime) bf.value = ev.barTime;
     updateProgress();
     var saved = ev[FORM_KEY];
