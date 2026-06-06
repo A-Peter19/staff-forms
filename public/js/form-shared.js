@@ -62,6 +62,43 @@
     });
   }
 
+  function setFieldValue(field, value) {
+    if (!field || value === undefined || value === null || value === '') return;
+    var textValue = String(value);
+    if (field.tagName && field.tagName.toLowerCase() === 'select') {
+      var hasOption = Array.from(field.options || []).some(function (option) { return option.value === textValue; });
+      if (!hasOption) {
+        var option = document.createElement('option');
+        option.value = textValue;
+        option.textContent = textValue;
+        field.appendChild(option);
+      }
+    }
+    field.value = textValue;
+  }
+
+  function formatGuestCount(guests) {
+    if (guests === undefined || guests === null || guests === '') return '';
+    var count = Number(guests);
+    var guestText = Number.isFinite(count) ? String(count) : String(guests);
+    return guestText + ' guest' + (guestText === '1' ? '' : 's');
+  }
+
+  function applyEventSummary(ev) {
+    if (!ev) return;
+    var headerSub = document.getElementById('header-sub') || document.querySelector('header p');
+    var title = ev.displayName || ev.coupleOrHost || ev.couple || ev.host || ev.name || '';
+    if (headerSub && title) {
+      var dateFmt = ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+      var parts = [title];
+      if (dateFmt) parts.push(dateFmt);
+      var guestText = formatGuestCount(ev.guests);
+      if (guestText) parts.push(guestText);
+      headerSub.textContent = parts.join('  ·  ');
+    }
+    setFieldValue(document.getElementById('meta-guests'), ev.guests);
+  }
+
   function loadEventMetaAndApplyHiddenTasks(formKey) {
     assignMissingTaskIds(formKey);
     var eventId = getEventId();
@@ -83,11 +120,7 @@
         if (el) el.style.display = 'none';
       });
 
-      var headerSub = document.getElementById('header-sub');
-      if (headerSub && ev.couple) {
-        var dateFmt = ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
-        headerSub.textContent = ev.couple + '  ·  ' + dateFmt + (ev.guests ? ('  ·  ' + ev.guests + ' guests') : '');
-      }
+      applyEventSummary(ev);
 
       if (ev[formKey]) {
         if (ev[formKey].teamLeader && document.getElementById('team-leader')) {
