@@ -226,11 +226,7 @@ button:hover { transform: translateY(-1px); }
 <div class="event-meta">
   <div class="meta-field">
     <label>Guest Count</label>
-    <select id="meta-guests">
-      <option value="">Select...</option>
-      <option>Up to 120 seated</option>
-      <option>Up to 220 standing</option>
-    </select>
+    <input type="number" id="meta-guests" placeholder="e.g. 100" min="1" max="220" readonly/>
   </div>
   <div class="meta-field">
     <label>Day of Week</label>
