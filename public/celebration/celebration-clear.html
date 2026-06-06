@@ -473,6 +473,9 @@ function injectCustomTasks(formKey, eventMeta) { return StaffFormSync.injectCust
 function loadRealtimeChecklist(formKey) { return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY); }
 function saveRealtimeChecklist(formKey) { return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY); }
 function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
+function loadRealtimeSectionNotes(formKey) { return StaffFormSync.loadRealtimeSectionNotes(formKey || FORM_KEY); }
+function saveRealtimeSectionNotes(formKey) { return StaffFormSync.saveRealtimeSectionNotes(formKey || FORM_KEY); }
+function bindRealtimeSectionNotesSync(formKey) { return StaffFormSync.bindRealtimeSectionNotesSync(formKey || FORM_KEY); }
 function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
 function bindRealtimeCheckboxSync(formKey, onCheckboxChanged) { return StaffFormSync.bindRealtimeCheckboxSync(formKey || FORM_KEY, onCheckboxChanged); }
 
@@ -545,6 +548,7 @@ async function saveForm() {
   btn.textContent = 'Saving...';
   try {
     await saveStaffSection(FORM_KEY);
+    await saveRealtimeSectionNotes(FORM_KEY);
     await db.collection('events').doc(EVENT_ID).set({
       [FORM_KEY]: { savedAt: new Date().toISOString() }
     }, { merge: true });
@@ -581,6 +585,8 @@ bindCheckboxMeta();
 loadEventMetaAndApplyHiddenTasks().then(function(ev) {
   injectCustomTasks(FORM_KEY, ev);
   loadRealtimeChecklist(FORM_KEY);
+  loadRealtimeSectionNotes(FORM_KEY);
+  bindRealtimeSectionNotesSync(FORM_KEY);
 });
 addStaffMember();
 </script>
