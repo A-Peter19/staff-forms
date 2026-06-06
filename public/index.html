@@ -543,6 +543,19 @@
   syncPackageVisibility();
 
   // ── Create event ───────────────────────────────────────────────────────────
+
+  function parseEventDate(dateString) {
+    if (!dateString || typeof dateString !== 'string') return null;
+    var parts = dateString.split('-').map(function(part) { return Number(part); });
+    if (parts.length !== 3 || parts.some(function(part) { return !Number.isFinite(part); })) return null;
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+
+  function getDayOfWeek(dateString) {
+    var date = parseEventDate(dateString);
+    return date ? date.toLocaleDateString('en-GB', { weekday: 'long' }) : '';
+  }
+
   function makeEventId(eventType, couple, date) {
     return (normalizeEventType(eventType) + '-' + couple + '-' + date).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   }
@@ -568,6 +581,7 @@
         displayName: couple,
         eventType:   eventType,
         date:        date,
+        dayOfWeek:   getDayOfWeek(date),
         guests:      parseInt(document.getElementById('f-guests').value) || 0,
         packagePrice: parseFloat(document.getElementById('f-package-price').value) || 0,
         sash:        document.getElementById('f-sash').value.trim(),

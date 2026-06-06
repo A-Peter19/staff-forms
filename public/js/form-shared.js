@@ -84,12 +84,34 @@
     return guestText + ' guest' + (guestText === '1' ? '' : 's');
   }
 
+  function parseLocalDate(dateString) {
+    if (!dateString || typeof dateString !== 'string') return null;
+    var parts = dateString.split('-').map(function (part) { return Number(part); });
+    if (parts.length !== 3 || parts.some(function (part) { return !Number.isFinite(part); })) return null;
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+
+  function formatEventDate(dateString) {
+    var date = parseLocalDate(dateString);
+    return date ? date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+  }
+
+  function formatEventDay(dateString) {
+    var date = parseLocalDate(dateString);
+    return date ? date.toLocaleDateString('en-GB', { weekday: 'long' }) : '';
+  }
+
+  function readEventDay(ev) {
+    if (!ev) return '';
+    return formatEventDay(ev.date) || ev.dayOfWeek || ev.day || '';
+  }
+
   function applyEventSummary(ev) {
     if (!ev) return;
     var headerSub = document.getElementById('header-sub') || document.querySelector('header p');
     var title = ev.displayName || ev.coupleOrHost || ev.couple || ev.host || ev.name || '';
     if (headerSub && title) {
-      var dateFmt = ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+      var dateFmt = formatEventDate(ev.date);
       var parts = [title];
       if (dateFmt) parts.push(dateFmt);
       var guestText = formatGuestCount(ev.guests);
@@ -97,6 +119,7 @@
       headerSub.textContent = parts.join('  ·  ');
     }
     setFieldValue(document.getElementById('meta-guests'), ev.guests);
+    setFieldValue(document.getElementById('meta-day'), readEventDay(ev));
   }
 
   function loadEventMetaAndApplyHiddenTasks(formKey) {
