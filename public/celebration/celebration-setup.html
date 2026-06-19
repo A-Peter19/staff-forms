@@ -667,10 +667,14 @@ if (!EVENT_ID) {
     }
     var gf = document.getElementById('meta-guests'); if (gf && ev.guests) gf.value = ev.guests;
     var df = document.getElementById('meta-day'); if (df && ev.date) df.value = new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB', {weekday:'long'});
+    var af = document.getElementById('meta-access'); if (af && ev.accessTime) af.value = ev.accessTime;
     var bf = document.getElementById('meta-bar'); if (bf && ev.barTime) bf.value = ev.barTime;
     updateProgress();
     var saved = ev[FORM_KEY];
     if (saved) {
+      if (saved.accessTime) document.getElementById('meta-access').value = saved.accessTime;
+      if (saved.barTime) document.getElementById('meta-bar').value = saved.barTime;
+      if (saved.tableStyle) document.getElementById('meta-tables').value = saved.tableStyle;
       if (saved.teamLeader) document.getElementById('team-leader').value = saved.teamLeader;
       document.getElementById('staff-list').innerHTML = '';
       (saved.staffMembers || []).forEach(function(n) { addStaffMember(n); });
@@ -753,6 +757,9 @@ async function saveForm() {
   });
   var data = {};
   data[FORM_KEY] = {
+    accessTime: document.getElementById('meta-access').value,
+    barTime: document.getElementById('meta-bar').value,
+    tableStyle: document.getElementById('meta-tables').value,
     teamLeader: document.getElementById('team-leader').value,
     staffMembers: Array.from(document.querySelectorAll('.staff-input')).map(i => i.value),
     checkboxes: checkboxes,

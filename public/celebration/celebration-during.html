@@ -579,9 +579,11 @@ if (!EVENT_ID) {
     }
     var gf = document.getElementById('meta-guests'); if (gf && ev.guests) gf.value = ev.guests;
     var df = document.getElementById('meta-day'); if (df && ev.date) df.value = new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB', {weekday:'long'});
+    var bf = document.getElementById('meta-bar'); if (bf && ev.barTime) bf.value = ev.barTime;
     updateProgress();
     var saved = ev[FORM_KEY];
     if (saved) {
+      if (saved.barTime) document.getElementById('meta-bar').value = saved.barTime;
       if (saved.teamLeader) document.getElementById('team-leader').value = saved.teamLeader;
       document.getElementById('staff-list').innerHTML = '';
       (saved.staffMembers || []).forEach(function(n) { addStaffMember(n); });
@@ -679,6 +681,7 @@ async function saveForm() {
   });
   var data = {};
   data[FORM_KEY] = {
+    barTime: document.getElementById('meta-bar').value,
     teamLeader: document.getElementById('team-leader').value,
     staffMembers: Array.from(document.querySelectorAll('.staff-input')).map(i => i.value),
     checkboxes, initialsData, savedAt: new Date().toISOString()
