@@ -414,3 +414,100 @@
     bindRealtimeCheckboxSync: bindRealtimeCheckboxSync
   };
 })(window);
+
+// Feast setup only: keep the event's hall access time separate from checklist state.
+(function (global) {
+  if (!global.location || !/\/feast\/feast-flourish-setup\.html$/.test(global.location.pathname)) return;
+
+  function initFeastHallAccessTime() {
+    var row = document.querySelector('.checklist-item[data-section="s1"]');
+    var label = row && row.querySelector('.item-label');
+    if (!label || document.getElementById('feast-hall-access-time')) return;
+    var section = row.closest('.section');
+    var heading = section && section.querySelector('.section-header h2');
+    if (heading) heading.textContent = '1 · Hall Access';
+
+    label.textContent = 'Main Hall unlocked and accessible from ';
+    var field = document.createElement('input');
+    field.type = 'time';
+    field.id = 'feast-hall-access-time';
+    field.value = '13:00';
+    field.required = true;
+    field.disabled = true;
+    field.setAttribute('aria-label', 'Main Hall access time for this event');
+    field.setAttribute('aria-describedby', 'feast-hall-access-status');
+    field.style.cssText = 'margin-left:6px;padding:6px 8px;border:1px solid #dbe3ee;border-radius:8px;font:inherit;background:#fbfcff;color:#1f2937;';
+    label.appendChild(field);
+
+    var status = document.createElement('div');
+    status.id = 'feast-hall-access-status';
+    status.className = 'item-note';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    label.parentNode.appendChild(status);
+    var retry = document.createElement('button');
+    retry.type = 'button';
+    retry.textContent = 'Retry access time';
+    retry.hidden = true;
+    label.parentNode.appendChild(retry);
+
+    var eventId = global.StaffFormSync.getEventId();
+    if (!eventId || !global.db || !global.db.collection) {
+      status.textContent = 'Open an event from the dashboard to edit its access time.';
+      return;
+    }
+    var ref = global.db.collection('events').doc(eventId);
+    var loaded = false;
+    function validTime(value) { return typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value); }
+
+    function load() {
+      field.disabled = true;
+      retry.hidden = true;
+      status.textContent = 'Loading access time...';
+      return ref.get().then(function (snapshot) {
+        if (!snapshot.exists) {
+          status.textContent = 'Event not found. Open an existing event from the dashboard.';
+          return;
+        }
+        var saved = snapshot.data().feastSetupHallAccessTime;
+        field.value = validTime(saved) ? saved : '13:00';
+        loaded = true;
+        field.disabled = false;
+        status.textContent = 'Changes save automatically for this event.';
+      }).catch(function () {
+        status.textContent = 'Could not load access time. Retry before editing.';
+        retry.hidden = false;
+      });
+    }
+
+    function save() {
+      if (!loaded || field.disabled) return;
+      if (!validTime(field.value)) {
+        status.textContent = 'Enter a valid access time.';
+        field.reportValidity();
+        return;
+      }
+      field.disabled = true;
+      retry.hidden = true;
+      status.textContent = 'Saving access time...';
+      return ref.update({ feastSetupHallAccessTime: field.value }).then(function () {
+        field.disabled = false;
+        status.textContent = 'Access time saved for this event.';
+      }).catch(function () {
+        field.disabled = false;
+        status.textContent = 'Access time not saved. Retry to save your change.';
+        retry.hidden = false;
+      });
+    }
+
+    field.addEventListener('change', save);
+    retry.addEventListener('click', function () { return loaded ? save() : load(); });
+    load();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFeastHallAccessTime);
+  } else {
+    initFeastHallAccessTime();
+  }
+})(window);
