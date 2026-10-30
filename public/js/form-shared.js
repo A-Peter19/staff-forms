@@ -511,3 +511,98 @@
     initFeastHallAccessTime();
   }
 })(window);
+
+// Feast setup only: keep the event's catering access time separate from checklist state.
+(function (global) {
+  if (!global.location || !/\/feast\/feast-flourish-setup\.html$/.test(global.location.pathname)) return;
+
+  function initFeastCateringAccessTime() {
+    var rows = document.querySelectorAll('.checklist-item[data-section="s1"]');
+    var row = rows[1];
+    var label = row && row.querySelector('.item-label');
+    if (!label || document.getElementById('feast-catering-access-time')) return;
+
+    label.textContent = 'Catering partner access confirmed from ';
+    var field = document.createElement('input');
+    field.type = 'time';
+    field.id = 'feast-catering-access-time';
+    field.value = '12:00';
+    field.required = true;
+    field.disabled = true;
+    field.setAttribute('aria-label', 'Catering partner access time for this event');
+    field.setAttribute('aria-describedby', 'feast-catering-access-status');
+    field.style.cssText = 'margin-left:6px;padding:6px 8px;border:1px solid #dbe3ee;border-radius:8px;font:inherit;background:#fbfcff;color:#1f2937;';
+    label.appendChild(field);
+
+    var status = document.createElement('div');
+    status.id = 'feast-catering-access-status';
+    status.className = 'item-note';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    label.parentNode.appendChild(status);
+    var retry = document.createElement('button');
+    retry.type = 'button';
+    retry.textContent = 'Retry catering access time';
+    retry.hidden = true;
+    label.parentNode.appendChild(retry);
+
+    var eventId = global.StaffFormSync.getEventId();
+    if (!eventId || !global.db || !global.db.collection) {
+      status.textContent = 'Open an event from the dashboard to edit its catering access time.';
+      return;
+    }
+    var ref = global.db.collection('events').doc(eventId);
+    var loaded = false;
+    function validTime(value) { return typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(value); }
+
+    function load() {
+      field.disabled = true;
+      retry.hidden = true;
+      status.textContent = 'Loading catering access time...';
+      return ref.get().then(function (snapshot) {
+        if (!snapshot.exists) {
+          status.textContent = 'Event not found. Open an existing event from the dashboard.';
+          return;
+        }
+        var saved = snapshot.data().feastSetupCateringAccessTime;
+        field.value = validTime(saved) ? saved : '12:00';
+        loaded = true;
+        field.disabled = false;
+        status.textContent = 'Changes save automatically for this event.';
+      }).catch(function () {
+        status.textContent = 'Could not load catering access time. Retry before editing.';
+        retry.hidden = false;
+      });
+    }
+
+    function save() {
+      if (!loaded || field.disabled) return;
+      if (!validTime(field.value)) {
+        status.textContent = 'Enter a valid catering access time.';
+        field.reportValidity();
+        return;
+      }
+      field.disabled = true;
+      retry.hidden = true;
+      status.textContent = 'Saving catering access time...';
+      return ref.update({ feastSetupCateringAccessTime: field.value }).then(function () {
+        field.disabled = false;
+        status.textContent = 'Catering access time saved for this event.';
+      }).catch(function () {
+        field.disabled = false;
+        status.textContent = 'Catering access time not saved. Retry to save your change.';
+        retry.hidden = false;
+      });
+    }
+
+    field.addEventListener('change', save);
+    retry.addEventListener('click', function () { return loaded ? save() : load(); });
+    load();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFeastCateringAccessTime);
+  } else {
+    initFeastCateringAccessTime();
+  }
+})(window);
