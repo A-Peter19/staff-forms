@@ -594,7 +594,7 @@
       await db.collection('events').doc(eventId).set(eventData);
       status.className = 'success';
       status.textContent = 'Event created: ' + couple + ' (' + date + ')' + (tasks.length ? ' with ' + tasks.length + ' custom task(s)' : '');
-      ['f-couple','f-date','f-event-type','f-package','f-party-type','f-guests','f-package-price','f-sash','f-runner'].forEach(function(id) {
+      ['f-couple','f-date','f-event-type','f-package','f-party-type','f-guests','f-sash','f-runner'].forEach(function(id) {
         document.getElementById(id).value = '';
       });
       document.getElementById('f-event-type').value = 'wedding';
