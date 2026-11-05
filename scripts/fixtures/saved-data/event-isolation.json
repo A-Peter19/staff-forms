@@ -1,0 +1,60 @@
+{
+  "firestore": {
+    "events": {
+      "fixture-isolation-a": {
+        "couple": "Synthetic Fixture Event",
+        "eventType": "wedding",
+        "date": "2030-06-01",
+        "guests": 80,
+        "hiddenTasks": [],
+        "customTasks": [],
+        "package": "flourish",
+        "setup": {
+          "teamLeader": "Fixture A Lead",
+          "staffMembers": [
+            "Fixture A Staff"
+          ],
+          "savedAt": "2026-01-01T12:00:00.000Z"
+        }
+      },
+      "fixture-isolation-b": {
+        "couple": "Synthetic Fixture Event",
+        "eventType": "wedding",
+        "date": "2030-06-01",
+        "guests": 80,
+        "hiddenTasks": [],
+        "customTasks": [],
+        "package": "flourish",
+        "setup": {
+          "teamLeader": "Fixture B Lead",
+          "staffMembers": [
+            "Fixture B Staff"
+          ],
+          "savedAt": "2026-01-01T12:00:00.000Z"
+        }
+      }
+    }
+  },
+  "realtimeDatabase": {
+    "events": {
+      "fixture-isolation-a": {
+        "setup": {
+          "wedding_setup_s1_0": {
+            "checked": true,
+            "initials": "AA",
+            "time": "12:34"
+          }
+        }
+      },
+      "fixture-isolation-b": {
+        "setup": {
+          "wedding_setup_s1_0": {
+            "checked": true,
+            "initials": "BB",
+            "time": "12:34"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "firestore": {
+    "events": {
+      "fixture-wake-overwritten": {
+        "couple": "Synthetic Fixture Event",
+        "eventType": "wake",
+        "date": "2030-06-01",
+        "guests": 80,
+        "hiddenTasks": [],
+        "customTasks": []
+      }
+    }
+  },
+  "realtimeDatabase": {
+    "events": {
+      "fixture-wake-overwritten": {
+        "during": {
+          "during_s0_0": {
+            "checked": true,
+            "initials": "WO",
+            "time": "12:34"
+          }
+        }
+      }
+    }
+  }
+}

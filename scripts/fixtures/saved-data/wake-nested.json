@@ -1,0 +1,54 @@
+{
+  "firestore": {
+    "events": {
+      "fixture-wake": {
+        "couple": "Synthetic Fixture Event",
+        "eventType": "wake",
+        "date": "2030-06-01",
+        "guests": 80,
+        "hiddenTasks": [],
+        "customTasks": []
+      }
+    }
+  },
+  "realtimeDatabase": {
+    "events": {
+      "fixture-wake": {
+        "setup": {
+          "guests": 80,
+          "tasks": {
+            "hall-buffet-1": {
+              "checked": true,
+              "initials": "WS",
+              "time": "12:34"
+            }
+          },
+          "timestamp": "2026-01-01T12:00:00.000Z"
+        },
+        "during": {
+          "guests": 80,
+          "tasks": {
+            "bar-bar-1": true,
+            "event-event-1": true
+          },
+          "teamLeader": "Fixture During Lead",
+          "staffNames": [
+            "Fixture During Staff"
+          ],
+          "timestamp": "2026-01-01T13:00:00.000Z"
+        },
+        "clearup": {
+          "guests": 80,
+          "tasks": {
+            "bar-bar-1": true
+          },
+          "teamLeader": "Fixture Clear Lead",
+          "staffNames": [
+            "Fixture Clear Staff"
+          ],
+          "timestamp": "2026-01-01T14:00:00.000Z"
+        }
+      }
+    }
+  }
+}

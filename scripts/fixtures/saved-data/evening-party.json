@@ -1,0 +1,39 @@
+{
+  "firestore": {
+    "events": {
+      "fixture-evening-party": {
+        "couple": "Synthetic Fixture Event",
+        "eventType": "party",
+        "date": "2030-06-01",
+        "guests": "80",
+        "hiddenTasks": [],
+        "customTasks": [],
+        "partyType": "evening-party",
+        "accessTime": "15:00",
+        "barTime": "18:00",
+        "tableStyle": "Round",
+        "day": "Saturday",
+        "setup": {
+          "teamLeader": "Fixture Setup Lead",
+          "staffMembers": [
+            "Fixture Setup Staff"
+          ],
+          "savedAt": "2026-01-01T12:00:00.000Z"
+        }
+      }
+    }
+  },
+  "realtimeDatabase": {
+    "events": {
+      "fixture-evening-party": {
+        "setup": {
+          "party_setup_s1_0": {
+            "checked": true,
+            "initials": "FX",
+            "time": "12:34"
+          }
+        }
+      }
+    }
+  }
+}

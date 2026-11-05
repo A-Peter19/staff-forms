@@ -1,0 +1,76 @@
+{
+  "firestore": {
+    "events": {
+      "fixture-twilight": {
+        "couple": "Synthetic Fixture Event",
+        "eventType": "wedding",
+        "date": "2030-06-01",
+        "guests": 80,
+        "hiddenTasks": [],
+        "customTasks": [],
+        "package": "twilight",
+        "setup": {
+          "teamLeader": "Fixture Setup Lead",
+          "staffMembers": [
+            "Fixture Setup Staff"
+          ],
+          "savedAt": "2026-01-01T12:00:00.000Z"
+        },
+        "during": {
+          "teamLeader": "Fixture During Lead",
+          "staffMembers": [
+            "Fixture During Staff"
+          ],
+          "savedAt": "2026-01-01T12:00:00.000Z",
+          "barOpen": "18:30",
+          "barClose": "23:15",
+          "sectionNotes": {
+            "ta_0": "Synthetic service note",
+            "ta_1": ""
+          },
+          "finalNotes": "Synthetic final handover"
+        },
+        "clearup": {
+          "teamLeader": "Fixture Clear Lead",
+          "staffMembers": [
+            "Fixture Clear Staff"
+          ],
+          "savedAt": "2026-01-01T12:00:00.000Z",
+          "finalNotes": "Synthetic close-down"
+        }
+      }
+    }
+  },
+  "realtimeDatabase": {
+    "events": {
+      "fixture-twilight": {
+        "setup": {
+          "cb_0": {
+            "checked": true,
+            "initials": "TS",
+            "time": "12:34"
+          }
+        },
+        "during": {
+          "cb_0": {
+            "checked": true,
+            "initials": "TD",
+            "time": "12:34"
+          },
+          "cb_2": {
+            "checked": true,
+            "initials": "TE",
+            "time": "12:34"
+          }
+        },
+        "clearup": {
+          "cb_0": {
+            "checked": true,
+            "initials": "TC",
+            "time": "12:34"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,307 @@
+{
+  "fixtureVersion": 1,
+  "synthetic": true,
+  "sourceRevision": "4f5823563c6fd2beecf80196690eeaa9a2a48539",
+  "cases": [
+    {
+      "id": "celebration",
+      "file": "celebration.json",
+      "description": "Three-stage party data with stage-specific staff, notes and a legacy random custom-task key.",
+      "sourceFiles": [
+        "public/js/form-shared.js",
+        "public/celebration/celebration-setup.html"
+      ],
+      "coverage": [
+        "celebration",
+        "stage-isolation",
+        "notes",
+        "random-custom-id",
+        "hidden-task",
+        "legacy-firestore-checkboxes"
+      ],
+      "sharedModuleChecks": [
+        {
+          "eventId": "fixture-celebration",
+          "stage": "setup",
+          "taskIds": [
+            "party_setup_s1_0",
+            "party_setup_s1_1"
+          ]
+        },
+        {
+          "eventId": "fixture-celebration",
+          "stage": "during",
+          "taskIds": [
+            "party_during_s1_0",
+            "party_during_s1_1"
+          ]
+        },
+        {
+          "eventId": "fixture-celebration",
+          "stage": "clearup",
+          "taskIds": [
+            "party_clearup_s1_0",
+            "party_clearup_s1_1"
+          ]
+        }
+      ],
+      "migrationRequirements": [
+        "Keep staff and notes separate by stage.",
+        "Do not associate a random custom-task key with a label without evidence.",
+        "The old Firestore checkbox backup disagrees with RTDB; do not silently choose a winner."
+      ]
+    },
+    {
+      "id": "evening-party",
+      "file": "evening-party.json",
+      "description": "Event-wide header values and a string guest count written by manual Save.",
+      "sourceFiles": [
+        "public/evening-party/evening-party-setup.html",
+        "public/js/form-shared.js"
+      ],
+      "coverage": [
+        "evening-party",
+        "shared-event-fields",
+        "string-guest-count"
+      ],
+      "sharedModuleChecks": [
+        {
+          "eventId": "fixture-evening-party",
+          "stage": "setup",
+          "taskIds": [
+            "party_setup_s1_0",
+            "party_setup_s1_1"
+          ]
+        }
+      ],
+      "migrationRequirements": [
+        "Preserve shared times and safely normalize numeric strings."
+      ]
+    },
+    {
+      "id": "feast",
+      "file": "feast.json",
+      "description": "Separate hall-access field and shared task map; absent quantity data was never saved.",
+      "sourceFiles": [
+        "public/js/form-shared.js",
+        "public/feast/feast-flourish-setup.html"
+      ],
+      "coverage": [
+        "feast",
+        "hall-access",
+        "missing-optional-fields"
+      ],
+      "sharedModuleChecks": [
+        {
+          "eventId": "fixture-feast",
+          "stage": "setup",
+          "taskIds": [
+            "wedding_setup_s1_0",
+            "wedding_setup_s1_1"
+          ]
+        }
+      ],
+      "migrationRequirements": [
+        "Retain feastSetupHallAccessTime when introducing a common access-time field.",
+        "Missing values are unknown; do not invent previous quantities."
+      ]
+    },
+    {
+      "id": "flourish",
+      "file": "flourish.json",
+      "description": "Saved notes and string-valued item quantities, including zero and multiple fields per row.",
+      "sourceFiles": [
+        "public/js/form-shared.js",
+        "public/flourish/flourish-setup.html"
+      ],
+      "coverage": [
+        "flourish",
+        "quantities",
+        "zero-value",
+        "multi-field-task"
+      ],
+      "sharedModuleChecks": [
+        {
+          "eventId": "fixture-flourish",
+          "stage": "setup",
+          "taskIds": [
+            "wedding_setup_s3_0",
+            "wedding_setup_s3_1"
+          ]
+        }
+      ],
+      "migrationRequirements": [
+        "Preserve zero quantities and all field suffixes.",
+        "Task prefixes may have been cached before metadata arrived; reconcile aliases before rewriting keys."
+      ]
+    },
+    {
+      "id": "foundation",
+      "file": "foundation.json",
+      "description": "Unprefixed shared task keys plus the manually saved Firestore checkbox backup.",
+      "sourceFiles": [
+        "public/foundation/foundation-during.html",
+        "public/js/form-shared.js"
+      ],
+      "coverage": [
+        "foundation",
+        "unprefixed-task-id",
+        "legacy-firestore-checkboxes"
+      ],
+      "sharedModuleChecks": [
+        {
+          "eventId": "fixture-foundation",
+          "stage": "during",
+          "taskIds": [
+            "during_s1_0",
+            "during_s1_1"
+          ]
+        }
+      ],
+      "migrationRequirements": [
+        "Map unprefixed and event-type-prefixed task identities without losing completion."
+      ]
+    },
+    {
+      "id": "twilight",
+      "file": "twilight.json",
+      "description": "Positional RTDB checkbox IDs and manually saved notes/bar times.",
+      "sourceFiles": [
+        "public/twilight/twilight-setup.html",
+        "public/twilight/twilight-during.html",
+        "public/twilight/twilight-clearup.html"
+      ],
+      "coverage": [
+        "twilight",
+        "positional-task-id",
+        "positional-note-id",
+        "final-notes",
+        "stage-isolation"
+      ],
+      "sharedModuleChecks": [],
+      "migrationRequirements": [
+        "Resolve cb_i and ta_i against the original page/task order, including inserted custom tasks.",
+        "Do not mistake a blank saved note for missing data."
+      ]
+    },
+    {
+      "id": "wake-nested",
+      "file": "wake-nested.json",
+      "description": "Wake setup stores task objects; during/clear-up store booleans inside a nested tasks map.",
+      "sourceFiles": [
+        "public/wake-setup.html",
+        "public/wake-during.html",
+        "public/wake-clear.html"
+      ],
+      "coverage": [
+        "wake",
+        "nested-task-objects",
+        "nested-task-booleans",
+        "stage-isolation"
+      ],
+      "sharedModuleChecks": [],
+      "migrationRequirements": [
+        "Boolean tasks contain no completion actor/time: do not fabricate them.",
+        "Nested data needs a compatibility adapter; it is not a shared flat task map."
+      ]
+    },
+    {
+      "id": "wake-overwritten",
+      "file": "wake-overwritten.json",
+      "description": "Synthetic state after the flat shared writer replaced the Wake stage object.",
+      "sourceFiles": [
+        "public/wake-during.html",
+        "public/js/form-shared.js"
+      ],
+      "coverage": [
+        "wake",
+        "overwritten-wake-data",
+        "missing-optional-fields"
+      ],
+      "sharedModuleChecks": [
+        {
+          "eventId": "fixture-wake-overwritten",
+          "stage": "during",
+          "taskIds": [
+            "during_s0_0",
+            "during_s0_1"
+          ]
+        }
+      ],
+      "migrationRequirements": [
+        "Missing staffNames/guests cannot be recovered from this snapshot. Preserve remaining completion data."
+      ]
+    },
+    {
+      "id": "event-isolation",
+      "file": "event-isolation.json",
+      "description": "Identical task IDs in different event IDs must remain independent.",
+      "sourceFiles": [
+        "public/js/form-shared.js"
+      ],
+      "coverage": [
+        "event-isolation"
+      ],
+      "sharedModuleChecks": [
+        {
+          "eventId": "fixture-isolation-a",
+          "stage": "setup",
+          "taskIds": [
+            "wedding_setup_s1_0"
+          ]
+        },
+        {
+          "eventId": "fixture-isolation-b",
+          "stage": "setup",
+          "taskIds": [
+            "wedding_setup_s1_0"
+          ]
+        }
+      ],
+      "migrationRequirements": [
+        "Keep event identity in every lookup and write."
+      ]
+    },
+    {
+      "id": "ambiguous-custom-tasks",
+      "file": "ambiguous-custom-tasks.json",
+      "description": "Duplicate labels and conflicting time aliases require explicit reconciliation.",
+      "sourceFiles": [
+        "public/index.html",
+        "public/js/form-shared.js",
+        "public/celebration/celebration-setup.html"
+      ],
+      "coverage": [
+        "duplicate-custom-label",
+        "conflicting-time-aliases",
+        "random-custom-id"
+      ],
+      "sharedModuleChecks": [],
+      "migrationRequirements": [
+        "Two identical labels do not identify which random completion key belongs to which task.",
+        "Preserve both time values until a conflict policy is defined."
+      ]
+    },
+    {
+      "id": "sparse-and-orphaned",
+      "file": "sparse-and-orphaned.json",
+      "description": "Fresh event, old event with no type, archived event, and RTDB data whose Firestore document is absent.",
+      "sourceFiles": [
+        "public/index.html",
+        "public/js/form-shared.js"
+      ],
+      "coverage": [
+        "empty-event",
+        "legacy-missing-event-type",
+        "archived-event",
+        "orphaned-rtdb"
+      ],
+      "sharedModuleChecks": [],
+      "migrationRequirements": [
+        "Absence of a stage means no saved stage data.",
+        "A missing Firestore document must not be recreated automatically by checklist writes.",
+        "Archived events must retain their saved information."
+      ]
+    }
+  ]
+}
