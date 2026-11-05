@@ -1,0 +1,22 @@
+package,stage,file,tasks,section_notes,item_details,notes_status,quantity_status,staff_status
+celebration,clearup,public/celebration/celebration-clear.html,22,5,2,Realtime,Not saved,Manual
+celebration,during,public/celebration/celebration-during.html,30,6,0,Realtime,Not present,Manual
+celebration,setup,public/celebration/celebration-setup.html,33,6,7,Realtime,Not saved,Manual
+evening-party,clearup,public/evening-party/evening-party-clear.html,34,7,2,Not saved,Not saved,Manual
+evening-party,during,public/evening-party/evening-party-during.html,25,5,0,Not saved,Not present,Manual
+evening-party,setup,public/evening-party/evening-party-setup.html,31,6,7,Not saved,Not saved,Manual
+feast,clearup,public/feast/feast-clearup.html,30,6,1,Not saved,Not saved,Manual
+feast,during,public/feast/feast-during.html,31,7,0,Not saved,Not present,Manual
+feast,setup,public/feast/feast-flourish-setup.html,38,9,9,Not saved,Not saved,Not saved
+flourish,clearup,public/flourish/flourish-clearup.html,45,7,1,Realtime,Realtime,Manual
+flourish,during,public/flourish/flourish-during.html,62,10,0,Realtime,Not present,Manual
+flourish,setup,public/flourish/flourish-setup.html,44,9,10,Realtime,Realtime,Manual
+foundation,clearup,public/foundation/foundation-clearup.html,22,7,1,Not saved,Not saved,Manual
+foundation,during,public/foundation/foundation-during.html,15,5,0,Not saved,Not present,Manual
+foundation,setup,public/foundation/foundation-setup.html,26,6,3,Not saved,Not saved,Not saved
+twilight,clearup,public/twilight/twilight-clearup.html,35,6,0,Not saved,Not present,Manual
+twilight,during,public/twilight/twilight-during.html,32,5,0,Manual,Not present,Manual
+twilight,setup,public/twilight/twilight-setup.html,21,5,2,Not saved,Not saved,Manual
+wake,clearup,public/wake-clear.html,26,0,0,Missing UI,Not present,Conflicting realtime
+wake,during,public/wake-during.html,12,0,0,Missing UI,Not present,Conflicting realtime
+wake,setup,public/wake-setup.html,35,0,0,Missing UI,Not present,Missing UI
