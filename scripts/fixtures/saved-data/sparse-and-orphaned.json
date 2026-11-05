@@ -1,0 +1,42 @@
+{
+  "firestore": {
+    "events": {
+      "fixture-new": {
+        "couple": "Synthetic Fixture Event",
+        "eventType": "wake",
+        "date": "2030-06-01",
+        "guests": 80,
+        "hiddenTasks": [],
+        "customTasks": []
+      },
+      "fixture-legacy": {
+        "couple": "Synthetic Legacy Event",
+        "date": "2030-06-01",
+        "package": "foundation"
+      },
+      "fixture-archived": {
+        "couple": "Synthetic Fixture Event",
+        "eventType": "wedding",
+        "date": "2030-06-01",
+        "guests": 80,
+        "hiddenTasks": [],
+        "customTasks": [],
+        "package": "feast",
+        "archivedAt": "2026-01-02T12:00:00.000Z"
+      }
+    }
+  },
+  "realtimeDatabase": {
+    "events": {
+      "fixture-orphan": {
+        "setup": {
+          "wedding_setup_s1_0": {
+            "checked": true,
+            "initials": "FX",
+            "time": "12:34"
+          }
+        }
+      }
+    }
+  }
+}

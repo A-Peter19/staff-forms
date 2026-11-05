@@ -1,0 +1,45 @@
+{
+  "firestore": {
+    "events": {
+      "fixture-flourish": {
+        "couple": "Synthetic Fixture Event",
+        "eventType": "wedding",
+        "date": "2030-06-01",
+        "guests": 80,
+        "hiddenTasks": [],
+        "customTasks": [],
+        "package": "flourish",
+        "sash": "Synthetic green",
+        "runner": "Synthetic lace",
+        "setup": {
+          "teamLeader": "Fixture Setup Lead",
+          "staffMembers": [
+            "Fixture Setup Staff"
+          ],
+          "savedAt": "2026-01-01T12:00:00.000Z"
+        }
+      }
+    }
+  },
+  "realtimeDatabase": {
+    "events": {
+      "fixture-flourish": {
+        "setup": {
+          "wedding_setup_s3_0": {
+            "checked": true,
+            "initials": "FX",
+            "time": "12:34"
+          }
+        },
+        "setup_notes": {
+          "section_s3": "Synthetic furniture note"
+        },
+        "setup_quantities": {
+          "wedding_setup_s3_0__field_0": "0",
+          "wedding_setup_s5_0__field_0": "6",
+          "wedding_setup_s5_0__field_1": "Fishbowl"
+        }
+      }
+    }
+  }
+}

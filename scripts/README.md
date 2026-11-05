@@ -17,3 +17,9 @@ node --test scripts/realtime-sync-runner.test.js
 These regression tests cover snapshot behaviour, metadata handling, execution from another directory, report creation, failed assertions, read errors and write errors. Failure probes edit disposable copies of the relevant files in a temporary directory.
 
 Passing this baseline does not establish that complete forms, notes, custom tasks, simultaneous/offline edits or live Firebase permissions work. Those require the broader tests and application fixes identified in the audit. Source wiring checks are labelled separately from in-memory behavioural checks in the report.
+
+Synthetic examples of the existing saved-data formats are documented in [fixtures/saved-data](fixtures/saved-data/README.md). Validate their catalog and supported shared-module read/save behaviour with:
+
+```sh
+node --test scripts/saved-data-fixtures.test.js
+```

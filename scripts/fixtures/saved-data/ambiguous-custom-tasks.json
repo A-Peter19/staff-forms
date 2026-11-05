@@ -1,0 +1,48 @@
+{
+  "firestore": {
+    "events": {
+      "fixture-ambiguous": {
+        "couple": "Synthetic Fixture Event",
+        "eventType": "party",
+        "date": "2030-06-01",
+        "guests": 80,
+        "hiddenTasks": [],
+        "customTasks": [
+          {
+            "form": "setup",
+            "section": "s1",
+            "label": "Duplicate synthetic task"
+          },
+          {
+            "form": "setup",
+            "section": "s1",
+            "label": "Duplicate synthetic task"
+          }
+        ],
+        "partyType": "celebration",
+        "barTime": "18:00",
+        "setup": {
+          "barTime": "17:00"
+        }
+      }
+    }
+  },
+  "realtimeDatabase": {
+    "events": {
+      "fixture-ambiguous": {
+        "setup": {
+          "custom_setup_s1_abc123": {
+            "checked": true,
+            "initials": "AA",
+            "time": "12:34"
+          },
+          "custom_setup_s1_def456": {
+            "checked": true,
+            "initials": "BB",
+            "time": "12:34"
+          }
+        }
+      }
+    }
+  }
+}

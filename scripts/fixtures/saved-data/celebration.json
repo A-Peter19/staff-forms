@@ -1,0 +1,91 @@
+{
+  "firestore": {
+    "events": {
+      "fixture-celebration": {
+        "couple": "Synthetic Fixture Event",
+        "eventType": "party",
+        "date": "2030-06-01",
+        "guests": 80,
+        "hiddenTasks": [
+          "party_setup_s1_1"
+        ],
+        "customTasks": [
+          {
+            "form": "setup",
+            "section": "s1",
+            "label": "Fixture manager task"
+          }
+        ],
+        "partyType": "celebration",
+        "setup": {
+          "teamLeader": "Fixture Setup Lead",
+          "staffMembers": [
+            "Fixture Setup Staff"
+          ],
+          "savedAt": "2026-01-01T12:00:00.000Z",
+          "accessTime": "14:00",
+          "barTime": "17:00",
+          "tableStyle": "Round",
+          "checkboxes": {
+            "cb_0": false
+          }
+        },
+        "during": {
+          "teamLeader": "Fixture During Lead",
+          "staffMembers": [
+            "Fixture During Staff"
+          ],
+          "savedAt": "2026-01-01T12:00:00.000Z"
+        },
+        "clearup": {
+          "teamLeader": "Fixture Clear Lead",
+          "staffMembers": [
+            "Fixture Clear Staff"
+          ],
+          "savedAt": "2026-01-01T12:00:00.000Z"
+        }
+      }
+    }
+  },
+  "realtimeDatabase": {
+    "events": {
+      "fixture-celebration": {
+        "setup": {
+          "party_setup_s1_0": {
+            "checked": true,
+            "initials": "FX",
+            "time": "12:34"
+          },
+          "custom_setup_s1_abc123": {
+            "checked": true,
+            "initials": "FM",
+            "time": "12:34"
+          }
+        },
+        "during": {
+          "party_during_s1_0": {
+            "checked": true,
+            "initials": "FD",
+            "time": "12:34"
+          }
+        },
+        "clearup": {
+          "party_clearup_s1_0": {
+            "checked": true,
+            "initials": "FC",
+            "time": "12:34"
+          }
+        },
+        "setup_notes": {
+          "section_s1": "Synthetic handover\nKeep both lines. Café & \"quotes\" <literal text>"
+        },
+        "during_notes": {
+          "section_s1": "Synthetic service note"
+        },
+        "clearup_notes": {
+          "section_s1": "Synthetic clear-up note"
+        }
+      }
+    }
+  }
+}

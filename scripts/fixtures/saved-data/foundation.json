@@ -1,0 +1,45 @@
+{
+  "firestore": {
+    "events": {
+      "fixture-foundation": {
+        "couple": "Synthetic Fixture Event",
+        "eventType": "wedding",
+        "date": "2030-06-01",
+        "guests": 80,
+        "hiddenTasks": [],
+        "customTasks": [],
+        "package": "foundation",
+        "during": {
+          "teamLeader": "Fixture During Lead",
+          "staffMembers": [
+            "Fixture During Staff"
+          ],
+          "savedAt": "2026-01-01T12:00:00.000Z",
+          "checkboxes": {
+            "cb_0": true,
+            "cb_1": false
+          },
+          "initialsData": {
+            "cb_0": {
+              "initials": "FL",
+              "time": "10:15"
+            }
+          }
+        }
+      }
+    }
+  },
+  "realtimeDatabase": {
+    "events": {
+      "fixture-foundation": {
+        "during": {
+          "during_s1_0": {
+            "checked": true,
+            "initials": "FL",
+            "time": "10:15"
+          }
+        }
+      }
+    }
+  }
+}
