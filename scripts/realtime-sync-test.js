@@ -203,7 +203,7 @@ async function run() {
   });
   await check('wedding-feast-setup', 'source', 'Feast setup references the shared module and realtime loader.', () => {
     const html = readSource('public/feast/feast-flourish-setup.html');
-    assert.ok(html.includes('form-shared.js') && html.includes('loadRealtimeChecklist'),
+    assert.ok(html.includes('form-shared.js') && html.includes('setup-form-sync.js') && html.includes('startSetupFormSync'),
       'Feast setup is missing shared-module or realtime-loader references');
   });
   await check('celebration-global-wiring', 'source', 'All three Celebration pages expose Firestore and Realtime Database globals.', () => {

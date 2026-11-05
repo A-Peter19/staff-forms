@@ -466,14 +466,18 @@
       box-shadow: var(--ui-focus-ring);
     }
 
+    .notes-row { padding: 16px; }
+    .notes-row label { display: block; margin-bottom: 6px; font-weight: 600; }
+    .notes-row textarea { width: 100%; min-height: 80px; padding: 10px; border: 1px solid #cbd5d1; border-radius: 8px; font: inherit; resize: vertical; }
 </style>
 
 </head>
-<body>
+<body data-stage="clearup">
     <div class="header">
         <h1>🧹 Wake Clear-up Checklist</h1>
         <a href="../index.html" style="color:rgba(32,128,141,.75);font-size:.82rem;text-decoration:none;">← Back to Dashboard</a>
         <p>Select guest count to see required staff numbers</p>
+        <p id="header-sub"></p>
         <div class="guest-selector">
             <button class="guest-btn active" data-count="60">60 Guests</button>
             <button class="guest-btn" data-count="80">80 Guests</button>
@@ -483,24 +487,15 @@
     </div>
 
     <div class="staff-panel">
-        <div class="staff-panel-row">
-            <div class="staff-field">
-                <label for="teamLeader">👑 Team Leader</label>
-                <input type="text" id="teamLeader" placeholder="Enter team leader name..." oninput="saveState()">
-            </div>
-        </div>
-        <div class="staff-names">
-            <label>👥 Staff on Shift</label>
-            <div id="staffList">
-                <div class="staff-entry">
-                    <input type="text" class="staff-name-input" placeholder="Staff member name..." oninput="saveState()">
-                    <button class="remove-staff-btn remove-staff-btn js-remove-staff">✕</button>
-                </div>
-            </div>
-            <button class="add-staff-btn add-staff-btn js-add-staff">+ Add Staff Member</button>
+        <div class="staff-panel-row"><div class="staff-field">
+            <label for="team-leader">👑 Team Leader</label>
+            <input type="text" id="team-leader" placeholder="Enter team leader name...">
+        </div></div>
+        <div class="staff-names"><label>👥 Staff on Shift</label>
+            <div id="staff-list"></div>
+            <button type="button" class="add-staff-btn js-add-staff">+ Add Staff Member</button>
         </div>
     </div>
-
 
     <div class="quick-ref">
         <h3>👥 Staff Required - <span id="currentGuests">60</span> Guests</h3>
@@ -531,62 +526,63 @@
             </div>
         </div>
         <div class="section-content" id="barContent">
-            <div class="task">
+            <div class="task checklist-item" data-section="bar" data-task-id="clearup_bar_0" data-legacy-flat-id="clearup_s0_0">
                 <input type="checkbox" data-section="bar" data-task="bar-1">
                 <div class="task-content">
                     <div class="task-title">All glasses clean and on the shelves</div>
                     <div class="task-details">Check all glassware is washed and properly stored</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="bar" data-task-id="clearup_bar_1" data-legacy-flat-id="clearup_s0_1">
                 <input type="checkbox" data-section="bar" data-task="bar-2">
                 <div class="task-content">
                     <div class="task-title">Empty bins</div>
                     <div class="task-details">Empty all bar area bins and replace liners</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="bar" data-task-id="clearup_bar_2" data-legacy-flat-id="clearup_s0_2">
                 <input type="checkbox" data-section="bar" data-task="bar-3">
                 <div class="task-content">
                     <div class="task-title">Replenish all fridges</div>
                     <div class="task-details">Restock fridges with drinks for next event</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="bar" data-task-id="clearup_bar_3" data-legacy-flat-id="clearup_s0_3">
                 <input type="checkbox" data-section="bar" data-task="bar-4">
                 <div class="task-content">
                     <div class="task-title">Seal all red wines</div>
                     <div class="task-details">Ensure opened red wine bottles are properly sealed</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="bar" data-task-id="clearup_bar_4" data-legacy-flat-id="clearup_s0_4">
                 <input type="checkbox" data-section="bar" data-task="bar-5">
                 <div class="task-content">
                     <div class="task-title">Seal prosecco</div>
                     <div class="task-details">Seal any opened prosecco bottles</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="bar" data-task-id="clearup_bar_5" data-legacy-flat-id="clearup_s0_5">
                 <input type="checkbox" data-section="bar" data-task="bar-6">
                 <div class="task-content">
                     <div class="task-title">Take open juices to the kitchen</div>
                     <div class="task-details">Move all opened juice bottles to kitchen storage</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="bar" data-task-id="clearup_bar_6" data-legacy-flat-id="clearup_s0_6">
                 <input type="checkbox" data-section="bar" data-task="bar-7">
                 <div class="task-content">
                     <div class="task-title">Empty open mixers and bin</div>
                     <div class="task-details">Dispose of opened mixer bottles</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="bar" data-task-id="clearup_bar_7" data-legacy-flat-id="clearup_s0_7">
                 <input type="checkbox" data-section="bar" data-task="bar-8">
                 <div class="task-content">
                     <div class="task-title">Wipe down bar surfaces</div>
                     <div class="task-details">Clean and sanitize all bar counters and surfaces</div>
                 </div>
             </div>
+        <div class="notes-row"><label for="notes-bar">Section Notes</label><textarea id="notes-bar" data-note-key="section_bar" placeholder="Add notes for this section..."></textarea></div>
         </div>
     </div>
 
@@ -601,97 +597,98 @@
             </div>
         </div>
         <div class="section-content" id="eventContent">
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="clearup_event_0" data-legacy-flat-id="clearup_s0_8">
                 <input type="checkbox" data-section="event" data-task="event-1">
                 <div class="task-content">
                     <div class="task-title">Clear all crockery &amp; cutlery</div>
                     <div class="task-details">Collect all plates, cups, and utensils from tables</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="clearup_event_1" data-legacy-flat-id="clearup_s0_9">
                 <input type="checkbox" data-section="event" data-task="event-2">
                 <div class="task-content">
                     <div class="task-title">Wash up all items</div>
                     <div class="task-details">Wash all collected crockery and cutlery thoroughly</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="clearup_event_2" data-legacy-flat-id="clearup_s0_10">
                 <input type="checkbox" data-section="event" data-task="event-3">
                 <div class="task-content">
                     <div class="task-title">All decorations in correct box and to balcony</div>
                     <div class="task-details">Pack decorations carefully and store on balcony</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="clearup_event_3" data-legacy-flat-id="clearup_s0_11">
                 <input type="checkbox" data-section="event" data-task="event-4">
                 <div class="task-content">
                     <div class="task-title">Runners nicely folded and in correct box</div>
                     <div class="task-details">If dirty, leave on side; if clean, fold and box</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="clearup_event_4" data-legacy-flat-id="clearup_s0_12">
                 <input type="checkbox" data-section="event" data-task="event-5">
                 <div class="task-content">
                     <div class="task-title">Projector - switch off, bag, and to cellar shelves</div>
                     <div class="task-details">Turn off projector, pack with cables, store in cellar</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="clearup_event_5" data-legacy-flat-id="clearup_s0_13">
                 <input type="checkbox" data-section="event" data-task="event-6">
                 <div class="task-content">
                     <div class="task-title">Empty all bins</div>
                     <div class="task-details">Empty all hall bins and replace liners</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="clearup_event_6" data-legacy-flat-id="clearup_s0_14">
                 <input type="checkbox" data-section="event" data-task="event-7">
                 <div class="task-content">
                     <div class="task-title">Roll all sashes and into box</div>
                     <div class="task-details">Remove sashes from chairs, roll neatly, and box</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="clearup_event_7" data-legacy-flat-id="clearup_s0_15">
                 <input type="checkbox" data-section="event" data-task="event-8">
                 <div class="task-content">
                     <div class="task-title">Chair covers into bin bag</div>
                     <div class="task-details">Remove all chair covers and place in bin bag</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="clearup_event_8" data-legacy-flat-id="clearup_s0_16">
                 <input type="checkbox" data-section="event" data-task="event-9">
                 <div class="task-content">
                     <div class="task-title">White tablecloths into bin bag</div>
                     <div class="task-details">Remove white tablecloths and bag separately</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="clearup_event_9" data-legacy-flat-id="clearup_s0_17">
                 <input type="checkbox" data-section="event" data-task="event-10">
                 <div class="task-content">
                     <div class="task-title">Black or navy tablecloths into separate bin bag</div>
                     <div class="task-details">Remove dark tablecloths and bag separately from white</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="clearup_event_10" data-legacy-flat-id="clearup_s0_18">
                 <input type="checkbox" data-section="event" data-task="event-11">
                 <div class="task-content">
                     <div class="task-title">Stack chairs in piles of 10 next to the stage</div>
                     <div class="task-details">Remove covers first, then stack chairs neatly</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="clearup_event_11" data-legacy-flat-id="clearup_s0_19">
                 <input type="checkbox" data-section="event" data-task="event-12">
                 <div class="task-content">
                     <div class="task-title">44 red plastic chairs into furniture cupboard</div>
                     <div class="task-details">Store red chairs in designated cupboard</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="clearup_event_12" data-legacy-flat-id="clearup_s0_20">
                 <input type="checkbox" data-section="event" data-task="event-13">
                 <div class="task-content">
                     <div class="task-title">Wooden trays from kitchen to balcony in correct box</div>
                     <div class="task-details">Return wooden trays to proper storage box on balcony</div>
                 </div>
             </div>
+        <div class="notes-row"><label for="notes-event">Section Notes</label><textarea id="notes-event" data-note-key="section_event" placeholder="Add notes for this section..."></textarea></div>
         </div>
     </div>
 
@@ -706,47 +703,47 @@
             </div>
         </div>
         <div class="section-content" id="kitchenContent">
-            <div class="task">
+            <div class="task checklist-item" data-section="kitchen" data-task-id="clearup_kitchen_0" data-legacy-flat-id="clearup_s0_21">
                 <input type="checkbox" data-section="kitchen" data-task="kitchen-1">
                 <div class="task-content">
                     <div class="task-title">All good food into community fridge</div>
                     <div class="task-details">Store leftover food that's still good in community fridge</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="kitchen" data-task-id="clearup_kitchen_1" data-legacy-flat-id="clearup_s0_22">
                 <input type="checkbox" data-section="kitchen" data-task="kitchen-2">
                 <div class="task-content">
                     <div class="task-title">Any food to store into proper places</div>
                     <div class="task-details">Return stored food items to correct storage locations</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="kitchen" data-task-id="clearup_kitchen_2" data-legacy-flat-id="clearup_s0_23">
                 <input type="checkbox" data-section="kitchen" data-task="kitchen-3">
                 <div class="task-content">
                     <div class="task-title">Bin any rubbish</div>
                     <div class="task-details">Dispose of all waste food and packaging</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="kitchen" data-task-id="clearup_kitchen_3" data-legacy-flat-id="clearup_s0_24">
                 <input type="checkbox" data-section="kitchen" data-task="kitchen-4">
                 <div class="task-content">
                     <div class="task-title">All areas tidy</div>
                     <div class="task-details">Clean and organize all kitchen work surfaces</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="kitchen" data-task-id="clearup_kitchen_4" data-legacy-flat-id="clearup_s0_25">
                 <input type="checkbox" data-section="kitchen" data-task="kitchen-5">
                 <div class="task-content">
                     <div class="task-title">All crockery to bar in correct place</div>
                     <div class="task-details">Return washed items to proper bar storage locations</div>
                 </div>
             </div>
+        <div class="notes-row"><label for="notes-kitchen">Section Notes</label><textarea id="notes-kitchen" data-note-key="section_kitchen" placeholder="Add notes for this section..."></textarea></div>
         </div>
     </div>
 
     <div class="controls">
-        <button class="btn btn-secondary" data-action="reset">Reset All</button>
-        <button class="btn btn-primary" data-action="save-progress">Save Progress</button>
+        <button class="btn btn-secondary" id="btn-reset">Reset All</button>
     </div>
 
     <script>
@@ -768,294 +765,8 @@ const rtdb = window.rtdb;
     </script>
 
     <script src="/js/form-shared.js"></script>
-
-    <script>
-        const staffCount = {
-            60: { bar: 1, event: 2, kitchen: 1 },
-            80: { bar: 1, event: 2, kitchen: 1 },
-            100: { bar: 1, event: 3, kitchen: 1 },
-            120: { bar: 1, event: 4, kitchen: 1 }
-        };
-
-        let currentGuests = 60;
-
-        function getEventId() {
-            return StaffFormSync.getEventId();
-        }
-
-        function loadEventMetaAndApplyHiddenTasks() {
-            return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY);
-        }
-
-        function injectCustomTasks(formKey, eventMeta) {
-            return StaffFormSync.injectCustomTasks(formKey || FORM_KEY, eventMeta);
-        }
-
-        function loadRealtimeChecklist(formKey) {
-            return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY);
-        }
-
-        function saveRealtimeChecklist(formKey) {
-            return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY);
-        }
-
-        function saveStaffSection(formKey) {
-            return StaffFormSync.saveStaffSection(formKey || FORM_KEY);
-        }
-
-        function bindCheckboxMeta() {
-            return StaffFormSync.bindCheckboxMeta();
-        }
-
-
-        // Load saved state
-        function loadState() {
-            rtdb.ref('events/' + getEventId() + '/' + FORM_KEY).on('value', (snapshot) => {
-                const state = snapshot.val();
-                if (!state) return;
-
-                currentGuests = state.guests || 60;
-
-                document.querySelectorAll('.guest-btn').forEach(b => b.classList.remove('active'));
-                const activeBtn = document.querySelector(`.guest-btn[data-count="${currentGuests}"]`);
-                if (activeBtn) activeBtn.classList.add('active');
-
-                updateStaffCount();
-
-            // Restore team leader
-            const leaderInput = document.getElementById('teamLeader');
-            if (state.teamLeader !== undefined && leaderInput.value !== state.teamLeader) {
-                leaderInput.value = state.teamLeader;
-            }
-
-
-                // Restore staff names list — only rebuild if data differs from current inputs
-                if (state.staffNames) {
-                    const list = document.getElementById('staffList');
-                    const currentInputs = Array.from(list.querySelectorAll('.staff-name-input'));
-                    const currentValues = currentInputs.map(i => i.value);
-
-                    const incoming = state.staffNames;
-                    const isDifferent = JSON.stringify(incoming) !== JSON.stringify(currentValues);
-
-                    if (isDifferent) {
-                        list.innerHTML = '';
-                        incoming.forEach(name => {
-                            const entry = document.createElement('div');
-                            entry.className = 'staff-entry';
-                            entry.innerHTML = `
-                                <input type="text" class="staff-name-input" placeholder="Staff member name..." oninput="saveState()" value="${name}">
-                                <button class="remove-staff-btn remove-staff-btn js-remove-staff">✕</button>
-                            `;
-                            list.appendChild(entry);
-                        });
-                    }
-                }
-
-                // Restore checkboxes
-                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                    const key = `${cb.dataset.section}-${cb.dataset.task}`;
-                    const shouldBeChecked = !!(state.tasks && state.tasks[key]);
-                    cb.checked = shouldBeChecked;
-                    cb.closest('.task').classList.toggle('completed', shouldBeChecked);
-                });
-
-        updateAllProgress();
-    });
-}
-
-
-
-        // Save state
-        function saveState() {
-            const tasks = {};
-            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-                const key = `${cb.dataset.section}-${cb.dataset.task}`;
-                tasks[key] = true;
-            });
-
-            const staffNames = Array.from(document.querySelectorAll('.staff-name-input'))
-                .map(input => input.value);
-
-            rtdb.ref('events/' + getEventId() + '/' + FORM_KEY).set({
-                guests: currentGuests,
-                tasks: tasks,
-                teamLeader: document.getElementById('teamLeader').value,
-                staffNames: staffNames,
-                timestamp: new Date().toISOString()
-            });
-        }
-
-
-
-        // Guest count selection
-        document.querySelectorAll('.guest-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.guest-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentGuests = parseInt(this.dataset.count);
-                updateStaffCount();
-                saveState();
-                saveRealtimeChecklist(FORM_KEY);
-            });
-        });
-
-        function updateStaffCount() {
-            const staff = staffCount[currentGuests];
-            document.getElementById('currentGuests').textContent = currentGuests;
-            document.getElementById('barStaff').textContent = staff.bar;
-            document.getElementById('eventStaff').textContent = staff.event;
-            document.getElementById('kitchenStaff').textContent = staff.kitchen;
-        }
-
-        // Checkbox handling
-        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const task = this.closest('.task');
-                if (this.checked) {
-                    task.classList.add('completed');
-                } else {
-                    task.classList.remove('completed');
-                }
-                updateProgress(this.dataset.section);
-                saveState();
-                saveRealtimeChecklist(FORM_KEY);
-            });
-        });
-
-        function updateProgress(section) {
-            const total = document.querySelectorAll(`input[data-section="${section}"]`).length;
-            const checked = document.querySelectorAll(`input[data-section="${section}"]:checked`).length;
-            const percent = Math.round((checked / total) * 100);
-            
-            document.getElementById(`${section}Progress`).textContent = `${checked}/${total}`;
-            document.getElementById(`${section}ProgressBar`).style.width = `${percent}%`;
-        }
-
-        function updateAllProgress() {
-            updateProgress('bar');
-            updateProgress('event');
-            updateProgress('kitchen');
-        }
-
-        function toggleSection(section) {
-            const content = document.getElementById(`${section}Content`);
-            content.classList.toggle('collapsed');
-        }
-
-        function addStaff() {
-            const list = document.getElementById('staffList');
-            const entry = document.createElement('div');
-            entry.className = 'staff-entry';
-            entry.innerHTML = `
-                <input type="text" class="staff-name-input" placeholder="Staff member name..." oninput="saveState()">
-                <button class="remove-staff-btn remove-staff-btn js-remove-staff">✕</button>
-            `;
-            list.appendChild(entry);
-        }
-
-        function removeStaff(btn) {
-            const list = document.getElementById('staffList');
-            if (list.children.length > 1) {
-                btn.closest('.staff-entry').remove();
-                saveState();
-                saveRealtimeChecklist(FORM_KEY);
-            }
-        }
-
-
-        function resetAll() {
-            if (confirm('Reset all checkboxes? This will clear your progress.')) {
-                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                    cb.checked = false;
-                    cb.closest('.task').classList.remove('completed');
-                });
-                updateAllProgress();
-                saveState();
-                saveRealtimeChecklist(FORM_KEY);
-            }
-        }
-
-        function saveProgress() {
-            alert('✅ All changes save automatically in real time.');
-        }
-
-        // Initialize
-        bindCheckboxMeta();
-        loadEventMetaAndApplyHiddenTasks().then(function(ev){ injectCustomTasks(FORM_KEY, ev); });
-        loadState();
-        loadRealtimeChecklist(FORM_KEY);
-        updateStaffCount();
-        updateAllProgress();
-
-        // Set initial guest count button
-        document.querySelector(`.guest-btn[data-count="${currentGuests}"]`).classList.add('active');
-    </script>
-
-<script>
-(function () {
-  function wireSharedUiControls() {
-    document.querySelectorAll('.js-section-toggle').forEach(function (header) {
-      if (header.dataset.wiredToggle === '1') return;
-      header.dataset.wiredToggle = '1';
-      header.setAttribute('tabindex', '0');
-      header.setAttribute('role', 'button');
-      header.addEventListener('click', function () { if (typeof toggleSection === 'function') toggleSection(header.dataset.toggleSection || header); });
-      header.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          if (typeof toggleSection === 'function') toggleSection(header.dataset.toggleSection || header);
-        }
-      });
-    });
-
-    var initialsBtn = document.querySelector('.js-change-initials');
-    if (initialsBtn && !initialsBtn.dataset.wired) {
-      initialsBtn.dataset.wired = '1';
-      initialsBtn.addEventListener('click', function () { if (typeof changeInitials === 'function') changeInitials(); });
-    }
-
-    document.querySelectorAll('.js-add-staff').forEach(function (btn) {
-      if (btn.dataset.wiredAddStaff === '1') return;
-      btn.dataset.wiredAddStaff = '1';
-      btn.addEventListener('click', function () { if (typeof addStaffMember === 'function') addStaffMember(); else if (typeof addStaff === 'function') addStaff(); });
-    });
-
-    var actionMap = {
-      'save': 'saveForm',
-      'reset': 'resetAll',
-      'load': 'loadForm',
-      'print': 'printChecklist',
-      'save-progress': 'saveProgress'
-    };
-
-    document.querySelectorAll('[data-action]').forEach(function (btn) {
-      if (btn.dataset.wiredAction === '1') return;
-      btn.dataset.wiredAction = '1';
-      btn.addEventListener('click', function () {
-        var action = btn.getAttribute('data-action');
-        var fnName = actionMap[action];
-        if (fnName && typeof window[fnName] === 'function') window[fnName]();
-      });
-    });
-
-    document.addEventListener('click', function (event) {
-      var removeBtn = event.target.closest('.js-remove-staff');
-      if (removeBtn) {
-        var row = removeBtn.closest('.staff-row') || removeBtn.parentElement;
-        if (row) row.remove();
-        if (typeof updateStaffBadge === 'function') updateStaffBadge();
-      }
-    }, { once: true });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', wireSharedUiControls);
-  } else {
-    wireSharedUiControls();
-  }
-})();
-</script>
-
+    <script src="/js/task-identity.js"></script>
+    <script src="/js/setup-form-sync.js"></script>
+    <script src="/js/wake-form.js"></script>
 </body>
 </html>

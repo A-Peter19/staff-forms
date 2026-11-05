@@ -466,14 +466,18 @@
       box-shadow: var(--ui-focus-ring);
     }
 
+    .notes-row { padding: 16px; }
+    .notes-row label { display: block; margin-bottom: 6px; font-weight: 600; }
+    .notes-row textarea { width: 100%; min-height: 80px; padding: 10px; border: 1px solid #cbd5d1; border-radius: 8px; font: inherit; resize: vertical; }
 </style>
 
 </head>
-<body>
+<body data-stage="during">
     <div class="header">
         <h1>👔 Wake During Event Checklist</h1>
         <a href="../index.html" style="color:rgba(32,128,141,.75);font-size:.82rem;text-decoration:none;">← Back to Dashboard</a>
         <p>Ongoing service tasks during the event</p>
+        <p id="header-sub"></p>
         <div class="guest-selector">
             <button class="guest-btn active" data-count="60">60 Guests</button>
             <button class="guest-btn" data-count="80">80 Guests</button>
@@ -483,24 +487,15 @@
     </div>
 
     <div class="staff-panel">
-        <div class="staff-panel-row">
-            <div class="staff-field">
-                <label for="teamLeader">👑 Team Leader</label>
-                <input type="text" id="teamLeader" placeholder="Enter team leader name..." oninput="saveState()">
-            </div>
-        </div>
-        <div class="staff-names">
-            <label>👥 Staff on Shift</label>
-            <div id="staffList">
-                <div class="staff-entry">
-                    <input type="text" class="staff-name-input" placeholder="Staff member name..." oninput="saveState()">
-                    <button class="remove-staff-btn remove-staff-btn js-remove-staff">✕</button>
-                </div>
-            </div>
-            <button class="add-staff-btn add-staff-btn js-add-staff">+ Add Staff Member</button>
+        <div class="staff-panel-row"><div class="staff-field">
+            <label for="team-leader">👑 Team Leader</label>
+            <input type="text" id="team-leader" placeholder="Enter team leader name...">
+        </div></div>
+        <div class="staff-names"><label>👥 Staff on Shift</label>
+            <div id="staff-list"></div>
+            <button type="button" class="add-staff-btn js-add-staff">+ Add Staff Member</button>
         </div>
     </div>
-
 
     <div class="quick-ref">
         <h3>👥 Staff Required - <span id="currentGuests">60</span> Guests</h3>
@@ -531,27 +526,28 @@
             </div>
         </div>
         <div class="section-content" id="barContent">
-            <div class="task">
+            <div class="task checklist-item" data-section="bar" data-task-id="during_bar_0" data-legacy-flat-id="during_s0_0">
                 <input type="checkbox" data-section="bar" data-task="bar-1">
                 <div class="task-content">
                     <div class="task-title">Run bar operations</div>
                     <div class="task-details">Serve guests, take orders, maintain bar service</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="bar" data-task-id="during_bar_1" data-legacy-flat-id="during_s0_1">
                 <input type="checkbox" data-section="bar" data-task="bar-2">
                 <div class="task-content">
                     <div class="task-title">Wipe shelves and clean all glasses</div>
                     <div class="task-details">Continuously clean glassware and maintain tidy bar area</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="bar" data-task-id="during_bar_2" data-legacy-flat-id="during_s0_2">
                 <input type="checkbox" data-section="bar" data-task="bar-3">
                 <div class="task-content">
                     <div class="task-title">Replenish stock as needed</div>
                     <div class="task-details">Monitor and restock drinks throughout the event</div>
                 </div>
             </div>
+        <div class="notes-row"><label for="notes-bar">Section Notes</label><textarea id="notes-bar" data-note-key="section_bar" placeholder="Add notes for this section..."></textarea></div>
         </div>
     </div>
 
@@ -566,48 +562,49 @@
             </div>
         </div>
         <div class="section-content" id="eventContent">
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="during_event_0" data-legacy-flat-id="during_s0_3">
                 <input type="checkbox" data-section="event" data-task="event-1">
                 <div class="task-content">
                     <div class="task-title">Warm up milk and put in jugs</div>
                     <div class="task-details">Heat milk and fill jugs for tables and coffee station flask</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="during_event_1" data-legacy-flat-id="during_s0_4">
                 <input type="checkbox" data-section="event" data-task="event-2">
                 <div class="task-content">
                     <div class="task-title">Put extra plates with food on tables (large events)</div>
                     <div class="task-details">As per kitchen instructions for larger guest counts</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="during_event_2" data-legacy-flat-id="during_s0_5">
                 <input type="checkbox" data-section="event" data-task="event-3">
                 <div class="task-content">
                     <div class="task-title">Assist kitchen as required</div>
                     <div class="task-details">Help kitchen staff with food prep and service tasks</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="during_event_3" data-legacy-flat-id="during_s0_6">
                 <input type="checkbox" data-section="event" data-task="event-4">
                 <div class="task-content">
                     <div class="task-title">Make tea &amp; coffee in flasks</div>
                     <div class="task-details">Prepare fresh tea and coffee and put on each table</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="during_event_4" data-legacy-flat-id="during_s0_7">
                 <input type="checkbox" data-section="event" data-task="event-5">
                 <div class="task-content">
                     <div class="task-title">Check coffee station for dirty cups</div>
                     <div class="task-details">Regularly monitor coffee station and bring dirty items to kitchen</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="event" data-task-id="during_event_5" data-legacy-flat-id="during_s0_8">
                 <input type="checkbox" data-section="event" data-task="event-6">
                 <div class="task-content">
                     <div class="task-title">Collect any dirty plates, glasses etc.</div>
                     <div class="task-details">Continuously clear tables and maintain tidy hall area</div>
                 </div>
             </div>
+        <div class="notes-row"><label for="notes-event">Section Notes</label><textarea id="notes-event" data-note-key="section_event" placeholder="Add notes for this section..."></textarea></div>
         </div>
     </div>
 
@@ -622,33 +619,33 @@
             </div>
         </div>
         <div class="section-content" id="kitchenContent">
-            <div class="task">
+            <div class="task checklist-item" data-section="kitchen" data-task-id="during_kitchen_0" data-legacy-flat-id="during_s0_9">
                 <input type="checkbox" data-section="kitchen" data-task="kitchen-1">
                 <div class="task-content">
                     <div class="task-title">Replenish food</div>
                     <div class="task-details">Monitor buffet and restock food items as needed</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="kitchen" data-task-id="during_kitchen_1" data-legacy-flat-id="during_s0_10">
                 <input type="checkbox" data-section="kitchen" data-task="kitchen-2">
                 <div class="task-content">
                     <div class="task-title">Tidy kitchen and wash up</div>
                     <div class="task-details">Continuously clean and organize kitchen throughout event</div>
                 </div>
             </div>
-            <div class="task">
+            <div class="task checklist-item" data-section="kitchen" data-task-id="during_kitchen_2" data-legacy-flat-id="during_s0_11">
                 <input type="checkbox" data-section="kitchen" data-task="kitchen-3">
                 <div class="task-content">
                     <div class="task-title">Put away unused items and food</div>
                     <div class="task-details">Store items properly as event progresses</div>
                 </div>
             </div>
+        <div class="notes-row"><label for="notes-kitchen">Section Notes</label><textarea id="notes-kitchen" data-note-key="section_kitchen" placeholder="Add notes for this section..."></textarea></div>
         </div>
     </div>
 
     <div class="controls">
-        <button class="btn btn-secondary" data-action="reset">Reset All</button>
-        <button class="btn btn-primary" data-action="save-progress">Save Progress</button>
+        <button class="btn btn-secondary" id="btn-reset">Reset All</button>
     </div>
 
     <script>
@@ -670,286 +667,8 @@ const rtdb = window.rtdb;
     </script>
 
     <script src="/js/form-shared.js"></script>
-
-    <script>
-        const staffCount = {
-            60: { bar: 1, event: 1, kitchen: 1 },
-            80: { bar: 1, event: 2, kitchen: 1 },
-            100: { bar: 1, event: 2, kitchen: 1 },
-            120: { bar: 1, event: 2, kitchen: 1 }
-        };
-
-        let currentGuests = 60;
-
-        function getEventId() {
-            return StaffFormSync.getEventId();
-        }
-
-        function loadEventMetaAndApplyHiddenTasks() {
-            return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY);
-        }
-
-        function injectCustomTasks(formKey, eventMeta) {
-            return StaffFormSync.injectCustomTasks(formKey || FORM_KEY, eventMeta);
-        }
-
-        function loadRealtimeChecklist(formKey) {
-            return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY);
-        }
-
-        function saveRealtimeChecklist(formKey) {
-            return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY);
-        }
-
-        function saveStaffSection(formKey) {
-            return StaffFormSync.saveStaffSection(formKey || FORM_KEY);
-        }
-
-        function bindCheckboxMeta() {
-            return StaffFormSync.bindCheckboxMeta();
-        }
-
-
-        // Load saved state
-        function loadState() {
-            rtdb.ref('events/' + getEventId() + '/' + FORM_KEY).on('value', (snapshot) => {
-                const state = snapshot.val();
-                if (!state) return;
-
-                currentGuests = state.guests || 60;
-
-                document.querySelectorAll('.guest-btn').forEach(b => b.classList.remove('active'));
-                const activeBtn = document.querySelector(`.guest-btn[data-count="${currentGuests}"]`);
-                if (activeBtn) activeBtn.classList.add('active');
-
-                updateStaffCount();
-
-                // Restore team leader (only if different)
-                const leaderInput = document.getElementById('teamLeader');
-                if (state.teamLeader !== undefined && leaderInput.value !== state.teamLeader) {
-                    leaderInput.value = state.teamLeader;
-                }
-
-                // Restore staff names (only rebuild if different)
-                if (state.staffNames) {
-                    const list = document.getElementById('staffList');
-                    const currentInputs = Array.from(list.querySelectorAll('.staff-name-input'));
-                    const currentValues = currentInputs.map(i => i.value);
-                    const incoming = state.staffNames;
-                    const isDifferent = JSON.stringify(incoming) !== JSON.stringify(currentValues);
-
-                    if (isDifferent) {
-                        list.innerHTML = '';
-                        incoming.forEach(name => {
-                            const entry = document.createElement('div');
-                            entry.className = 'staff-entry';
-                            entry.innerHTML = `
-                                <input type="text" class="staff-name-input" placeholder="Staff member name..." oninput="saveState()" value="${name}">
-                                <button class="remove-staff-btn remove-staff-btn js-remove-staff">✕</button>
-                            `;
-                            list.appendChild(entry);
-                        });
-                    }
-                }
-
-                // Restore checkboxes
-                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                    const key = `${cb.dataset.section}-${cb.dataset.task}`;
-                    const shouldBeChecked = !!(state.tasks && state.tasks[key]);
-                    cb.checked = shouldBeChecked;
-                    cb.closest('.task').classList.toggle('completed', shouldBeChecked);
-                });
-
-                updateAllProgress();
-            });
-        }
-
-        function saveState() {
-            const tasks = {};
-            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-                const key = `${cb.dataset.section}-${cb.dataset.task}`;
-                tasks[key] = true;
-            });
-
-            const staffNames = Array.from(document.querySelectorAll('.staff-name-input'))
-                .map(input => input.value);
-
-            rtdb.ref('events/' + getEventId() + '/' + FORM_KEY).set({
-                guests: currentGuests,
-                tasks: tasks,
-                teamLeader: document.getElementById('teamLeader').value,
-                staffNames: staffNames,
-                timestamp: new Date().toISOString()
-            });
-        }
-
-        // Guest count selection
-        document.querySelectorAll('.guest-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.guest-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentGuests = parseInt(this.dataset.count);
-                updateStaffCount();
-                saveState();
-                saveRealtimeChecklist(FORM_KEY);
-            });
-        });
-
-        function updateStaffCount() {
-            const staff = staffCount[currentGuests];
-            document.getElementById('currentGuests').textContent = currentGuests;
-            document.getElementById('barStaff').textContent = staff.bar;
-            document.getElementById('eventStaff').textContent = staff.event;
-            document.getElementById('kitchenStaff').textContent = staff.kitchen;
-        }
-
-        // Checkbox handling
-        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const task = this.closest('.task');
-                if (this.checked) {
-                    task.classList.add('completed');
-                } else {
-                    task.classList.remove('completed');
-                }
-                updateProgress(this.dataset.section);
-                saveState();
-                saveRealtimeChecklist(FORM_KEY);
-            });
-        });
-
-        function updateProgress(section) {
-            const total = document.querySelectorAll(`input[data-section="${section}"]`).length;
-            const checked = document.querySelectorAll(`input[data-section="${section}"]:checked`).length;
-            const percent = Math.round((checked / total) * 100);
-            
-            document.getElementById(`${section}Progress`).textContent = `${checked}/${total}`;
-            document.getElementById(`${section}ProgressBar`).style.width = `${percent}%`;
-        }
-
-        function updateAllProgress() {
-            updateProgress('bar');
-            updateProgress('event');
-            updateProgress('kitchen');
-        }
-
-        function toggleSection(section) {
-            const content = document.getElementById(`${section}Content`);
-            content.classList.toggle('collapsed');
-        }
-
-        function addStaff() {
-            const list = document.getElementById('staffList');
-            const entry = document.createElement('div');
-            entry.className = 'staff-entry';
-            entry.innerHTML = `
-                <input type="text" class="staff-name-input" placeholder="Staff member name..." oninput="saveState()">
-                <button class="remove-staff-btn remove-staff-btn js-remove-staff">✕</button>
-            `;
-            list.appendChild(entry);
-        }
-
-        function removeStaff(btn) {
-            const list = document.getElementById('staffList');
-            if (list.children.length > 1) {
-                btn.closest('.staff-entry').remove();
-                saveState();
-                saveRealtimeChecklist(FORM_KEY);
-            }
-        }
-
-        function resetAll() {
-            if (confirm('Reset all checkboxes? This will clear your progress.')) {
-                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                    cb.checked = false;
-                    cb.closest('.task').classList.remove('completed');
-                });
-                updateAllProgress();
-                saveState();
-                saveRealtimeChecklist(FORM_KEY);
-            }
-        }
-
-        function saveProgress() {
-            alert('✅ All changes save automatically in real time!');
-        }
-
-        // Initialize
-        bindCheckboxMeta();
-        loadEventMetaAndApplyHiddenTasks().then(function(ev){ injectCustomTasks(FORM_KEY, ev); });
-        loadState();
-        loadRealtimeChecklist(FORM_KEY);
-        updateStaffCount();
-        updateAllProgress();
-
-        // Set initial guest count button
-        document.querySelector(`.guest-btn[data-count="${currentGuests}"]`).classList.add('active');
-    </script>
-
-<script>
-(function () {
-  function wireSharedUiControls() {
-    document.querySelectorAll('.js-section-toggle').forEach(function (header) {
-      if (header.dataset.wiredToggle === '1') return;
-      header.dataset.wiredToggle = '1';
-      header.setAttribute('tabindex', '0');
-      header.setAttribute('role', 'button');
-      header.addEventListener('click', function () { if (typeof toggleSection === 'function') toggleSection(header.dataset.toggleSection || header); });
-      header.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          if (typeof toggleSection === 'function') toggleSection(header.dataset.toggleSection || header);
-        }
-      });
-    });
-
-    var initialsBtn = document.querySelector('.js-change-initials');
-    if (initialsBtn && !initialsBtn.dataset.wired) {
-      initialsBtn.dataset.wired = '1';
-      initialsBtn.addEventListener('click', function () { if (typeof changeInitials === 'function') changeInitials(); });
-    }
-
-    document.querySelectorAll('.js-add-staff').forEach(function (btn) {
-      if (btn.dataset.wiredAddStaff === '1') return;
-      btn.dataset.wiredAddStaff = '1';
-      btn.addEventListener('click', function () { if (typeof addStaffMember === 'function') addStaffMember(); else if (typeof addStaff === 'function') addStaff(); });
-    });
-
-    var actionMap = {
-      'save': 'saveForm',
-      'reset': 'resetAll',
-      'load': 'loadForm',
-      'print': 'printChecklist',
-      'save-progress': 'saveProgress'
-    };
-
-    document.querySelectorAll('[data-action]').forEach(function (btn) {
-      if (btn.dataset.wiredAction === '1') return;
-      btn.dataset.wiredAction = '1';
-      btn.addEventListener('click', function () {
-        var action = btn.getAttribute('data-action');
-        var fnName = actionMap[action];
-        if (fnName && typeof window[fnName] === 'function') window[fnName]();
-      });
-    });
-
-    document.addEventListener('click', function (event) {
-      var removeBtn = event.target.closest('.js-remove-staff');
-      if (removeBtn) {
-        var row = removeBtn.closest('.staff-row') || removeBtn.parentElement;
-        if (row) row.remove();
-        if (typeof updateStaffBadge === 'function') updateStaffBadge();
-      }
-    }, { once: true });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', wireSharedUiControls);
-  } else {
-    wireSharedUiControls();
-  }
-})();
-</script>
-
+    <script src="/js/task-identity.js"></script>
+    <script src="/js/setup-form-sync.js"></script>
+    <script src="/js/wake-form.js"></script>
 </body>
 </html>
