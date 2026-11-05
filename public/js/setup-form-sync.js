@@ -199,7 +199,7 @@
       field.setAttribute('aria-label', 'Main Hall access time');
       label.appendChild(field);
     }
-    const metadata = { 'feast-hall-access-time': 'feastSetupHallAccessTime', 'team-leader': stage + '.teamLeader', 'meta-catering': 'catering', 'meta-sash': 'sash', 'meta-runner': 'runner' };
+    const metadata = { ...options.metadata, 'feast-hall-access-time': 'feastSetupHallAccessTime', 'team-leader': stage + '.teamLeader', 'meta-catering': 'catering', 'meta-sash': 'sash', 'meta-runner': 'runner' };
     function queue(field, save) {
       dirty.set(field, {}); status(field, 'Unsaved…'); clearTimeout(timers.get(field));
       timers.set(field, setTimeout(() => { timers.delete(field); save(); }, 250));
@@ -243,7 +243,13 @@
         const value = key === stage + '.teamLeader' ?
           (Object.hasOwn(latestEvent[stage] || {}, 'teamLeader') ? latestEvent[stage].teamLeader :
             (options.preserveLegacy ? checklist.teamLeader : '')) : latestEvent[key];
-        if (field && !dirty.has(field)) field.value = value || (id === 'feast-hall-access-time' ? '13:00' : '');
+        if (field && !dirty.has(field)) {
+          const next = value == null ? (id === 'feast-hall-access-time' ? '13:00' : '') : String(value);
+          if (field.tagName === 'SELECT' && next && !Array.from(field.options).some(option => option.value === next)) {
+            const option = document.createElement('option'); option.value = next; option.textContent = next; field.appendChild(option);
+          }
+          field.value = next;
+        }
       });
       if (options.renderDetails) options.renderDetails(latestEvent, checklist);
     }
