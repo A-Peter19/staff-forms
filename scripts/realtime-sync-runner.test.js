@@ -94,7 +94,7 @@ test('a failed source check exits nonzero, replaces a stale report and continues
   fs.mkdirSync(path.dirname(f.report));
   fs.writeFileSync(f.report, 'STALE REPORT');
   const page = path.join(f.root, 'public/feast/feast-flourish-setup.html');
-  fs.writeFileSync(page, fs.readFileSync(page, 'utf8').replaceAll('loadRealtimeChecklist', 'removedRealtimeLoader'));
+  fs.writeFileSync(page, fs.readFileSync(page, 'utf8').replaceAll('startSetupFormSync', 'removedRealtimeLoader'));
   const result = f.run();
   assert.equal(result.status, 1, result.stdout + result.stderr);
   const report = fs.readFileSync(f.report, 'utf8');

@@ -466,23 +466,35 @@
       box-shadow: var(--ui-focus-ring);
     }
 
+    .notes-row { padding: 16px; }
+    .notes-row label { display: block; margin-bottom: 6px; font-weight: 600; }
+    .notes-row textarea { width: 100%; min-height: 80px; padding: 10px; border: 1px solid #cbd5d1; border-radius: 8px; font: inherit; resize: vertical; }
 </style>
 
 </head>
-<body>
+<body data-stage="setup">
     <div class="header">
         <h1>&#127963;&#65039; Wake Setup Checklist</h1>
         <a href="../index.html" style="color:rgba(32,128,141,.75);font-size:.82rem;text-decoration:none;">← Back to Dashboard</a>
         <p>Select guest count below to see required quantities</p>
-        <div id="staffBanner" class="staff-banner">
-            <span>&#128100; Ticking as: <strong id="staffInitialsDisplay">Not set</strong></span>
-            <button  class="btn-initials-change js-change-initials" >Change</button>
-        </div>
+
+        <p id="header-sub"></p>
         <div class="guest-selector">
             <button class="guest-btn active" data-count="60">60 Guests</button>
             <button class="guest-btn" data-count="80">80 Guests</button>
             <button class="guest-btn" data-count="100">100 Guests</button>
             <button class="guest-btn" data-count="120">120 Guests</button>
+        </div>
+    </div>
+
+    <div class="staff-panel">
+        <div class="staff-panel-row"><div class="staff-field">
+            <label for="team-leader">👑 Team Leader</label>
+            <input type="text" id="team-leader" placeholder="Enter team leader name...">
+        </div></div>
+        <div class="staff-names"><label>👥 Staff on Shift</label>
+            <div id="staff-list"></div>
+            <button type="button" class="add-staff-btn js-add-staff">+ Add Staff Member</button>
         </div>
     </div>
 
@@ -511,53 +523,54 @@
         <div class="section-content" id="hallContent">
             <div class="subsection">
                 <h3>&#127869;&#65039; Buffet Tables (2 rectangular)</h3>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="buffet-1"><div class="task-content"><div class="task-title">Position tables</div><div class="task-location">&#128205; Between radiators at bar wall</div><div class="task-details">2 rectangular tables - check tables are stable and level</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="buffet-2"><div class="task-content"><div class="task-title">Add tablecloths</div><div class="task-details">Black or navy cloths - ensure cloths sit properly with no wrinkles</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="buffet-3"><div class="task-content"><div class="task-title">Arrange side plates</div><div class="task-details">One side of table, stacked neatly and clean</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="buffet-4"><div class="task-content"><div class="task-title">Place crockery basket</div><div class="task-details">Other side of table - crockery wrapped with napkins in basket</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_0" data-legacy-flat-id="setup_s0_0"><input type="checkbox" data-section="hall" data-task="buffet-1"><div class="task-content"><div class="task-title">Position tables</div><div class="task-location">&#128205; Between radiators at bar wall</div><div class="task-details">2 rectangular tables - check tables are stable and level</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_1" data-legacy-flat-id="setup_s0_1"><input type="checkbox" data-section="hall" data-task="buffet-2"><div class="task-content"><div class="task-title">Add tablecloths</div><div class="task-details">Black or navy cloths - ensure cloths sit properly with no wrinkles</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_2" data-legacy-flat-id="setup_s0_2"><input type="checkbox" data-section="hall" data-task="buffet-3"><div class="task-content"><div class="task-title">Arrange side plates</div><div class="task-details">One side of table, stacked neatly and clean</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_3" data-legacy-flat-id="setup_s0_3"><input type="checkbox" data-section="hall" data-task="buffet-4"><div class="task-content"><div class="task-title">Place crockery basket</div><div class="task-details">Other side of table - crockery wrapped with napkins in basket</div></div></div>
             </div>
 
             <div class="subsection">
                 <h3>&#9749; Coffee Station (1 rectangular table)</h3>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-1"><div class="task-content"><div class="task-title">Position table</div><div class="task-location">&#128205; Near furniture cupboard</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-2"><div class="task-content"><div class="task-title">Add tablecloth</div><div class="task-details">Black or navy cloth</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-3"><div class="task-content"><div class="task-title">Fill urn with water</div><div class="task-warning">&#9888;&#65039; CHECK BEFORE EVENT - Urn must be working</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-4"><div class="task-content"><div class="task-title">Arrange supplies</div><div class="task-details">Teas, coffees put in basket and place on the side of the table</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-5"><div class="task-content"><div class="task-title">Add bowl for used tea bags</div><div class="task-details">Bowl must be clean</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-6"><div class="task-content"><div class="task-title">Set out sugar</div><div class="task-details">Place in small ramekin with teaspoon, then place onto table</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="coffee-7"><div class="task-content"><div class="task-title">Stack cups &amp; saucers</div><div class="quantity-badge">60 cups &amp; saucers stacked on top of each other, all handles facing the same way. (max height 3)</div><div class="task-details">Near coffee station - all clean and ready with a teaspoon</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_4" data-legacy-flat-id="setup_s0_4"><input type="checkbox" data-section="hall" data-task="coffee-1"><div class="task-content"><div class="task-title">Position table</div><div class="task-location">&#128205; Near furniture cupboard</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_5" data-legacy-flat-id="setup_s0_5"><input type="checkbox" data-section="hall" data-task="coffee-2"><div class="task-content"><div class="task-title">Add tablecloth</div><div class="task-details">Black or navy cloth</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_6" data-legacy-flat-id="setup_s0_6"><input type="checkbox" data-section="hall" data-task="coffee-3"><div class="task-content"><div class="task-title">Fill urn with water</div><div class="task-warning">&#9888;&#65039; CHECK BEFORE EVENT - Urn must be working</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_7" data-legacy-flat-id="setup_s0_7"><input type="checkbox" data-section="hall" data-task="coffee-4"><div class="task-content"><div class="task-title">Arrange supplies</div><div class="task-details">Teas, coffees put in basket and place on the side of the table</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_8" data-legacy-flat-id="setup_s0_8"><input type="checkbox" data-section="hall" data-task="coffee-5"><div class="task-content"><div class="task-title">Add bowl for used tea bags</div><div class="task-details">Bowl must be clean</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_9" data-legacy-flat-id="setup_s0_9"><input type="checkbox" data-section="hall" data-task="coffee-6"><div class="task-content"><div class="task-title">Set out sugar</div><div class="task-details">Place in small ramekin with teaspoon, then place onto table</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_10" data-legacy-flat-id="setup_s0_10"><input type="checkbox" data-section="hall" data-task="coffee-7"><div class="task-content"><div class="task-title">Stack cups &amp; saucers</div><div class="quantity-badge">60 cups &amp; saucers stacked on top of each other, all handles facing the same way. (max height 3)</div><div class="task-details">Near coffee station - all clean and ready with a teaspoon</div></div></div>
             </div>
 
             <div class="subsection">
                 <h3>&#9898; Guest Tables (Round, White)</h3>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-1"><div class="task-content"><div class="task-title">Position round tables</div><div class="quantity-badge"><span id="tablesQty">6</span> tables</div><div class="task-details">Evenly spaced in hall - all tables must be stable</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-2"><div class="task-content"><div class="task-title">Add white tablecloths</div><div class="task-details">White cloth on each table - centered and smooth</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-3"><div class="task-content"><div class="task-title">Place table runners</div><div class="quantity-badge">6 runners (fixed)</div><div class="task-details">Runners positioned across center of tables</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-4"><div class="task-content"><div class="task-title">Add centerpiece base</div><div class="task-warning">&#9888;&#65039; CLEAN MIRRORS</div><div class="task-details">Mirror or wooden log - mirrors must be clean</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-5"><div class="task-content"><div class="task-title">Place candles</div><div class="task-warning">&#9888;&#65039; TEST CANDLES WORKING</div><div class="task-details">1 candle per table - check all are working before event</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-6"><div class="task-content"><div class="task-title">Add small vases</div><div class="task-details">Small vase with water for flowers on each table</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="tables-7"><div class="task-content"><div class="task-title">Place sugar on each table</div><div class="task-details">Sugar container on every table</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_11" data-legacy-flat-id="setup_s0_11"><input type="checkbox" data-section="hall" data-task="tables-1"><div class="task-content"><div class="task-title">Position round tables</div><div class="quantity-badge"><span id="tablesQty">6</span> tables</div><div class="task-details">Evenly spaced in hall - all tables must be stable</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_12" data-legacy-flat-id="setup_s0_12"><input type="checkbox" data-section="hall" data-task="tables-2"><div class="task-content"><div class="task-title">Add white tablecloths</div><div class="task-details">White cloth on each table - centered and smooth</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_13" data-legacy-flat-id="setup_s0_13"><input type="checkbox" data-section="hall" data-task="tables-3"><div class="task-content"><div class="task-title">Place table runners</div><div class="quantity-badge">6 runners (fixed)</div><div class="task-details">Runners positioned across center of tables</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_14" data-legacy-flat-id="setup_s0_14"><input type="checkbox" data-section="hall" data-task="tables-4"><div class="task-content"><div class="task-title">Add centerpiece base</div><div class="task-warning">&#9888;&#65039; CLEAN MIRRORS</div><div class="task-details">Mirror or wooden log - mirrors must be clean</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_15" data-legacy-flat-id="setup_s0_15"><input type="checkbox" data-section="hall" data-task="tables-5"><div class="task-content"><div class="task-title">Place candles</div><div class="task-warning">&#9888;&#65039; TEST CANDLES WORKING</div><div class="task-details">1 candle per table - check all are working before event</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_16" data-legacy-flat-id="setup_s0_16"><input type="checkbox" data-section="hall" data-task="tables-6"><div class="task-content"><div class="task-title">Add small vases</div><div class="task-details">Small vase with water for flowers on each table</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_17" data-legacy-flat-id="setup_s0_17"><input type="checkbox" data-section="hall" data-task="tables-7"><div class="task-content"><div class="task-title">Place sugar on each table</div><div class="task-details">Sugar container on every table</div></div></div>
             </div>
 
             <div class="subsection">
                 <h3>&#129681; Chairs with Covers</h3>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="chairs-1"><div class="task-content"><div class="task-title">Position chairs</div><div class="quantity-badge"><span id="chairsQty">60</span> chairs total</div><div class="task-details">Around tables (10 per table) - all chairs must be stable</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="chairs-2"><div class="task-content"><div class="task-title">Add chair covers</div><div class="task-warning">&#9888;&#65039; CRITICAL - Check legs positioned properly</div><div class="task-details">NO LEGS STICKING OUT - check every chair carefully</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="chairs-3"><div class="task-content"><div class="task-title">Fix problem covers</div><div class="task-details">If legs sticking out: remove and use different cover - don't use damaged</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="chairs-4"><div class="task-content"><div class="task-title">Add sashes</div><div class="task-details">Sash on every chair - check bow looks nice and make bows uniform</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_18" data-legacy-flat-id="setup_s0_18"><input type="checkbox" data-section="hall" data-task="chairs-1"><div class="task-content"><div class="task-title">Position chairs</div><div class="quantity-badge"><span id="chairsQty">60</span> chairs total</div><div class="task-details">Around tables (10 per table) - all chairs must be stable</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_19" data-legacy-flat-id="setup_s0_19"><input type="checkbox" data-section="hall" data-task="chairs-2"><div class="task-content"><div class="task-title">Add chair covers</div><div class="task-warning">&#9888;&#65039; CRITICAL - Check legs positioned properly</div><div class="task-details">NO LEGS STICKING OUT - check every chair carefully</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_20" data-legacy-flat-id="setup_s0_20"><input type="checkbox" data-section="hall" data-task="chairs-3"><div class="task-content"><div class="task-title">Fix problem covers</div><div class="task-details">If legs sticking out: remove and use different cover - don't use damaged</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_21" data-legacy-flat-id="setup_s0_21"><input type="checkbox" data-section="hall" data-task="chairs-4"><div class="task-content"><div class="task-title">Add sashes</div><div class="task-details">Sash on every chair - check bow looks nice and make bows uniform</div></div></div>
             </div>
 
             <div class="subsection">
                 <h3>&#128444;&#65039; Picture Table</h3>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="picture-1"><div class="task-content"><div class="task-title">Position Round table</div><div class="task-location">&#128205; Next to the stage</div><div class="task-details">1 round table - check stable</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="picture-2"><div class="task-content"><div class="task-title">Add white tablecloth</div><div class="task-details">Cloth centered</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_22" data-legacy-flat-id="setup_s0_22"><input type="checkbox" data-section="hall" data-task="picture-1"><div class="task-content"><div class="task-title">Position Round table</div><div class="task-location">&#128205; Next to the stage</div><div class="task-details">1 round table - check stable</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_23" data-legacy-flat-id="setup_s0_23"><input type="checkbox" data-section="hall" data-task="picture-2"><div class="task-content"><div class="task-title">Add white tablecloth</div><div class="task-details">Cloth centered</div></div></div>
             </div>
 
             <div class="subsection">
                 <h3>&#128253;&#65039; Projector</h3>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="projector-1"><div class="task-content"><div class="task-title">Retrieve projector</div><div class="task-location">&#128205; From cellar</div><div class="task-details">Projector in bag - check bag contains all cables</div></div></div>
-                <div class="task"><input type="checkbox" data-section="hall" data-task="projector-2"><div class="task-content"><div class="task-title">Set up on stage</div><div class="task-warning">&#9888;&#65039; TEST BEFORE EVENT</div><div class="task-details">Position and connect all cables - ensure working</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_24" data-legacy-flat-id="setup_s0_24"><input type="checkbox" data-section="hall" data-task="projector-1"><div class="task-content"><div class="task-title">Retrieve projector</div><div class="task-location">&#128205; From cellar</div><div class="task-details">Projector in bag - check bag contains all cables</div></div></div>
+                <div class="task checklist-item" data-section="hall" data-task-id="setup_hall_25" data-legacy-flat-id="setup_s0_25"><input type="checkbox" data-section="hall" data-task="projector-2"><div class="task-content"><div class="task-title">Set up on stage</div><div class="task-warning">&#9888;&#65039; TEST BEFORE EVENT</div><div class="task-details">Position and connect all cables - ensure working</div></div></div>
             </div>
+        <div class="notes-row"><label for="notes-hall">Section Notes</label><textarea id="notes-hall" data-note-key="section_hall" placeholder="Add notes for this section..."></textarea></div>
         </div>
     </div>
 
@@ -574,16 +587,17 @@
         <div class="section-content" id="kitchenContent">
             <div class="subsection">
                 <h3>&#128230; Serving Trays</h3>
-                <div class="task"><input type="checkbox" data-section="kitchen" data-task="kitchen-1"><div class="task-content"><div class="task-title">Position narrow table</div><div class="task-location">&#128205; Next to radiator in kitchen</div><div class="task-details">1 rectangular table (narrow, not white)</div></div></div>
-                <div class="task"><input type="checkbox" data-section="kitchen" data-task="kitchen-2"><div class="task-content"><div class="task-title">Get wooden trays</div><div class="quantity-badge"><span id="woodenTraysQty">4</span> trays</div><div class="task-location">&#128205; From balcony</div><div class="task-details">Erect wooden serving trays - must be clean and stable</div></div></div>
-                <div class="task"><input type="checkbox" data-section="kitchen" data-task="kitchen-3"><div class="task-content"><div class="task-title">Get white trays</div><div class="quantity-badge"><span id="whiteTraysQty">4</span> trays</div><div class="task-location">&#128205; From bar area</div><div class="task-details">Long white serving trays - must be clean</div></div></div>
+                <div class="task checklist-item" data-section="kitchen" data-task-id="setup_kitchen_0" data-legacy-flat-id="setup_s0_26"><input type="checkbox" data-section="kitchen" data-task="kitchen-1"><div class="task-content"><div class="task-title">Position narrow table</div><div class="task-location">&#128205; Next to radiator in kitchen</div><div class="task-details">1 rectangular table (narrow, not white)</div></div></div>
+                <div class="task checklist-item" data-section="kitchen" data-task-id="setup_kitchen_1" data-legacy-flat-id="setup_s0_27"><input type="checkbox" data-section="kitchen" data-task="kitchen-2"><div class="task-content"><div class="task-title">Get wooden trays</div><div class="quantity-badge"><span id="woodenTraysQty">4</span> trays</div><div class="task-location">&#128205; From balcony</div><div class="task-details">Erect wooden serving trays - must be clean and stable</div></div></div>
+                <div class="task checklist-item" data-section="kitchen" data-task-id="setup_kitchen_2" data-legacy-flat-id="setup_s0_28"><input type="checkbox" data-section="kitchen" data-task="kitchen-3"><div class="task-content"><div class="task-title">Get white trays</div><div class="quantity-badge"><span id="whiteTraysQty">4</span> trays</div><div class="task-location">&#128205; From bar area</div><div class="task-details">Long white serving trays - must be clean</div></div></div>
             </div>
 
             <div class="subsection">
                 <h3>&#129371; Milk Preparation</h3>
-                <div class="task"><input type="checkbox" data-section="kitchen" data-task="kitchen-4"><div class="task-content"><div class="task-title">Get milk jugs</div><div class="quantity-badge"><span id="milkJugsQty">12</span> jugs</div><div class="task-location">&#128205; From bar area to kitchen</div><div class="task-details">Place on tray next to microwave</div></div></div>
-                <div class="task"><input type="checkbox" data-section="kitchen" data-task="kitchen-5"><div class="task-content"><div class="task-title">Get milk flask</div><div class="task-location">&#128205; From bar area</div><div class="task-details">Flask marked 'Milk' - place next to microwave</div></div></div>
+                <div class="task checklist-item" data-section="kitchen" data-task-id="setup_kitchen_3" data-legacy-flat-id="setup_s0_29"><input type="checkbox" data-section="kitchen" data-task="kitchen-4"><div class="task-content"><div class="task-title">Get milk jugs</div><div class="quantity-badge"><span id="milkJugsQty">12</span> jugs</div><div class="task-location">&#128205; From bar area to kitchen</div><div class="task-details">Place on tray next to microwave</div></div></div>
+                <div class="task checklist-item" data-section="kitchen" data-task-id="setup_kitchen_4" data-legacy-flat-id="setup_s0_30"><input type="checkbox" data-section="kitchen" data-task="kitchen-5"><div class="task-content"><div class="task-title">Get milk flask</div><div class="task-location">&#128205; From bar area</div><div class="task-details">Flask marked 'Milk' - place next to microwave</div></div></div>
             </div>
+        <div class="notes-row"><label for="notes-kitchen">Section Notes</label><textarea id="notes-kitchen" data-note-key="section_kitchen" placeholder="Add notes for this section..."></textarea></div>
         </div>
     </div>
 
@@ -600,17 +614,17 @@
         <div class="section-content" id="barContent">
             <div class="subsection">
                 <h3>&#9749; Flask Preparation</h3>
-                <div class="task"><input type="checkbox" data-section="bar" data-task="bar-1"><div class="task-content"><div class="task-title">Retrieve flasks</div><div class="task-warning">&#9888;&#65039; CHECK FLASKS ARE CLEAN INSIDE</div><div class="task-details">Get tea and coffee flasks</div></div></div>
-                <div class="task"><input type="checkbox" data-section="bar" data-task="bar-2"><div class="task-content"><div class="task-title">Add tea bags</div><div class="task-details">Put tea bags in tea flask (sufficient quantity)</div></div></div>
-                <div class="task"><input type="checkbox" data-section="bar" data-task="bar-3"><div class="task-content"><div class="task-title">Add coffee</div><div class="task-details">Put coffee in coffee flask (sufficient quantity)</div></div></div>
-                <div class="task"><input type="checkbox" data-section="bar" data-task="bar-4"><div class="task-content"><div class="task-title">Get urn from kitchen</div><div class="task-details">Bring urn with water - must be filled and working</div></div></div>
+                <div class="task checklist-item" data-section="bar" data-task-id="setup_bar_0" data-legacy-flat-id="setup_s0_31"><input type="checkbox" data-section="bar" data-task="bar-1"><div class="task-content"><div class="task-title">Retrieve flasks</div><div class="task-warning">&#9888;&#65039; CHECK FLASKS ARE CLEAN INSIDE</div><div class="task-details">Get tea and coffee flasks</div></div></div>
+                <div class="task checklist-item" data-section="bar" data-task-id="setup_bar_1" data-legacy-flat-id="setup_s0_32"><input type="checkbox" data-section="bar" data-task="bar-2"><div class="task-content"><div class="task-title">Add tea bags</div><div class="task-details">Put tea bags in tea flask (sufficient quantity)</div></div></div>
+                <div class="task checklist-item" data-section="bar" data-task-id="setup_bar_2" data-legacy-flat-id="setup_s0_33"><input type="checkbox" data-section="bar" data-task="bar-3"><div class="task-content"><div class="task-title">Add coffee</div><div class="task-details">Put coffee in coffee flask (sufficient quantity)</div></div></div>
+                <div class="task checklist-item" data-section="bar" data-task-id="setup_bar_3" data-legacy-flat-id="setup_s0_34"><input type="checkbox" data-section="bar" data-task="bar-4"><div class="task-content"><div class="task-title">Get urn from kitchen</div><div class="task-details">Bring urn with water - must be filled and working</div></div></div>
             </div>
+        <div class="notes-row"><label for="notes-bar">Section Notes</label><textarea id="notes-bar" data-note-key="section_bar" placeholder="Add notes for this section..."></textarea></div>
         </div>
     </div>
 
     <div class="controls">
-        <button class="btn btn-secondary" data-action="reset">Reset All</button>
-        <button class="btn btn-primary" data-action="save-progress">Save Progress</button>
+        <button class="btn btn-secondary" id="btn-reset">Reset All</button>
     </div>
 
     <script>
@@ -632,271 +646,8 @@ const rtdb = window.rtdb;
     </script>
 
     <script src="/js/form-shared.js"></script>
-
-    <script>
-        const quantities = {
-            60: { tables: 6, chairs: 60, woodenTrays: 4, whiteTrays: 4, milkJugs: 12 },
-            80: { tables: 8, chairs: 80, woodenTrays: 6, whiteTrays: 6, milkJugs: 16 },
-            100: { tables: 10, chairs: 100, woodenTrays: 8, whiteTrays: 8, milkJugs: 20 },
-            120: { tables: 10, chairs: 120, woodenTrays: 8, whiteTrays: 8, milkJugs: 20 }
-        };
-
-        let currentGuests = 60;
-
-        function getEventId() {
-            return StaffFormSync.getEventId();
-        }
-
-        function loadEventMetaAndApplyHiddenTasks() {
-            return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY);
-        }
-
-        function injectCustomTasks(formKey, eventMeta) {
-            return StaffFormSync.injectCustomTasks(formKey || FORM_KEY, eventMeta);
-        }
-
-        function loadRealtimeChecklist(formKey) {
-            return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY);
-        }
-
-        function saveRealtimeChecklist(formKey) {
-            return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY);
-        }
-
-        function saveStaffSection(formKey) {
-            return StaffFormSync.saveStaffSection(formKey || FORM_KEY);
-        }
-
-        function bindCheckboxMeta() {
-            return StaffFormSync.bindCheckboxMeta();
-        }
-
-
-        function loadState() {
-            rtdb.ref('events/' + getEventId() + '/' + FORM_KEY).on('value', (snapshot) => {
-                const state = snapshot.val();
-                if (!state) return;
-
-                currentGuests = state.guests || 60;
-
-                document.querySelectorAll('.guest-btn').forEach(b => b.classList.remove('active'));
-                const activeBtn = document.querySelector(`.guest-btn[data-count="${currentGuests}"]`);
-                if (activeBtn) activeBtn.classList.add('active');
-
-                updateQuantities();
-
-                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                    const key = `${cb.dataset.section}-${cb.dataset.task}`;
-                    const taskData = state.tasks && state.tasks[key];
-                    const shouldBeChecked = !!(taskData && taskData.checked);
-                    cb.checked = shouldBeChecked;
-                    cb.closest('.task').classList.toggle('completed', shouldBeChecked);
-
-                    let meta = cb.closest('.task').querySelector('.task-meta');
-                    if (!meta) {
-                        meta = document.createElement('div');
-                        meta.className = 'task-meta';
-                        cb.closest('.task').querySelector('.task-content').appendChild(meta);
-                    }
-                    if (shouldBeChecked && taskData.initials) {
-                        meta.innerHTML = `<span class="task-initials">${taskData.initials}</span><span class="task-time">${taskData.time || ''}</span>`;
-                    } else {
-                        meta.innerHTML = '';
-                    }
-                });
-
-                updateAllProgress();
-            });
-        }
-
-        function saveState() {
-            const tasks = {};
-            document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-                const key = `${cb.dataset.section}-${cb.dataset.task}`;
-                tasks[key] = {
-                    checked: true,
-                    initials: staffInitials || '?',
-                    time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-                };
-            });
-
-            rtdb.ref('events/' + getEventId() + '/' + FORM_KEY).set({
-                guests: currentGuests,
-                tasks: tasks,
-                timestamp: new Date().toISOString()
-            });
-        }
-
-        document.querySelectorAll('.guest-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.guest-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                currentGuests = parseInt(this.dataset.count);
-                updateQuantities();
-                saveState();
-                saveRealtimeChecklist(FORM_KEY);
-            });
-        });
-
-        function updateQuantities() {
-            const qty = quantities[currentGuests];
-            document.getElementById('currentGuests').textContent = currentGuests;
-            document.getElementById('tables').textContent = qty.tables;
-            document.getElementById('chairs').textContent = qty.chairs;
-            document.getElementById('woodenTrays').textContent = qty.woodenTrays;
-            document.getElementById('whiteTrays').textContent = qty.whiteTrays;
-            document.getElementById('milkJugs').textContent = qty.milkJugs;
-            document.getElementById('tablesQty').textContent = qty.tables;
-            document.getElementById('chairsQty').textContent = qty.chairs;
-            document.getElementById('woodenTraysQty').textContent = qty.woodenTrays;
-            document.getElementById('whiteTraysQty').textContent = qty.whiteTrays;
-            document.getElementById('milkJugsQty').textContent = qty.milkJugs;
-        }
-
-        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const task = this.closest('.task');
-                if (this.checked) {
-                    task.classList.add('completed');
-                } else {
-                    task.classList.remove('completed');
-                }
-                updateProgress(this.dataset.section);
-                saveState();
-                saveRealtimeChecklist(FORM_KEY);
-            });
-        });
-
-        function updateProgress(section) {
-            const total = document.querySelectorAll(`input[data-section="${section}"]`).length;
-            const checked = document.querySelectorAll(`input[data-section="${section}"]:checked`).length;
-            const percent = Math.round((checked / total) * 100);
-            document.getElementById(`${section}Progress`).textContent = `${checked}/${total}`;
-            document.getElementById(`${section}ProgressBar`).style.width = `${percent}%`;
-        }
-
-        function updateAllProgress() {
-            updateProgress('hall');
-            updateProgress('kitchen');
-            updateProgress('bar');
-        }
-
-        function toggleSection(section) {
-            const content = document.getElementById(`${section}Content`);
-            content.classList.toggle('collapsed');
-        }
-
-        function resetAll() {
-            if (confirm('Reset all checkboxes? This will clear your progress.')) {
-                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                    cb.checked = false;
-                    cb.closest('.task').classList.remove('completed');
-                });
-                updateAllProgress();
-                saveState();
-                saveRealtimeChecklist(FORM_KEY);
-            }
-        }
-
-        function saveProgress() {
-            alert('\u2705 All changes save automatically in real time');
-        }
-
-        let staffInitials = localStorage.getItem('staffInitials');
-
-        function promptInitials() {
-            const input = prompt('Enter your initials (e.g. JS):');
-            if (input && input.trim()) {
-                staffInitials = input.trim().toUpperCase().slice(0, 4);
-                localStorage.setItem('staffInitials', staffInitials);
-                document.getElementById('staffInitialsDisplay').textContent = staffInitials;
-            }
-        }
-
-        function changeInitials() {
-            promptInitials();
-        }
-
-        if (!staffInitials) {
-            promptInitials();
-        } else {
-            document.getElementById('staffInitialsDisplay').textContent = staffInitials;
-        }
-
-        // Initialize
-        bindCheckboxMeta();
-        loadEventMetaAndApplyHiddenTasks().then(function(ev){ injectCustomTasks(FORM_KEY, ev); });
-        loadState();
-        loadRealtimeChecklist(FORM_KEY);
-        updateQuantities();
-        updateAllProgress();
-        document.querySelector(`.guest-btn[data-count="${currentGuests}"]`).classList.add('active');
-    </script>
-
-<script>
-(function () {
-  function wireSharedUiControls() {
-    document.querySelectorAll('.js-section-toggle').forEach(function (header) {
-      if (header.dataset.wiredToggle === '1') return;
-      header.dataset.wiredToggle = '1';
-      header.setAttribute('tabindex', '0');
-      header.setAttribute('role', 'button');
-      header.addEventListener('click', function () { if (typeof toggleSection === 'function') toggleSection(header.dataset.toggleSection || header); });
-      header.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          if (typeof toggleSection === 'function') toggleSection(header.dataset.toggleSection || header);
-        }
-      });
-    });
-
-    var initialsBtn = document.querySelector('.js-change-initials');
-    if (initialsBtn && !initialsBtn.dataset.wired) {
-      initialsBtn.dataset.wired = '1';
-      initialsBtn.addEventListener('click', function () { if (typeof changeInitials === 'function') changeInitials(); });
-    }
-
-    document.querySelectorAll('.js-add-staff').forEach(function (btn) {
-      if (btn.dataset.wiredAddStaff === '1') return;
-      btn.dataset.wiredAddStaff = '1';
-      btn.addEventListener('click', function () { if (typeof addStaffMember === 'function') addStaffMember(); else if (typeof addStaff === 'function') addStaff(); });
-    });
-
-    var actionMap = {
-      'save': 'saveForm',
-      'reset': 'resetAll',
-      'load': 'loadForm',
-      'print': 'printChecklist',
-      'save-progress': 'saveProgress'
-    };
-
-    document.querySelectorAll('[data-action]').forEach(function (btn) {
-      if (btn.dataset.wiredAction === '1') return;
-      btn.dataset.wiredAction = '1';
-      btn.addEventListener('click', function () {
-        var action = btn.getAttribute('data-action');
-        var fnName = actionMap[action];
-        if (fnName && typeof window[fnName] === 'function') window[fnName]();
-      });
-    });
-
-    document.addEventListener('click', function (event) {
-      var removeBtn = event.target.closest('.js-remove-staff');
-      if (removeBtn) {
-        var row = removeBtn.closest('.staff-row') || removeBtn.parentElement;
-        if (row) row.remove();
-        if (typeof updateStaffBadge === 'function') updateStaffBadge();
-      }
-    }, { once: true });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', wireSharedUiControls);
-  } else {
-    wireSharedUiControls();
-  }
-})();
-</script>
-
+    <script src="/js/task-identity.js"></script>
+    <script src="/js/setup-form-sync.js"></script>
+    <script src="/js/wake-form.js"></script>
 </body>
 </html>

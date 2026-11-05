@@ -6,16 +6,28 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 const root = path.resolve(__dirname, '../public');
 
-for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-setup.html']) {
-  test(`${form}: realtime setup workflow`, async () => {
+for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-setup.html', 'wake-setup.html', 'wake-during.html', 'wake-clear.html']) {
+  test(`${form}: realtime stage workflow`, async () => {
     const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH || (fs.existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined), args: ['--no-sandbox'] });
     try {
       const context = await browser.newContext();
       context.setDefaultTimeout(6000);
-      let event = { eventType: form.startsWith('feast') ? 'feast' : 'foundation', guests: 80, date: '2026-11-05',
-        setup: { teamLeader: 'Alex', staffMembers: ['Sam', 'Jo'] }, during: { teamLeader: 'Other stage' },
-        customTasks: [{ form: 'setup', section: form.startsWith('feast') ? 's1' : 's2', label: 'Manager task' }], hiddenTasks: [] };
+      const wake = form.startsWith('wake');
+      const stage = form === 'wake-during.html' ? 'during' : form === 'wake-clear.html' ? 'clearup' : 'setup';
+      const otherStage = stage === 'during' ? 'clearup' : 'during';
+      const section = wake ? (stage === 'setup' ? 'hall' : 'bar') : form.startsWith('feast') ? 's1' : 's2';
+      let event = { eventType: wake ? 'wake' : form.startsWith('feast') ? 'feast' : 'foundation', guests: 80, date: '2026-11-05',
+        [otherStage]: { teamLeader: 'Other stage' },
+        customTasks: [{ form: stage, section, label: 'Manager task' }], hiddenTasks: [] };
       const data = {};
+      const taskPath = 'events/test/' + stage;
+      const legacyKey = stage === 'setup' ? 'hall-buffet-1' : 'bar-bar-1';
+      if (wake) {
+        data[taskPath] = { tasks: { [legacyKey]: stage === 'setup' ? { checked: true, initials: 'OLD', time: '12:34' } : true },
+          [stage + '_s0_1']: { checked: true, initials: 'FLAT', time: '12:35' },
+          teamLeader: 'Alex', staffNames: ['Sam', 'Jo'], guests: 60 };
+      } else event[stage] = { teamLeader: 'Alex', staffMembers: ['Sam', 'Jo'] };
+      const legacyBefore = structuredClone(data[taskPath]);
       let fail = false;
       const errors = [];
       const publish = async () => {
@@ -71,10 +83,10 @@ for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-se
         const file = path.join(root, url.pathname);
         route.fulfill({ body: fs.readFileSync(file), contentType: file.endsWith('.js') ? 'application/javascript' : 'text/html' });
       });
-      async function open() {
+      async function open(pageForm = form) {
         const page = await context.newPage();
         page.on('pageerror', error => { errors.push(error.message); console.error(error.message); });
-        await page.goto(`https://forms.test/${form}?event=test`);
+        await page.goto(`https://forms.test/${pageForm}?event=test`);
         await page.waitForFunction(() => !document.getElementById('team-leader').disabled);
         return page;
       }
@@ -84,14 +96,16 @@ for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-se
       await a.locator(notes).first().fill('Keep my notes');
       await a.waitForFunction(() => document.querySelector('.notes-row textarea').dataset.unsaved === 'false');
       assert.equal(await b.locator(notes).first().inputValue(), 'Keep my notes');
+      if (!wake) {
       await a.locator('.item-qty input').first().fill('0');
       await a.waitForFunction(() => document.querySelector('.item-qty input').dataset.unsaved === 'false');
       assert.equal(await b.locator('.item-qty input').first().inputValue(), '0');
+      }
       await a.locator('#team-leader').fill('New leader');
       await b.waitForFunction(() => document.getElementById('team-leader').value === 'New leader');
       await a.locator('.staff-input').first().fill('Updated Sam');
       await b.waitForFunction(() => document.querySelector('.staff-input').value === 'Updated Sam');
-      assert.equal(event.during.teamLeader, 'Other stage');
+      assert.equal(event[otherStage].teamLeader, 'Other stage');
       await a.locator('.js-remove-staff').first().click();
       await b.waitForFunction(() => document.querySelectorAll('.staff-input').length === 1);
       await a.locator('.js-remove-staff').first().click();
@@ -100,6 +114,15 @@ for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-se
       await a.locator('.staff-input').fill('Added staff');
       await b.waitForFunction(() => document.querySelector('.staff-input')?.value === 'Added staff');
       const cb = '.checklist-item input[type=checkbox]';
+      if (wake) {
+        assert.equal(await a.locator(cb).first().isChecked(), true);
+        assert.equal(await a.locator(cb).nth(1).isChecked(), true);
+        await a.locator(cb).first().uncheck();
+        await b.waitForFunction(() => !document.querySelector('.checklist-item input').checked);
+        const reopened = await open();
+        assert.equal(await reopened.locator(cb).first().isChecked(), false);
+        await reopened.close();
+      }
       await Promise.all([a.locator(cb).nth(0).check(), b.locator(cb).nth(1).check()]);
       await a.waitForFunction(() => [...document.querySelectorAll('.checklist-item input[type=checkbox]')].slice(0, 2).every(cb => cb.checked));
       await a.locator('.custom-task input').check();
@@ -110,7 +133,7 @@ for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-se
       assert.equal(await c.locator('.custom-task input').isChecked(), true);
       assert.equal(await c.locator('.staff-input').inputValue(), 'Added staff');
       const key = await a.locator('.checklist-item').first().getAttribute('data-task-id');
-      event.hiddenTasks = [key]; event.customTasks.push({ id: 'new-manager-task', form: 'setup', section: 's2', label: 'New task' });
+      event.hiddenTasks = [key]; event.customTasks.push({ id: 'new-manager-task', form: stage, section: wake ? section : 's2', label: 'New task' });
       await publish();
       assert.equal(await a.locator('.checklist-item').first().isVisible(), false);
       assert.equal(await b.locator('.custom-task').count(), 2);
@@ -129,6 +152,37 @@ for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-se
         await b.waitForFunction(() => document.getElementById('meta-sash').value === 'Ivory');
         await a.locator('#feast-hall-access-time').fill('14:30');
         await b.waitForFunction(() => document.getElementById('feast-hall-access-time').value === '14:30');
+      }
+      if (wake) {
+        await a.locator('.guest-btn[data-count="120"]').click();
+        await b.waitForFunction(() => document.getElementById('currentGuests').textContent === '120');
+        assert.equal(event.guests, 120);
+        if (stage === 'during') {
+          const clearup = await open('wake-clear.html');
+          assert.equal(await clearup.locator('#team-leader').inputValue(), 'Other stage');
+          assert.equal(await clearup.locator('.notes-row textarea').first().inputValue(), '');
+          assert.equal(await clearup.locator('#currentGuests').innerText(), '120');
+          const setup = await open('wake-setup.html');
+          assert.equal(await setup.locator('#currentGuests').innerText(), '120');
+          assert.equal(await setup.locator('#chairs').innerText(), '120');
+        }
+        assert.deepEqual(data[taskPath].tasks, legacyBefore.tasks);
+        assert.deepEqual(data[taskPath].staffNames, legacyBefore.staffNames);
+        assert.deepEqual(data[taskPath][stage + '_s0_1'], legacyBefore[stage + '_s0_1']);
+        assert.equal(data[taskPath].guests, 60);
+        // A conflicting legacy pair is surfaced, never silently combined.
+        const conflicting = await a.locator(cb).nth(2).evaluate(el => ({
+          nested: el.dataset.section + '-' + el.dataset.task,
+          flat: el.closest('.task').dataset.legacyFlatId
+        }));
+        data[taskPath].tasks[conflicting.nested] = true;
+        data[taskPath][conflicting.flat] = { checked: false };
+        await publish();
+        assert.equal(await a.locator(cb).nth(2).isDisabled(), true);
+        await a.getByRole('button', { name: 'Legacy record: complete', exact: true }).click();
+        await b.waitForFunction(() => document.querySelectorAll('.checklist-item input[type=checkbox]')[2].checked);
+        assert.equal(data[taskPath].tasks[conflicting.nested], true);
+        assert.deepEqual(data[taskPath][conflicting.flat], { checked: false });
       }
       const missing = await context.newPage();
       await missing.goto(`https://forms.test/${form}`);

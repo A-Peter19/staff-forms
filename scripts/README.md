@@ -39,3 +39,8 @@ hiding/unhiding, retry after a failed write, and Feast event details. Set
 `CHROMIUM_PATH` to use another installed Chromium; `/usr/bin/chromium` is detected
 automatically. These checks do not verify production Firebase rules or offline
 reconnection. The transaction mock does not simulate Firestore conflict retries.
+
+The same browser suite also covers Wake setup, during and clear-up, including
+nested and flat legacy saves, explicit unticking without resurrecting old ticks,
+conflict choices, stage isolation and shared guest counts. Wake compatibility
+rules are documented in `docs/wake-form-autosave.md`.
