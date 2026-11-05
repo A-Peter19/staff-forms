@@ -56,3 +56,6 @@ Run just Flourish and its shared UI consumers with:
 ```sh
 node --test --test-name-pattern='flourish/|evening-party/' scripts/setup-forms.test.js
 ```
+
+Twilight's three pages are included, with legacy positional-tick review/application,
+existing Firestore section notes, bar times, and final handover-note autosave.
