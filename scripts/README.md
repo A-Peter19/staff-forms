@@ -23,3 +23,19 @@ Synthetic examples of the existing saved-data formats are documented in [fixture
 ```sh
 node --test scripts/saved-data-fixtures.test.js
 ```
+
+Setup-form browser checks (Feast and Foundation):
+
+```sh
+npm install --no-save --package-lock=false playwright
+npx playwright install chromium
+node --test scripts/setup-forms.test.js
+```
+
+The test uses an in-memory Firebase adapter and loads the actual HTML/scripts in
+Chromium. It covers multiple staff screens, saving/reopening notes and quantities,
+stage-specific staffing, repeated removal, checkbox updates, manager tasks,
+hiding/unhiding, retry after a failed write, and Feast event details. Set
+`CHROMIUM_PATH` to use another installed Chromium; `/usr/bin/chromium` is detected
+automatically. These checks do not verify production Firebase rules or offline
+reconnection. The transaction mock does not simulate Firestore conflict retries.
