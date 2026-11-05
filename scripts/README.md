@@ -59,3 +59,11 @@ node --test --test-name-pattern='flourish/|evening-party/' scripts/setup-forms.t
 
 Twilight's three pages are included, with legacy positional-tick review/application,
 existing Firestore section notes, bar times, and final handover-note autosave.
+
+Feast/Foundation during and clear-up checks preserve unprefixed saved tick keys,
+verify scoped manager-hidden IDs, and ensure reset leaves hidden completions intact.
+Run all six pages in these two families with:
+
+```sh
+node --test --test-name-pattern='^(feast|foundation)/' scripts/setup-forms.test.js
+```
