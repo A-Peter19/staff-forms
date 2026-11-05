@@ -67,3 +67,6 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Generated local realtime test report
+/qa/realtime-sync-report.md
