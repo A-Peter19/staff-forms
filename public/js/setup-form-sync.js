@@ -1,0 +1,241 @@
+// Opt-in controller for Feast and Foundation. Existing stage paths remain compatible.
+(function (global) {
+  'use strict';
+  global.startSetupFormSync = function () {
+    const stage = 'setup';
+    const sync = global.StaffFormSync;
+    const eventId = sync.getEventId();
+    const controls = () => [...document.querySelectorAll('input, select, textarea, .js-add-staff, .js-remove-staff, #btn-reset')];
+    const banner = document.createElement('div');
+    banner.className = 'staff-banner';
+    const message = document.createElement('span');
+    message.setAttribute('role', 'status');
+    banner.appendChild(message);
+    document.querySelector('header').after(banner);
+    const initials = document.createElement('input');
+    initials.placeholder = 'Your initials';
+    initials.maxLength = 8;
+    initials.setAttribute('aria-label', 'Your initials for completed tasks');
+    initials.value = localStorage.getItem('staffInitials') || '';
+    global.staffInitials = initials.value;
+    initials.addEventListener('input', () => {
+      global.staffInitials = initials.value.trim().toUpperCase();
+      localStorage.setItem('staffInitials', global.staffInitials);
+    });
+    banner.appendChild(initials);
+    let ready = false, eventLoaded = false, checklistLoaded = false, notesLoaded = false, quantitiesLoaded = false;
+    let checklist = {};
+    const pendingTasks = new Map(), dirty = new Map(), timers = new Map();
+    const statuses = new Map();
+    function status(field, text, retry) {
+      let node = statuses.get(field);
+      if (!node) {
+        node = document.createElement('span');
+        node.setAttribute('role', 'status');
+        field.after(node);
+        statuses.set(field, node);
+      }
+      node.textContent = text;
+      if (retry) {
+        const button = document.createElement('button');
+        button.type = 'button'; button.textContent = 'Retry';
+        button.addEventListener('click', retry); node.appendChild(button);
+      }
+    }
+    function lock(text) {
+      ready = false; controls().forEach(field => { field.disabled = true; });
+      message.textContent = text;
+    }
+    function enable() {
+      if (!eventLoaded || !checklistLoaded || !notesLoaded || !quantitiesLoaded) return;
+      ready = true;
+      controls().forEach(field => { field.disabled = false; });
+      document.getElementById('meta-guests').disabled = true;
+      document.getElementById('meta-day').disabled = true;
+      message.textContent = 'Changes save automatically. Enter your initials before ticking tasks.';
+    }
+    lock('Loading saved form…');
+    if (!eventId) { lock('Open an event from the dashboard to use this form.'); return; }
+    const eventRef = global.db.collection('events').doc(eventId);
+    const taskRef = global.rtdb.ref('events/' + eventId + '/' + stage);
+    sync.assignMissingTaskIds(stage);
+    const baseRows = [...document.querySelectorAll('.checklist-item')];
+    baseRows.forEach(row => { row.dataset.baseTaskId = row.dataset.taskId; });
+    const boxes = () => [...document.querySelectorAll('.checklist-item input[type="checkbox"]')];
+    function paintTasks() {
+      boxes().forEach(cb => {
+        const key = cb.closest('.checklist-item').dataset.taskId;
+        const value = pendingTasks.has(key) ? pendingTasks.get(key).value : checklist[key];
+        cb.checked = !!(value && value.checked);
+        const row = cb.closest('.checklist-item');
+        row.classList.toggle('done', cb.checked);
+        let meta = row.querySelector('.task-meta');
+        if (!meta) { meta = document.createElement('div'); meta.className = 'task-meta'; row.appendChild(meta); }
+        meta.textContent = cb.checked ? [value.initials, value.time].filter(Boolean).join(' · ') : '';
+      });
+      global.updateProgress();
+    }
+    function writeTask(cb, value) {
+      const key = cb.closest('.checklist-item').dataset.taskId;
+      const edit = { value };
+      pendingTasks.set(key, edit); paintTasks(); status(cb, 'Saving…');
+      taskRef.update({ [key]: value }).then(() => {
+        if (pendingTasks.get(key) !== edit) return;
+        pendingTasks.delete(key); status(cb, 'Saved'); paintTasks();
+      }).catch(() => {
+        if (pendingTasks.get(key) === edit) status(cb, 'Not saved. ', () => writeTask(cb, edit.value));
+      });
+    }
+    document.addEventListener('change', event => {
+      const cb = event.target;
+      if (!cb.matches('.checklist-item input[type="checkbox"]') || !ready) return;
+      if (cb.checked && !global.staffInitials.trim()) {
+        cb.checked = false; initials.focus(); message.textContent = 'Enter your initials before ticking a task.'; return;
+      }
+      writeTask(cb, cb.checked ? { checked: true, initials: global.staffInitials,
+        time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) } : null);
+    });
+    global.resetAll = function () {
+      if (!ready || !confirm('Reset visible checkboxes? This cannot be undone.')) return;
+      boxes().filter(cb => !cb.closest('.checklist-item').hidden).forEach(cb => writeTask(cb, null));
+    };
+    // Legacy tasks without IDs use a deterministic content key; never guess old random IDs.
+    function customKey(task, occurrence) {
+      return 'custom_' + global.customTaskId(task, occurrence);
+    }
+    function renderTasks(ev) {
+      const type = ev.eventType || 'wedding';
+      baseRows.forEach(row => { row.dataset.taskId = type + '_' + row.dataset.baseTaskId; });
+      const wanted = new Set(), seen = new Map();
+      (ev.customTasks || []).filter(t => t.form === stage).forEach(task => {
+        const signature = JSON.stringify([task.form, task.section, task.label]);
+        const occurrence = seen.get(signature) || 0; seen.set(signature, occurrence + 1);
+        const key = customKey(task, occurrence); wanted.add(key);
+        let row = [...document.querySelectorAll('.custom-task')].find(r => r.dataset.taskId === key);
+        if (!row) {
+          const anchor = baseRows.find(r => r.dataset.section === task.section);
+          if (!anchor) return;
+          row = document.createElement('div'); row.className = 'checklist-item custom-task';
+          row.dataset.section = task.section; row.dataset.taskId = key;
+          row.innerHTML = '<input type="checkbox"><div class="item-content"><div class="item-label"></div></div>';
+          const body = anchor.parentElement;
+          body.insertBefore(row, body.querySelector('.notes-row'));
+        }
+        row.querySelector('.item-label').textContent = task.label;
+      });
+      document.querySelectorAll('.custom-task').forEach(row => { if (!wanted.has(row.dataset.taskId)) row.remove(); });
+      const hidden = new Set(ev.hiddenTasks || []);
+      document.querySelectorAll('.checklist-item').forEach(row => {
+        row.hidden = hidden.has(row.dataset.taskId) || hidden.has(row.dataset.baseTaskId);
+        row.style.display = row.hidden ? 'none' : '';
+      });
+      paintTasks();
+    }
+    function staffEntries(ev) {
+      if (ev.setup && ev.setup.staffEntries) return ev.setup.staffEntries;
+      return Object.fromEntries(((ev.setup || {}).staffMembers || []).map((name, i) => ['legacy_' + i, name]));
+    }
+    function renderStaff(ev) {
+      const entries = staffEntries(ev);
+      const list = document.getElementById('staff-list');
+      [...list.children].forEach(row => {
+        const input = row.querySelector('input');
+        if (!Object.hasOwn(entries, row.dataset.staffId) && !dirty.has(input)) row.remove();
+      });
+      Object.entries(entries).forEach(([id, name]) => {
+        let row = [...list.children].find(r => r.dataset.staffId === id);
+        if (!row) { global.addStaffMember(name, id); row = list.lastElementChild; }
+        const input = row.querySelector('input');
+        if (!dirty.has(input)) input.value = name;
+      });
+      global.updateStaffBadge();
+    }
+    function writeField(field, operation) {
+      const edit = {};
+      dirty.set(field, edit); status(field, 'Saving…');
+      operation().then(() => {
+        if (dirty.get(field) !== edit) return;
+        dirty.delete(field); status(field, 'Saved');
+      }).catch(() => { if (dirty.get(field) === edit) status(field, 'Not saved. ', () => writeField(field, operation)); });
+    }
+    function saveStaff(input, remove) {
+      const id = input.parentElement.dataset.staffId;
+      const value = input.value;
+      writeField(input, () => global.db.runTransaction(async transaction => {
+        const snap = await transaction.get(eventRef);
+        if (!snap.exists) throw new Error('Event missing');
+        const entries = { ...staffEntries(snap.data()) };
+        if (remove) delete entries[id]; else entries[id] = value;
+        transaction.update(eventRef, { 'setup.staffEntries': entries,
+          'setup.staffMembers': Object.values(entries).filter(Boolean) });
+      }).then(() => { if (remove) input.parentElement.remove(); global.updateStaffBadge(); }));
+    }
+    // Hall access is an event detail, separate from the checklist tick.
+    if (/\/feast\//.test(global.location.pathname)) {
+      const label = baseRows[0].querySelector('.item-label');
+      label.textContent = 'Main Hall unlocked and accessible from ';
+      const field = document.createElement('input');
+      field.type = 'time'; field.id = 'feast-hall-access-time'; field.required = true;
+      field.setAttribute('aria-label', 'Main Hall access time');
+      label.appendChild(field);
+    }
+    const metadata = { 'feast-hall-access-time': 'feastSetupHallAccessTime', 'team-leader': 'setup.teamLeader', 'meta-catering': 'catering', 'meta-sash': 'sash', 'meta-runner': 'runner' };
+    function queue(field, save) {
+      dirty.set(field, {}); status(field, 'Unsaved…'); clearTimeout(timers.get(field));
+      timers.set(field, setTimeout(() => { timers.delete(field); save(); }, 250));
+    }
+    document.addEventListener('input', event => {
+      if (!ready) return;
+      const field = event.target;
+      if (field.matches('.staff-input')) queue(field, () => saveStaff(field, false));
+      else if (metadata[field.id]) {
+        if (!field.checkValidity()) {
+          clearTimeout(timers.get(field)); timers.delete(field);
+          dirty.set(field, {}); status(field, 'Enter a valid value.'); return;
+        }
+        queue(field, () => {
+          const value = field.value;
+          writeField(field, () => eventRef.update({ [metadata[field.id]]: value }));
+        });
+      }
+    });
+    document.addEventListener('click', event => {
+      const button = event.target.closest('.js-remove-staff');
+      if (!button || !ready) return;
+      const input = button.parentElement.querySelector('input');
+      clearTimeout(timers.get(input)); timers.delete(input); saveStaff(input, true);
+    });
+    global.addEventListener('beforeunload', event => {
+      if (dirty.size || pendingTasks.size || document.querySelector('[data-unsaved="true"]')) {
+        event.preventDefault(); event.returnValue = '';
+      }
+    });
+    let notesStarted = false;
+    eventRef.onSnapshot(snap => {
+      if (!snap.exists) { eventLoaded = false; lock('Event not found. Return to the dashboard.'); return; }
+      const latestEvent = snap.data();
+      document.getElementById('meta-guests').value = '';
+      document.getElementById('meta-day').value = '';
+      sync.applyEventSummary(latestEvent);
+      renderTasks(latestEvent); renderStaff(latestEvent);
+      Object.entries(metadata).forEach(([id, key]) => {
+        const field = document.getElementById(id);
+        const value = key === 'setup.teamLeader' ? (latestEvent.setup || {}).teamLeader : latestEvent[key];
+        if (field && !dirty.has(field)) field.value = value || (id === 'feast-hall-access-time' ? '13:00' : '');
+      });
+      eventLoaded = true;
+      if (!notesStarted) {
+        notesStarted = true;
+        sync.loadRealtimeSectionNotes(stage, () => { notesLoaded = true; enable(); },
+          () => { notesLoaded = false; lock('Could not load notes. Reload to reconnect.'); });
+        sync.bindRealtimeSectionNotesSync(stage);
+        sync.loadRealtimeItemQuantities(stage, () => { quantitiesLoaded = true; enable(); },
+          () => { quantitiesLoaded = false; lock('Could not load details. Reload to reconnect.'); });
+        sync.bindRealtimeItemQuantitiesSync(stage);
+      }
+      enable();
+    }, () => { eventLoaded = false; lock('Could not load event details. Reload to reconnect.'); });
+    taskRef.on('value', snap => { checklist = snap.val() || {}; checklistLoaded = true; paintTasks(); enable(); },
+      () => { checklistLoaded = false; lock('Could not load checklist. Reload to reconnect.'); });
+  };
+})(window);

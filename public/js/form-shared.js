@@ -264,6 +264,7 @@
   }
   function showFieldSaveState(field, message, retry) {
     var state = fieldState(field);
+    if (field.dataset) field.dataset.unsaved = state.dirty ? 'true' : 'false';
     if (!field.insertAdjacentElement) return;
     if (!state.status) {
       state.status = document.createElement('span');
@@ -335,7 +336,7 @@
     return key;
   }
 
-  function loadRealtimeSectionNotes(formKey) {
+  function loadRealtimeSectionNotes(formKey, onReady, onError) {
     var eventId = getEventId();
     if (!eventId || !global.rtdb || !global.rtdb.ref) return;
     global.rtdb.ref('events/' + eventId + '/' + formKey + '_notes').on('value', function (snapshot) {
@@ -346,7 +347,8 @@
         var remoteValue = state[key] || '';
         applyRemoteField(textarea, remoteValue);
       });
-    });
+      if (onReady) onReady();
+    }, onError);
   }
 
   function saveRealtimeSectionNotes(formKey, changedField) {
@@ -364,6 +366,7 @@
       if (!target || !target.matches || !target.matches('.notes-row textarea')) return;
       fieldState(target).dirty = true;
       fieldState(target).revision++;
+      if (target.dataset) target.dataset.unsaved = 'true';
       var key = getSectionNoteKey(target, Array.from(document.querySelectorAll('.notes-row textarea')).indexOf(target));
       if (timers[key]) clearTimeout(timers[key]);
       timers[key] = setTimeout(function () {
@@ -388,7 +391,7 @@
     return key;
   }
 
-  function loadRealtimeItemQuantities(formKey) {
+  function loadRealtimeItemQuantities(formKey, onReady, onError) {
     var eventId = getEventId();
     if (!eventId || !global.rtdb || !global.rtdb.ref) return;
     global.rtdb.ref('events/' + eventId + '/' + formKey + '_quantities').on('value', function (snapshot) {
@@ -400,7 +403,8 @@
           (field.tagName === 'SELECT' ? fieldState(field).defaultValue : '');
         applyRemoteField(field, nextValue);
       });
-    });
+      if (onReady) onReady();
+    }, onError);
   }
 
   function saveRealtimeItemQuantities(formKey, changedField) {
@@ -418,6 +422,7 @@
       if (!target || !target.matches || !target.matches('.checklist-item .item-qty input, .checklist-item .item-qty textarea, .task .item-qty input, .task .item-qty textarea')) return;
       fieldState(target).dirty = true;
       fieldState(target).revision++;
+      if (target.dataset) target.dataset.unsaved = 'true';
       var key = getItemQuantityKey(target, 0);
       if (timers[key]) clearTimeout(timers[key]);
       timers[key] = setTimeout(function () {
@@ -429,6 +434,7 @@
       if (!target || !target.matches || !target.matches('.checklist-item .item-qty select, .task .item-qty select')) return;
       fieldState(target).dirty = true;
       fieldState(target).revision++;
+      if (target.dataset) target.dataset.unsaved = 'true';
       saveRealtimeItemQuantities(formKey, target).catch(function () {});
     });
   }
@@ -455,6 +461,8 @@
 
   global.StaffFormSync = {
     getEventId: getEventId,
+    assignMissingTaskIds: assignMissingTaskIds,
+    applyEventSummary: applyEventSummary,
     loadEventMetaAndApplyHiddenTasks: loadEventMetaAndApplyHiddenTasks,
     injectCustomTasks: injectCustomTasks,
     loadRealtimeChecklist: loadRealtimeChecklist,
@@ -476,6 +484,7 @@
   if (!global.location || !/\/feast\/feast-flourish-setup\.html$/.test(global.location.pathname)) return;
 
   function initFeastHallAccessTime() {
+    if (global.startSetupFormSync) return;
     var row = document.querySelector('.checklist-item[data-section="s1"]');
     var label = row && row.querySelector('.item-label');
     if (!label || document.getElementById('feast-hall-access-time')) return;

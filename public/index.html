@@ -125,6 +125,7 @@
     .mt-footer{padding:16px 28px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #eaecf0}
 
   </style>
+<script src="/js/task-identity.js"></script>
 </head>
 <body>
 
@@ -412,6 +413,7 @@
     var fVal = task.form || 'setup';
     var row = document.createElement('div');
     row.className = 'task-row';
+    row.dataset.taskId = task.id || ('task_' + crypto.randomUUID());
 
     var formSel = document.createElement('select');
     formSel.className = 'task-form';
@@ -467,6 +469,7 @@
       var label = row.querySelector('.task-label').value.trim();
       if (label) {
         result.push({
+          id:      row.dataset.taskId,
           form:    row.querySelector('.task-form').value,
           section: row.querySelector('.task-section').value,
           label:   label
@@ -831,8 +834,12 @@
     } catch (err) {
       editSectionMaps = DEFAULT_SECTION_MAPS;
     }
+    var taskOccurrences = new Map();
     ev.customTasks.forEach(function(t) {
-      list.appendChild(buildTaskRow(t, editSectionMaps));
+      var signature = JSON.stringify([t.form, t.section, t.label]);
+      var occurrence = taskOccurrences.get(signature) || 0;
+      taskOccurrences.set(signature, occurrence + 1);
+      list.appendChild(buildTaskRow(Object.assign({}, t, { id: customTaskId(t, occurrence) }), editSectionMaps));
     });
     document.getElementById('edit-status').textContent = '';
     document.getElementById('edit-overlay').classList.add('open');

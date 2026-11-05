@@ -749,6 +749,8 @@
 </div>
 
 <script src="/js/form-shared.js"></script>
+<script src="/js/task-identity.js"></script>
+<script src="/js/setup-form-sync.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyBa9zA9-RlT5SVAaOb208_KE644zY8dvUE",
@@ -766,19 +768,13 @@ const db = window.db;
 const rtdb = window.rtdb;
   const FORM_KEY = "setup";
 
-  function getEventId() { return StaffFormSync.getEventId(); }
-  function loadEventMetaAndApplyHiddenTasks() { return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY); }
-  function injectCustomTasks(formKey, eventMeta) { return StaffFormSync.injectCustomTasks(formKey || FORM_KEY, eventMeta); }
-  function loadRealtimeChecklist(formKey) { return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY); }
-  function saveRealtimeChecklist(formKey) { return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY); }
-  function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
-  function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
+
 </script>
 
 <script>
   function updateProgress() {
-    const all  = document.querySelectorAll('.checklist-item input[type="checkbox"]');
-    const done = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked');
+    const all = [...document.querySelectorAll('.checklist-item input[type="checkbox"]')].filter(cb => !cb.closest('.checklist-item').hidden);
+    const done = all.filter(cb => cb.checked);
     const pct  = all.length ? Math.round((done.length / all.length) * 100) : 0;
     document.getElementById('progress-text').textContent = `${done.length} / ${all.length} items complete`;
     document.getElementById('bar-fill').style.width = pct + '%';
@@ -787,46 +783,40 @@ const rtdb = window.rtdb;
       const item = sec.querySelector('.checklist-item');
       if (!item) return;
       const sid     = item.dataset.section;
-      const items   = sec.querySelectorAll(`.checklist-item[data-section="${sid}"] input[type="checkbox"]`);
-      const checked = sec.querySelectorAll(`.checklist-item[data-section="${sid}"] input[type="checkbox"]:checked`);
+      const items = [...sec.querySelectorAll(`.checklist-item[data-section="${sid}"] input[type="checkbox"]`)].filter(cb => !cb.closest(".checklist-item").hidden);
+      const checked = items.filter(cb => cb.checked);
       const badge   = sec.querySelector('.badge');
       if (badge && sid) badge.textContent = `${checked.length}/${items.length}`;
     });
   }
 
-  document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
-    cb.addEventListener('change', function () {
-      this.closest('.checklist-item').classList.toggle('done', this.checked);
-      updateProgress();
-      saveRealtimeChecklist(FORM_KEY);
-    });
-  });
-
   updateProgress();
-  bindCheckboxMeta();
-  loadEventMetaAndApplyHiddenTasks().then(function(ev){
-    injectCustomTasks(FORM_KEY, ev);
-    loadRealtimeChecklist(FORM_KEY);
-  });
+  document.addEventListener('DOMContentLoaded', startSetupFormSync);
+
 
   function toggleSection(header) {
     const body = header.nextElementSibling;
     body.style.display = body.style.display === 'none' ? 'block' : 'none';
   }
 
-  function addStaffMember(value = '') {
+  function addStaffMember(value = '', staffId) {
     const list = document.getElementById('staff-list');
     const row = document.createElement('div');
+    row.dataset.staffId = staffId || ('staff_' + crypto.randomUUID());
     row.style.cssText = 'display:flex; gap:8px; margin-bottom:8px; align-items:center;';
     row.innerHTML = `
-      <input type="text" class="staff-input" placeholder="Staff member name..." value="${value}"
+      <input type="text" class="staff-input" placeholder="Staff member name..."
         style="flex:1; padding:10px 12px; border:1px solid #ddd; border-radius:6px; font-size:0.92rem; background:#fdf7ff;" />
       <button type="button" class="btn-remove-staff js-remove-staff"
         style="width:38px; height:38px; background:#c0392b; border:none; border-radius:6px; color:white; font-size:1rem; cursor:pointer; flex-shrink:0;">✕</button>
     `;
+    row.querySelector('input').value = value;
     row.querySelector('input').addEventListener('input', updateStaffBadge);
     list.appendChild(row);
-    row.querySelector('input').focus();
+    if (!staffId) {
+      row.querySelector('input').focus();
+      row.querySelector('input').dispatchEvent(new Event('input', { bubbles: true }));
+    }
     updateStaffBadge();
   }
 
@@ -837,17 +827,6 @@ const rtdb = window.rtdb;
     if (badge) badge.textContent = filled + ' staff';
   }
 
-  addStaffMember();
-
-  function resetAll() {
-    if (!confirm('Reset all checkboxes? This cannot be undone.')) return;
-    document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
-      cb.checked = false;
-      cb.closest('.checklist-item').classList.remove('done');
-    });
-    updateProgress();
-    saveRealtimeChecklist(FORM_KEY);
-  }
 </script>
 
 <script>
@@ -897,14 +876,7 @@ const rtdb = window.rtdb;
       });
     });
 
-    document.addEventListener('click', function (event) {
-      var removeBtn = event.target.closest('.js-remove-staff');
-      if (removeBtn) {
-        var row = removeBtn.closest('.staff-row') || removeBtn.parentElement;
-        if (row) row.remove();
-        if (typeof updateStaffBadge === 'function') updateStaffBadge();
-      }
-    }, { once: true });
+
   }
 
   if (document.readyState === 'loading') {
