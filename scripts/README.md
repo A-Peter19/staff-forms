@@ -44,3 +44,7 @@ The same browser suite also covers Wake setup, during and clear-up, including
 nested and flat legacy saves, explicit unticking without resurrecting old ticks,
 conflict choices, stage isolation and shared guest counts. Wake compatibility
 rules are documented in `docs/wake-form-autosave.md`.
+
+Evening Party setup, during and clear-up are also included in the browser suite.
+It checks shared event details across stages, unknown saved table-style options,
+and preservation of positional backups without overwriting current realtime ticks.
