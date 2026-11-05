@@ -1,7 +1,7 @@
 # Evening Party realtime forms
 
 Setup, during and clear-up now use the shared stage controller with
-`public/js/evening-party-form.js`. Manual Save buttons, duplicate initializers and
+`public/js/checklist-form-ui.js`. Manual Save buttons, duplicate initializers and
 whole-checklist backup writes have been removed. Existing task content and blue
 styling remain.
 
