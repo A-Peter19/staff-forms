@@ -6,7 +6,7 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 const root = path.resolve(__dirname, '../public');
 
-for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-setup.html', 'wake-setup.html', 'wake-during.html', 'wake-clear.html', 'evening-party/evening-party-setup.html', 'evening-party/evening-party-during.html', 'evening-party/evening-party-clear.html', 'flourish/flourish-setup.html', 'flourish/flourish-during.html', 'flourish/flourish-clearup.html']) {
+for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-setup.html', 'wake-setup.html', 'wake-during.html', 'wake-clear.html', 'evening-party/evening-party-setup.html', 'evening-party/evening-party-during.html', 'evening-party/evening-party-clear.html', 'flourish/flourish-setup.html', 'flourish/flourish-during.html', 'flourish/flourish-clearup.html', 'twilight/twilight-setup.html', 'twilight/twilight-during.html', 'twilight/twilight-clearup.html']) {
   test(`${form}: realtime stage workflow`, async () => {
     const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH || (fs.existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined), args: ['--no-sandbox'] });
     try {
@@ -15,10 +15,11 @@ for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-se
       const wake = form.startsWith('wake');
       const evening = form.startsWith('evening-party/');
       const flourish = form.startsWith('flourish/');
+      const twilight = form.startsWith('twilight/');
       const stage = form.endsWith('-during.html') ? 'during' : (form.endsWith('-clear.html') || form.endsWith('-clearup.html')) ? 'clearup' : 'setup';
       const otherStage = stage === 'during' ? 'clearup' : 'during';
-      const section = wake ? (stage === 'setup' ? 'hall' : 'bar') : (evening || flourish || form.startsWith('feast')) ? 's1' : 's2';
-      let event = { eventType: wake ? 'wake' : evening ? 'party' : flourish ? 'wedding' : form.startsWith('feast') ? 'feast' : 'foundation', guests: 80, date: '2026-11-05',
+      const section = wake ? (stage === 'setup' ? 'hall' : 'bar') : (evening || flourish || twilight || form.startsWith('feast')) ? 's1' : 's2';
+      let event = { eventType: wake ? 'wake' : evening ? 'party' : (flourish || twilight) ? 'wedding' : form.startsWith('feast') ? 'feast' : 'foundation', guests: 80, date: '2026-11-05',
         [otherStage]: { teamLeader: 'Other stage' },
         customTasks: [{ form: stage, section, label: 'Manager task' }], hiddenTasks: [] };
       const data = {};
@@ -46,6 +47,11 @@ for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-se
           Object.assign(data[taskPath + '_notes'], fixture.setup_notes);
           data[taskPath + '_quantities'] = structuredClone(fixture.setup_quantities);
         }
+      }
+      if (twilight) {
+        const fixture = require('./fixtures/saved-data/twilight.json');
+        data[taskPath] = structuredClone(fixture.realtimeDatabase.events['fixture-twilight'][stage]);
+        Object.assign(event[stage], { sectionNotes: { ta_0: 'Old section note' }, finalNotes: 'Old handover', barOpen: '18:30', barClose: '23:15' });
       }
       const legacyBefore = structuredClone(data[taskPath]);
       let fail = false;
@@ -126,6 +132,14 @@ for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-se
           assert.equal(await a.locator('[data-qty-key="wedding_setup_s5_0__field_1"]').inputValue(), 'Fishbowl');
         }
       }
+      if (twilight) {
+        assert.equal(await a.locator('.notes-row textarea').first().inputValue(), 'Old section note');
+        await a.locator('details summary').click();
+        await a.getByLabel('Match cb_0 to current task').selectOption('0');
+        await a.locator('details button').first().click();
+        await b.waitForFunction(() => document.querySelector('.checklist-item input[type=checkbox]').checked);
+        assert.deepEqual(data[taskPath].cb_0, legacyBefore.cb_0);
+      }
       const notes = '.notes-row textarea';
       await a.locator(notes).first().fill('Keep my notes');
       await a.waitForFunction(() => document.querySelector('.notes-row textarea').dataset.unsaved === 'false');
@@ -167,7 +181,7 @@ for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-se
       assert.equal(await c.locator('.custom-task input').isChecked(), true);
       assert.equal(await c.locator('.staff-input').inputValue(), 'Added staff');
       const key = await a.locator('.checklist-item').first().getAttribute('data-task-id');
-      event.hiddenTasks = [key]; event.customTasks.push({ id: 'new-manager-task', form: stage, section: wake ? section : 's2', label: 'New task' });
+      event.hiddenTasks = [key]; event.customTasks.push({ id: 'new-manager-task', form: stage, section: (wake || twilight) ? section : 's2', label: 'New task' });
       await publish();
       assert.equal(await a.locator('.checklist-item').first().isVisible(), false);
       assert.equal(await b.locator('.custom-task').count(), 2);
@@ -205,6 +219,22 @@ for (const form of ['feast/feast-flourish-setup.html', 'foundation/foundation-se
         assert.equal(await other.locator('#meta-runner').inputValue(), 'Hessian');
         assert.equal(await other.locator('.notes-row textarea').first().inputValue(), '');
         assert.deepEqual(event[stage].checkboxes, { cb_0: false, cb_1: true });
+      }
+      if (twilight) {
+        assert.equal(event[stage].sectionNotes.ta_0, 'Failed draft');
+        if (stage !== 'setup') {
+          assert.equal(await a.locator('#final-notes').inputValue(), 'Old handover');
+          await a.locator('#final-notes').fill('Updated handover');
+          await b.waitForFunction(() => document.getElementById('final-notes').value === 'Updated handover');
+          await a.locator('#final-notes').fill('');
+          await b.waitForFunction(() => document.getElementById('final-notes').value === '');
+        }
+        if (stage === 'during') {
+          assert.equal(await a.locator('#meta-bar-open').inputValue(), '18:30');
+          await a.locator('#meta-bar-close').fill('23:45');
+          await b.waitForFunction(() => document.getElementById('meta-bar-close').value === '23:45');
+        }
+        assert.deepEqual(data[taskPath].cb_0, legacyBefore.cb_0);
       }
       if (form.startsWith('feast')) {
         await a.locator('#meta-catering').selectOption('Buffet');

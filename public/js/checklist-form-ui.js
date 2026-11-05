@@ -60,18 +60,30 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   document.querySelector('.js-add-staff').addEventListener('click', () => addStaffMember());
   document.getElementById('btn-reset').addEventListener('click', () => window.resetAll());
+  const twilight = document.body.dataset.twilight === 'true';
+  const metadata = { 'meta-access': 'accessTime', 'meta-bar': 'barTime', 'meta-tables': 'tableStyle' };
+  if (twilight) {
+    metadata['meta-bar-open'] = stage + '.barOpen';
+    metadata['meta-bar-close'] = stage + '.barClose';
+    metadata['final-notes'] = stage + '.finalNotes';
+    document.querySelectorAll('.notes-row textarea').forEach((field, index) => {
+      field.id = 'section-note-' + index;
+      metadata[field.id] = stage + '.sectionNotes.ta_' + index;
+    });
+  }
   let backupPanel, backupSignature;
   window.startStageFormSync({
     stage,
-    metadata: { 'meta-access': 'accessTime', 'meta-bar': 'barTime', 'meta-tables': 'tableStyle' },
-    renderDetails(event) {
+    metadata, notesInFirestore: twilight,
+    renderDetails(event, realtime, applyTask) {
       // Positional backups may include historical custom tasks; never guess their names.
       const saved = event[stage] || {};
-      const signature = JSON.stringify([saved.checkboxes, saved.initialsData]);
+      const older = twilight ? Object.fromEntries(Object.entries(realtime).filter(([key, value]) => /^cb_\d+$/.test(key) && value && typeof value.checked === 'boolean')) : {};
+      const signature = JSON.stringify([saved.checkboxes, saved.initialsData, older, event.customTasks]);
       if (signature === backupSignature) return;
       backupSignature = signature;
       if (backupPanel) backupPanel.remove();
-      if (!saved.checkboxes || !Object.keys(saved.checkboxes).length) return;
+      if (!Object.keys(saved.checkboxes || {}).length && !Object.keys(older).length) return;
       backupPanel = document.createElement('details');
       backupPanel.className = 'section';
       backupPanel.style.padding = '16px';
@@ -79,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const explanation = document.createElement('p');
       explanation.textContent = 'These older entries have no stable task names. Review them against the current checklist; they have not been applied automatically.';
       const list = document.createElement('ul');
-      Object.entries(saved.checkboxes).forEach(([key, checked]) => {
+      Object.entries(saved.checkboxes || {}).forEach(([key, checked]) => {
         const item = document.createElement('li');
         const attribution = (saved.initialsData || {})[key] || {};
         const label = /^cb_\d+$/.test(key) ? 'Saved item ' + (Number(key.slice(3)) + 1) : key;
@@ -87,8 +99,25 @@ document.addEventListener('DOMContentLoaded', function () {
           (checked ? ' ' + [attribution.initials, attribution.time].filter(Boolean).join(' · ') : '');
         list.appendChild(item);
       });
+      Object.entries(older).forEach(([key, record]) => {
+        const item = document.createElement('li');
+        item.textContent = 'Saved item ' + (Number(key.slice(3)) + 1) + ': ' + (record.checked ? 'Complete' : 'Incomplete') + ' ' + [record.initials, record.time].filter(Boolean).join(' · ');
+        const select = document.createElement('select');
+        select.setAttribute('aria-label', 'Match ' + key + ' to current task');
+        const empty = document.createElement('option'); empty.value = ''; empty.textContent = 'Choose matching task…'; select.appendChild(empty);
+        const rows = [...document.querySelectorAll('.checklist-item')];
+        rows.forEach((row, index) => {
+          const option = document.createElement('option'); option.value = String(index);
+          option.textContent = row.querySelector('.item-label').textContent; select.appendChild(option);
+        });
+        const apply = document.createElement('button'); apply.type = 'button'; apply.textContent = 'Apply saved value';
+        apply.addEventListener('click', () => {
+          if (select.value !== '') applyTask(rows[Number(select.value)].querySelector('input[type="checkbox"]'), record);
+        });
+        item.append(select, apply); list.appendChild(item);
+      });
       backupPanel.append(title, explanation, list);
-      document.querySelector('.staff-section, #staff-section').after(backupPanel);
+      document.querySelector('.staff-section, #staff-section, .staff-panel').after(backupPanel);
     }
   });
 });

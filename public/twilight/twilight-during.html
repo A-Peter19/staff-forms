@@ -169,13 +169,13 @@
 
 </style>
 </head>
-<body>
+<body data-stage="during" data-twilight="true" data-staff-background="#faf8ff">
 
 <header>
   <h1>🌙 Twilight Package — During Event</h1>
   <p id="header-sub">Loading event details...</p>
 </header>
-<div id="staffBanner" class="staff-banner"><span>&#128100; Ticking as: <strong id="staffInitialsDisplay">Not set</strong></span><button  class="btn-initials-change js-change-initials" >Change</button></div>
+
 
 <div class="card">
   <div class="card-title">Event Info</div>
@@ -190,7 +190,7 @@
     <input type="text" id="team-leader" placeholder="Team leader name..."/>
     <span class="staff-label">👥 Staff on Shift &nbsp;<span id="badge-staff" style="display:inline-block;padding:2px 9px;border-radius:999px;background:#ece8f5;font-size:.7rem;font-weight:700;color:#3d2b7a">0 staff</span></span>
     <div id="staff-list"></div>
-    <button class="btn-add-staff" id="btn-add-staff">+ Add Staff Member</button>
+    <button class="btn-add-staff js-add-staff" id="btn-add-staff">+ Add Staff Member</button>
   </div>
 </div>
 
@@ -485,7 +485,6 @@
 </div>
 
 <div class="actions">
-  <button id="btn-save" data-action="save" style="background:#3d2b7a;color:white;">💾 Save Staff &amp; Notes</button>
   <button id="btn-reset" data-action="reset" style="background:#e05c5c;color:white;">🔄 Reset</button>
 </div>
 
@@ -504,331 +503,9 @@ window.db = firebase.firestore();
 window.rtdb = firebase.database();
 const db = window.db;
 const rtdb = window.rtdb;
-
-  var staffInitials = localStorage.getItem('staffInitials');
-  function promptInitials() {
-    var inp = prompt('Enter your initials (e.g. JS):');
-    if (inp && inp.trim()) {
-      staffInitials = inp.trim().toUpperCase().slice(0,4);
-      localStorage.setItem('staffInitials', staffInitials);
-      var d = document.getElementById('staffInitialsDisplay');
-      if (d) d.textContent = staffInitials;
-    }
-  }
-  function changeInitials() { promptInitials(); }
-
-  const EVENT_ID = new URLSearchParams(window.location.search).get('event');
-  
-
-  function getEventId() { return StaffFormSync.getEventId(); }
-  function loadEventMetaAndApplyHiddenTasks() { return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY); }
-  function injectCustomTasks(formKey, eventMeta) { return StaffFormSync.injectCustomTasks(formKey || FORM_KEY, eventMeta); }
-  function loadRealtimeChecklist(formKey) { return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY); }
-  function saveRealtimeChecklist(formKey) { return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY); }
-  function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
-  function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
-
-  const FORM_KEY = 'during';
-
-  // ── REAL-TIME SYNC (Realtime Database) ───────────────────────────────────────
-  function loadRealtime() {
-    if (!EVENT_ID) return;
-    rtdb.ref('events/' + EVENT_ID + '/during').on('value', function(snapshot) {
-      var state = snapshot.val();
-      document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb, i) {
-        var key = 'cb_' + i;
-        var taskData = state && state[key];
-        var shouldBeChecked = !!(taskData && taskData.checked);
-        cb.checked = shouldBeChecked;
-        cb.closest('.checklist-item').classList.toggle('done', shouldBeChecked);
-        var meta = cb.closest('.checklist-item').querySelector('.task-meta');
-        if (!meta) {
-          meta = document.createElement('div');
-          meta.className = 'task-meta';
-          cb.closest('.checklist-item').querySelector('.item-content').appendChild(meta);
-        }
-        if (shouldBeChecked && taskData && taskData.initials) {
-          meta.innerHTML = '<span class="task-initials">' + taskData.initials + '</span>'
-                         + '<span class="task-time">' + (taskData.time || '') + '</span>';
-        } else { meta.innerHTML = ''; }
-      });
-      updateProgress();
-    });
-  }
-
-  function saveRealtime() {
-    if (!EVENT_ID) return;
-    var tasks = {};
-    document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb, i) {
-      if (cb.checked) {
-        var meta = cb.closest('.checklist-item').querySelector('.task-meta');
-        var t = meta && meta.querySelector('.task-time') ? meta.querySelector('.task-time').textContent : '';
-        tasks['cb_' + i] = {
-          checked: true,
-          initials: staffInitials || '?',
-          time: t || new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'})
-        };
-      }
-    });
-    rtdb.ref('events/' + EVENT_ID + '/during').set(tasks);
-  }
-
-
-
-  function applyEventTypeTaskIds(eventType) {
-    document.querySelectorAll('.checklist-item[data-task-id]').forEach(function(row) {
-      var baseTaskId = row.getAttribute('data-base-task-id') || row.getAttribute('data-task-id');
-      row.setAttribute('data-base-task-id', baseTaskId);
-      row.setAttribute('data-task-id', eventType + '_' + baseTaskId);
-    });
-  }
-
-  // ── Firestore: load event data ────────────────────────────────────────────────
-  if (!EVENT_ID) {
-    var banner = document.createElement('div');
-    banner.style.cssText = 'background:#fff3cd;color:#856404;padding:14px 20px;border-radius:10px;margin-bottom:20px;font-weight:600;font-size:0.92rem;';
-    banner.innerHTML = 'No event selected. <a href="../index.html" style="color:#3d2b7a;">Go to the dashboard</a> and open this form from there.';
-    document.body.insertBefore(banner, document.body.children[1]);
-  } else {
-    db.collection('events').doc(EVENT_ID).get().then(function(snap) {
-      if (!snap.exists) return;
-      var ev = snap.data();
-
-      var eventType = ev.eventType || 'wedding';
-      applyEventTypeTaskIds(eventType);
-      (ev.hiddenTasks || []).forEach(function(tid) {
-        var scopedTaskId = tid.indexOf(eventType + '_') === 0 ? tid : (eventType + '_' + tid);
-        var el = document.querySelector('[data-task-id="' + scopedTaskId + '"]');
-        if (el) el.style.display = 'none';
-      });
-
-      var sub = document.getElementById('header-sub');
-      if (sub) {
-        var dateFmt = ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'}) : '';
-        sub.textContent = ev.couple + '  ·  ' + dateFmt + '  ·  ' + (ev.guests || '?') + ' guests';
-      }
-      var gf = document.getElementById('meta-guests'); if (gf && ev.guests) gf.value = ev.guests;
-
-      var customTasks = (ev.customTasks || []).filter(function(t) { return t.form === FORM_KEY; });
-      customTasks.forEach(function(task) {
-        document.querySelectorAll('.section-body').forEach(function(body) {
-          var sample = body.querySelector('.checklist-item[data-section="' + task.section + '"]');
-          if (!sample) return;
-          var item = document.createElement('div');
-          item.className = 'checklist-item custom-task';
-          item.dataset.section = task.section;
-          var cb = document.createElement('input'); cb.type = 'checkbox';
-          var content = document.createElement('div'); content.className = 'item-content';
-          var labelDiv = document.createElement('div'); labelDiv.className = 'item-label';
-          labelDiv.textContent = task.label;
-          var badge = document.createElement('span'); badge.className = 'custom-badge'; badge.textContent = 'Custom';
-          labelDiv.appendChild(badge); content.appendChild(labelDiv); item.appendChild(cb); item.appendChild(content);
-          cb.addEventListener('change', function() {
-            item.classList.toggle('done', this.checked);
-            var meta = item.querySelector('.task-meta');
-            if (!meta) { meta = document.createElement('div'); meta.className = 'task-meta'; item.querySelector('.item-content').appendChild(meta); }
-            if (this.checked) {
-              var t = new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
-              meta.innerHTML = '<span class="task-initials">' + (staffInitials||'?') + '</span><span class="task-time">' + t + '</span>';
-            } else { meta.innerHTML = ''; }
-            updateProgress();
-            saveRealtime();
-          });
-          var notesRow = body.querySelector('.notes-row');
-          if (notesRow) body.insertBefore(item, notesRow); else body.appendChild(item);
-        });
-      });
-
-      updateProgress();
-
-      var saved = ev[FORM_KEY];
-      if (saved) {
-        if (saved.teamLeader) document.getElementById('team-leader').value = saved.teamLeader;
-        if (saved.barOpen)    document.getElementById('meta-bar-open').value  = saved.barOpen;
-        if (saved.barClose)   document.getElementById('meta-bar-close').value = saved.barClose;
-        if (saved.finalNotes) document.getElementById('final-notes').value    = saved.finalNotes;
-        document.getElementById('staff-list').innerHTML = '';
-        (saved.staffMembers || []).forEach(function(n) { addStaffMember(n); });
-        updateStaffBadge();
-        var textareas = document.querySelectorAll('.notes-row textarea');
-        textareas.forEach(function(ta, i) {
-          if (saved.sectionNotes && saved.sectionNotes['ta_' + i]) ta.value = saved.sectionNotes['ta_' + i];
-        });
-      } else { addStaffMember(); }
-
-      updateProgress();
-      loadRealtime();
-    });
-  }
-
-  // ── Save Form: staff, notes, bar times to Firestore ──────────────────────────
-  async function saveForm() {
-    if (!EVENT_ID) { alert('No event selected.'); return; }
-    var sectionNotes = {};
-    document.querySelectorAll('.notes-row textarea').forEach(function(ta, i) {
-      sectionNotes['ta_' + i] = ta.value;
-    });
-    var data = {};
-    data[FORM_KEY] = {
-      teamLeader:   document.getElementById('team-leader').value,
-      staffMembers: Array.from(document.querySelectorAll('.staff-input')).map(function(i) { return i.value; }),
-      barOpen:      document.getElementById('meta-bar-open').value,
-      barClose:     document.getElementById('meta-bar-close').value,
-      finalNotes:   document.getElementById('final-notes').value,
-      sectionNotes: sectionNotes,
-      savedAt:      new Date().toISOString()
-    };
-    var btn = document.getElementById('btn-save'); btn.textContent = 'Saving...';
-    try {
-      await db.collection('events').doc(EVENT_ID).set(data, { merge: true });
-      btn.textContent = '✅ Saved!'; setTimeout(function() { btn.textContent = '💾 Save Staff & Notes'; }, 2500);
-    } catch(e) {
-      btn.textContent = '❌ Error'; alert('Save failed: ' + e.message);
-      setTimeout(function() { btn.textContent = '💾 Save Staff & Notes'; }, 2500);
-    }
-  }
-
-  function updateProgress() {
-    var all    = document.querySelectorAll('.checklist-item input[type="checkbox"]');
-    var done   = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked');
-    var pct    = all.length ? Math.round((done.length / all.length) * 100) : 0;
-    document.getElementById('progress-text').textContent = done.length + ' / ' + all.length + ' items complete';
-    document.getElementById('bar-fill').style.width = pct + '%';
-    ['s1','s2','s3','s4','s5','s6','s7'].forEach(function(sid) {
-      var items   = document.querySelectorAll('.checklist-item[data-section="' + sid + '"] input[type="checkbox"]');
-      var checked = document.querySelectorAll('.checklist-item[data-section="' + sid + '"] input[type="checkbox"]:checked');
-      var badge   = document.getElementById('badge-' + sid);
-      if (badge) badge.textContent = checked.length + '/' + items.length;
-    });
-  }
-
-  document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb) {
-    cb.addEventListener('change', function() {
-      var item = this.closest('.checklist-item');
-      item.classList.toggle('done', this.checked);
-      var meta = item.querySelector('.task-meta');
-      if (!meta) { meta = document.createElement('div'); meta.className = 'task-meta'; item.querySelector('.item-content').appendChild(meta); }
-      if (this.checked) {
-        var t = new Date().toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit'});
-        meta.innerHTML = '<span class="task-initials">' + (staffInitials||'?') + '</span><span class="task-time">' + t + '</span>';
-      } else { meta.innerHTML = ''; }
-      updateProgress();
-      saveRealtime();
-    });
-  });
-
-  if (!staffInitials) { promptInitials(); }
-  else { var d2 = document.getElementById('staffInitialsDisplay'); if (d2) d2.textContent = staffInitials; }
-  updateProgress();
-
-  function toggleSection(header) {
-    var body = header.nextElementSibling;
-    body.style.display = body.style.display === 'none' ? 'block' : 'none';
-  }
-
-  document.getElementById('btn-add-staff').addEventListener('click', function() { addStaffMember(); });
-
-  function addStaffMember(value) {
-    value = value || '';
-    var list = document.getElementById('staff-list');
-    var row  = document.createElement('div');
-    row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;';
-    var inp = document.createElement('input');
-    inp.type = 'text'; inp.className = 'staff-input';
-    inp.placeholder = 'Staff member name...'; inp.value = value;
-    inp.style.cssText = 'flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.92rem;background:#fcfafe;';
-    inp.addEventListener('input', updateStaffBadge);
-    var removeBtn = document.createElement('button');
-    removeBtn.type = 'button'; removeBtn.textContent = '✕';
-    removeBtn.style.cssText = 'width:38px;height:38px;background:#c0392b;border:none;border-radius:6px;color:white;font-size:1rem;cursor:pointer;flex-shrink:0;';
-    removeBtn.addEventListener('click', function() { row.remove(); updateStaffBadge(); });
-    row.appendChild(inp); row.appendChild(removeBtn);
-    list.appendChild(row); updateStaffBadge();
-  }
-
-  function updateStaffBadge() {
-    var inputs = document.querySelectorAll('.staff-input');
-    var filled = Array.from(inputs).filter(function(i) { return i.value.trim() !== ''; }).length;
-    var badge  = document.getElementById('badge-staff');
-    if (badge) badge.textContent = filled + ' staff';
-  }
-
-  function resetAll() {
-    if (!confirm('Reset all checkboxes? This will clear all ticks on ALL devices.')) return;
-    document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(function(cb) {
-      cb.checked = false;
-      cb.closest('.checklist-item').classList.remove('done');
-      var m = cb.closest('.checklist-item').querySelector('.task-meta'); if (m) m.innerHTML = '';
-    });
-    updateProgress();
-    saveRealtime();
-  }
 </script>
-
-<script>
-(function () {
-  function wireSharedUiControls() {
-    document.querySelectorAll('.js-section-toggle').forEach(function (header) {
-      if (header.dataset.wiredToggle === '1') return;
-      header.dataset.wiredToggle = '1';
-      header.setAttribute('tabindex', '0');
-      header.setAttribute('role', 'button');
-      header.addEventListener('click', function () { if (typeof toggleSection === 'function') toggleSection(header); });
-      header.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          if (typeof toggleSection === 'function') toggleSection(header);
-        }
-      });
-    });
-
-    var initialsBtn = document.querySelector('.js-change-initials');
-    if (initialsBtn && !initialsBtn.dataset.wired) {
-      initialsBtn.dataset.wired = '1';
-      initialsBtn.addEventListener('click', function () { if (typeof changeInitials === 'function') changeInitials(); });
-    }
-
-    document.querySelectorAll('.js-add-staff').forEach(function (btn) {
-      if (btn.dataset.wiredAddStaff === '1') return;
-      btn.dataset.wiredAddStaff = '1';
-      btn.addEventListener('click', function () { if (typeof addStaffMember === 'function') addStaffMember(); else if (typeof addStaff === 'function') addStaff(); });
-    });
-
-    var actionMap = {
-      'save': 'saveForm',
-      'reset': 'resetAll',
-      'load': 'loadForm',
-      'print': 'printChecklist',
-      'save-progress': 'saveProgress'
-    };
-
-    document.querySelectorAll('[data-action]').forEach(function (btn) {
-      if (btn.dataset.wiredAction === '1') return;
-      btn.dataset.wiredAction = '1';
-      btn.addEventListener('click', function () {
-        var action = btn.getAttribute('data-action');
-        var fnName = actionMap[action];
-        if (fnName && typeof window[fnName] === 'function') window[fnName]();
-      });
-    });
-
-    document.addEventListener('click', function (event) {
-      var removeBtn = event.target.closest('.js-remove-staff');
-      if (removeBtn) {
-        var row = removeBtn.closest('.staff-row') || removeBtn.parentElement;
-        if (row) row.remove();
-        if (typeof updateStaffBadge === 'function') updateStaffBadge();
-      }
-    }, { once: true });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', wireSharedUiControls);
-  } else {
-    wireSharedUiControls();
-  }
-})();
-</script>
-
+<script src="/js/task-identity.js"></script>
+<script src="/js/setup-form-sync.js"></script>
+<script src="/js/checklist-form-ui.js"></script>
 </body>
 </html>

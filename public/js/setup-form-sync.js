@@ -29,6 +29,7 @@
     const pendingTasks = new Map(), dirty = new Map(), timers = new Map();
     const statuses = new Map();
     function status(field, text, retry) {
+      field.dataset.unsaved = dirty.has(field) ? 'true' : 'false';
       let node = statuses.get(field);
       if (!node) {
         node = document.createElement('span');
@@ -242,7 +243,7 @@
         const field = document.getElementById(id);
         const value = key === stage + '.teamLeader' ?
           (Object.hasOwn(latestEvent[stage] || {}, 'teamLeader') ? latestEvent[stage].teamLeader :
-            (options.preserveLegacy ? checklist.teamLeader : '')) : latestEvent[key];
+            (options.preserveLegacy ? checklist.teamLeader : '')) : key.split('.').reduce((value, part) => value == null ? undefined : value[part], latestEvent);
         if (field && !dirty.has(field)) {
           const next = value == null ? (id === 'feast-hall-access-time' ? '13:00' : '') : String(value);
           if (field.tagName === 'SELECT' && next && !Array.from(field.options).some(option => option.value === next)) {
@@ -251,7 +252,7 @@
           field.value = next;
         }
       });
-      if (options.renderDetails) options.renderDetails(latestEvent, checklist);
+      if (options.renderDetails) options.renderDetails(latestEvent, checklist, (cb, value) => { if (ready) writeTask(cb, value); });
     }
     eventRef.onSnapshot(snap => {
       if (!snap.exists) { eventLoaded = false; lock('Event not found. Return to the dashboard.'); return; }
@@ -260,9 +261,12 @@
       renderEvent();
       if (!notesStarted) {
         notesStarted = true;
+        if (options.notesInFirestore) notesLoaded = true;
+        else {
         sync.loadRealtimeSectionNotes(stage, () => { notesLoaded = true; enable(); },
           () => { notesLoaded = false; lock('Could not load notes. Reload to reconnect.'); });
         sync.bindRealtimeSectionNotesSync(stage);
+        }
         sync.loadRealtimeItemQuantities(stage, () => { quantitiesLoaded = true; enable(); },
           () => { quantitiesLoaded = false; lock('Could not load details. Reload to reconnect.'); });
         sync.bindRealtimeItemQuantitiesSync(stage);
