@@ -67,3 +67,8 @@ Run all six pages in these two families with:
 ```sh
 node --test --test-name-pattern='^(feast|foundation)/' scripts/setup-forms.test.js
 ```
+
+The browser suite now includes all 21 forms, including Celebration's consistency
+review and legacy event-detail fallbacks. Run the complete suite with
+`node --test scripts/setup-forms.test.js`. Live-verification limits and prerequisites
+are documented in `docs/celebration-consistency-review.md`.

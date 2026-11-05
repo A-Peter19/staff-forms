@@ -75,6 +75,11 @@ document.addEventListener('DOMContentLoaded', function () {
   window.startStageFormSync({
     stage, unscopedTasks: document.body.dataset.unscopedTasks === 'true',
     metadata, notesInFirestore: twilight,
+    metadataFallbacks: document.body.dataset.celebration === 'true' ? {
+      accessTime: [stage + '.accessTime', 'setup.accessTime'],
+      barTime: [stage + '.barTime', 'setup.barTime'],
+      tableStyle: [stage + '.tableStyle', 'setup.tableStyle']
+    } : undefined,
     renderDetails(event, realtime, applyTask) {
       // Positional backups may include historical custom tasks; never guess their names.
       const saved = event[stage] || {};
