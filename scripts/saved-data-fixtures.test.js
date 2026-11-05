@@ -122,3 +122,56 @@ test('Flourish notes and quantity strings hydrate and survive a save/reload, inc
   assert.equal(reopened.notes[0].value, first.notes[0].value);
   assert.deepEqual(reopened.quantities.map((field) => field.value), Object.values(data.setup_quantities));
 });
+
+test('autosave preserves concurrent notes and pending drafts, and clears only the edited field', async () => {
+  const rtdb = new FakeRTDB();
+  function open() {
+    const { window, document } = buildSession({ eventId: 'concurrent', rtdb, taskIds: [] });
+    const notes = ['section_1', 'section_2'].map(noteKey => ({
+      dataset: { noteKey }, value: '', matches: selector => selector === '.notes-row textarea'
+    }));
+    const handlers = {};
+    const timers = new Map();
+    let id = 0;
+    window.setTimeout = callback => { timers.set(++id, callback); return id; };
+    window.clearTimeout = key => timers.delete(key);
+    document.querySelectorAll = () => notes;
+    document.addEventListener = (type, callback) => { handlers[type] = callback; };
+    window.StaffFormSync.loadRealtimeSectionNotes('setup');
+    window.StaffFormSync.bindRealtimeSectionNotesSync('setup');
+    return {
+      notes,
+      edit(index, value) { notes[index].value = value; handlers.input({ target: notes[index] }); },
+      async flush() { for (const callback of timers.values()) callback(); timers.clear(); await Promise.resolve(); await Promise.resolve(); }
+    };
+  }
+  const a = open(), b = open();
+  a.edit(0, 'Draft A');
+  b.edit(1, 'Note B');
+  await b.flush();
+  assert.equal(a.notes[0].value, 'Draft A');
+  await a.flush();
+  assert.deepEqual(a.notes.map(n => n.value), ['Draft A', 'Note B']);
+  assert.deepEqual(b.notes.map(n => n.value), ['Draft A', 'Note B']);
+  a.edit(0, '');
+  await a.flush();
+  assert.deepEqual(open().notes.map(n => n.value), ['', 'Note B']);
+});
+
+test('failed note writes preserve the draft until a successful retry', async () => {
+  const rtdb = new FakeRTDB();
+  const session = buildSession({ eventId: 'retry', rtdb, taskIds: [] });
+  const field = { dataset: { noteKey: 'section_1' }, value: '' };
+  session.document.querySelectorAll = () => [field];
+  const sync = session.window.StaffFormSync;
+  sync.loadRealtimeSectionNotes('setup');
+  const originalRef = rtdb.ref.bind(rtdb);
+  rtdb.ref = path => ({ ...originalRef(path), update: () => Promise.reject(new Error('offline')) });
+  field.value = 'Keep this draft';
+  await assert.rejects(sync.saveRealtimeSectionNotes('setup', field), /offline/);
+  await originalRef('events/retry/setup_notes').set({ section_1: 'Remote change' });
+  assert.equal(field.value, 'Keep this draft');
+  rtdb.ref = originalRef;
+  await sync.saveRealtimeSectionNotes('setup', field);
+  assert.equal((await rtdb.ref('events/retry/setup_notes').once('value')).val().section_1, 'Keep this draft');
+});

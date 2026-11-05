@@ -257,6 +257,74 @@
     return global.db.collection('events').doc(eventId).set(data, { merge: true });
   }
 
+  var fieldStates = new WeakMap();
+  function fieldState(field) {
+    if (!fieldStates.has(field)) fieldStates.set(field, { dirty: false, savedValue: null, revision: 0, defaultValue: field.value });
+    return fieldStates.get(field);
+  }
+  function showFieldSaveState(field, message, retry) {
+    var state = fieldState(field);
+    if (!field.insertAdjacentElement) return;
+    if (!state.status) {
+      state.status = document.createElement('span');
+      state.status.setAttribute('role', 'status');
+      state.status.style.cssText = 'display:block;font-size:0.8rem;margin-top:4px;';
+      field.insertAdjacentElement('afterend', state.status);
+    }
+    state.status.textContent = message;
+    if (retry) {
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = 'Retry';
+      button.addEventListener('click', retry);
+      state.status.appendChild(button);
+    }
+  }
+  function applyRemoteField(field, value) {
+    var state = fieldState(field);
+    // Keep a local draft intact while its debounce or write is pending.
+    if (state.dirty) return;
+    field.value = value === undefined || value === null ? '' : String(value);
+    state.savedValue = field.value;
+  }
+  function saveFields(formKey, suffix, selector, keyFor, changedField) {
+    var eventId = getEventId();
+    if (!eventId || !global.rtdb || !global.rtdb.ref) return Promise.resolve();
+    var fields = Array.from(document.querySelectorAll(selector));
+    var pending = [];
+    var payload = {};
+    fields.forEach(function (field, index) {
+      if (changedField && field !== changedField) return;
+      var state = fieldState(field);
+      var value = field.value;
+      if (!state.dirty && state.savedValue === value) return;
+      state.dirty = true;
+      payload[keyFor(field, index)] = value === '' ? null : value;
+      pending.push({ field: field, value: value, revision: state.revision });
+      showFieldSaveState(field, 'Saving…');
+    });
+    if (!pending.length) return Promise.resolve();
+    return global.rtdb.ref('events/' + eventId + '/' + formKey + suffix).update(payload).then(function () {
+      pending.forEach(function (entry) {
+        var state = fieldState(entry.field);
+        if (state.revision !== entry.revision) return;
+        state.savedValue = entry.value;
+        if (entry.field.value === entry.value) {
+          state.dirty = false;
+          showFieldSaveState(entry.field, 'Saved');
+        }
+      });
+    }).catch(function (error) {
+      pending.forEach(function (entry) {
+        if (fieldState(entry.field).revision !== entry.revision) return;
+        showFieldSaveState(entry.field, 'Not saved. ', function () {
+          saveFields(formKey, suffix, selector, keyFor, entry.field).catch(function () {});
+        });
+      });
+      throw error;
+    });
+  }
+
   function getSectionNoteKey(textarea, index) {
     if (textarea.dataset && textarea.dataset.noteKey) return textarea.dataset.noteKey;
     var section = textarea.closest('.section');
@@ -276,22 +344,13 @@
       notes.forEach(function (textarea, index) {
         var key = getSectionNoteKey(textarea, index);
         var remoteValue = state[key] || '';
-        if (document.activeElement === textarea && textarea.value === remoteValue) return;
-        if (textarea.value !== remoteValue) textarea.value = remoteValue;
+        applyRemoteField(textarea, remoteValue);
       });
     });
   }
 
-  function saveRealtimeSectionNotes(formKey) {
-    var eventId = getEventId();
-    if (!eventId || !global.rtdb || !global.rtdb.ref) return Promise.resolve();
-    var payload = {};
-    var notes = document.querySelectorAll('.notes-row textarea');
-    notes.forEach(function (textarea, index) {
-      var key = getSectionNoteKey(textarea, index);
-      if (textarea.value && textarea.value.trim()) payload[key] = textarea.value;
-    });
-    return global.rtdb.ref('events/' + eventId + '/' + formKey + '_notes').set(payload);
+  function saveRealtimeSectionNotes(formKey, changedField) {
+    return saveFields(formKey, '_notes', '.notes-row textarea', getSectionNoteKey, changedField);
   }
 
   function bindRealtimeSectionNotesSync(formKey) {
@@ -303,10 +362,12 @@
     document.addEventListener('input', function (event) {
       var target = event.target;
       if (!target || !target.matches || !target.matches('.notes-row textarea')) return;
-      var key = getSectionNoteKey(target, 0);
+      fieldState(target).dirty = true;
+      fieldState(target).revision++;
+      var key = getSectionNoteKey(target, Array.from(document.querySelectorAll('.notes-row textarea')).indexOf(target));
       if (timers[key]) clearTimeout(timers[key]);
       timers[key] = setTimeout(function () {
-        saveRealtimeSectionNotes(formKey);
+        saveRealtimeSectionNotes(formKey, target).catch(function () {});
       }, 250);
     });
   }
@@ -335,24 +396,15 @@
       var fields = document.querySelectorAll('.checklist-item .item-qty input, .checklist-item .item-qty select, .checklist-item .item-qty textarea, .task .item-qty input, .task .item-qty select, .task .item-qty textarea');
       fields.forEach(function (field, index) {
         var key = getItemQuantityKey(field, index);
-        var nextValue = Object.prototype.hasOwnProperty.call(state, key) ? state[key] : '';
-        if (document.activeElement === field && String(field.value || '') === String(nextValue || '')) return;
-        if (String(field.value || '') !== String(nextValue || '')) field.value = nextValue;
+        var nextValue = Object.prototype.hasOwnProperty.call(state, key) ? state[key] :
+          (field.tagName === 'SELECT' ? fieldState(field).defaultValue : '');
+        applyRemoteField(field, nextValue);
       });
     });
   }
 
-  function saveRealtimeItemQuantities(formKey) {
-    var eventId = getEventId();
-    if (!eventId || !global.rtdb || !global.rtdb.ref) return Promise.resolve();
-    var payload = {};
-    var fields = document.querySelectorAll('.checklist-item .item-qty input, .checklist-item .item-qty select, .checklist-item .item-qty textarea, .task .item-qty input, .task .item-qty select, .task .item-qty textarea');
-    fields.forEach(function (field, index) {
-      var key = getItemQuantityKey(field, index);
-      var value = (field.value || '').trim();
-      if (value) payload[key] = value;
-    });
-    return global.rtdb.ref('events/' + eventId + '/' + formKey + '_quantities').set(payload);
+  function saveRealtimeItemQuantities(formKey, changedField) {
+    return saveFields(formKey, '_quantities', '.checklist-item .item-qty input, .checklist-item .item-qty select, .checklist-item .item-qty textarea, .task .item-qty input, .task .item-qty select, .task .item-qty textarea', getItemQuantityKey, changedField);
   }
 
   function bindRealtimeItemQuantitiesSync(formKey) {
@@ -364,16 +416,20 @@
     document.addEventListener('input', function (event) {
       var target = event.target;
       if (!target || !target.matches || !target.matches('.checklist-item .item-qty input, .checklist-item .item-qty textarea, .task .item-qty input, .task .item-qty textarea')) return;
+      fieldState(target).dirty = true;
+      fieldState(target).revision++;
       var key = getItemQuantityKey(target, 0);
       if (timers[key]) clearTimeout(timers[key]);
       timers[key] = setTimeout(function () {
-        saveRealtimeItemQuantities(formKey);
+        saveRealtimeItemQuantities(formKey, target).catch(function () {});
       }, 200);
     });
     document.addEventListener('change', function (event) {
       var target = event.target;
       if (!target || !target.matches || !target.matches('.checklist-item .item-qty select, .task .item-qty select')) return;
-      saveRealtimeItemQuantities(formKey);
+      fieldState(target).dirty = true;
+      fieldState(target).revision++;
+      saveRealtimeItemQuantities(formKey, target).catch(function () {});
     });
   }
 

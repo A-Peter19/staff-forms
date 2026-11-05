@@ -587,6 +587,8 @@ loadEventMetaAndApplyHiddenTasks().then(function(ev) {
   loadRealtimeChecklist(FORM_KEY);
   loadRealtimeSectionNotes(FORM_KEY);
   bindRealtimeSectionNotesSync(FORM_KEY);
+  StaffFormSync.loadRealtimeItemQuantities(FORM_KEY);
+  StaffFormSync.bindRealtimeItemQuantitiesSync(FORM_KEY);
 });
 addStaffMember();
 </script>

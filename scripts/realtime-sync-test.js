@@ -106,6 +106,14 @@ class FakeRTDB {
         if (evt !== 'value') throw new Error('only value supported');
         return Promise.resolve(new FakeSnapshot(self.data[path]));
       },
+      update(patch) {
+        const next = copyValue(self.data[path]) || {};
+        for (const [key, value] of Object.entries(patch)) {
+          if (value === null) delete next[key];
+          else next[key] = copyValue(value);
+        }
+        return this.set(next);
+      },
       set(payload) {
         self.data[path] = copyValue(payload);
         (self.listeners[path] || []).forEach((cb) => cb(new FakeSnapshot(self.data[path])));
