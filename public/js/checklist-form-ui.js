@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   let backupPanel, backupSignature;
   window.startStageFormSync({
-    stage,
+    stage, unscopedTasks: document.body.dataset.unscopedTasks === 'true',
     metadata, notesInFirestore: twilight,
     renderDetails(event, realtime, applyTask) {
       // Positional backups may include historical custom tasks; never guess their names.

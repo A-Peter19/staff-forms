@@ -120,7 +120,7 @@
     }
     function renderTasks(ev) {
       const type = ev.eventType || 'wedding';
-      baseRows.forEach(row => { row.dataset.taskId = type + '_' + row.dataset.baseTaskId; });
+      baseRows.forEach(row => { row.dataset.taskId = options.unscopedTasks ? row.dataset.baseTaskId : type + '_' + row.dataset.baseTaskId; });
       const wanted = new Set(), seen = new Map();
       (ev.customTasks || []).filter(t => t.form === stage).forEach(task => {
         const signature = JSON.stringify([task.form, task.section, task.label]);
@@ -145,7 +145,7 @@
       document.querySelectorAll('.custom-task').forEach(row => { if (!wanted.has(row.dataset.taskId)) row.remove(); });
       const hidden = new Set(ev.hiddenTasks || []);
       document.querySelectorAll('.checklist-item').forEach(row => {
-        row.hidden = hidden.has(row.dataset.taskId) || hidden.has(row.dataset.baseTaskId);
+        row.hidden = hidden.has(row.dataset.taskId) || hidden.has(row.dataset.baseTaskId) || hidden.has(type + '_' + row.dataset.baseTaskId);
         row.style.display = row.hidden ? 'none' : '';
       });
       paintTasks();
@@ -192,7 +192,7 @@
       }).then(() => { if (remove) input.parentElement.remove(); global.updateStaffBadge(); }));
     }
     // Hall access is an event detail, separate from the checklist tick.
-    if (/\/feast\//.test(global.location.pathname)) {
+    if (/\/feast\/feast-flourish-setup\.html$/.test(global.location.pathname)) {
       const label = baseRows[0].querySelector('.item-label');
       label.textContent = 'Main Hall unlocked and accessible from ';
       const field = document.createElement('input');
