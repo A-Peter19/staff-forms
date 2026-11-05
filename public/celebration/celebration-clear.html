@@ -166,7 +166,7 @@ button:hover { transform:translateY(-1px); }
 
 </style>
 </head>
-<body>
+<body data-stage="clearup" data-celebration="true" data-staff-background="#fbfcff">
 
 <a class="back-link" href="../index.html">← Back to Dashboard</a>
 
@@ -176,10 +176,7 @@ button:hover { transform:translateY(-1px); }
 </header>
 
 <!-- Initials -->
-<div class="initials-bar">
-  👤 Ticking as: <span id="staffInitialsDisplay">Not set</span>
-  <button type="button"  class="btn-initials-change js-change-initials" >Change</button>
-</div>
+
 
 <!-- Event Meta -->
 <div class="event-meta">
@@ -442,7 +439,6 @@ button:hover { transform:translateY(-1px); }
 </div>
 
 <div class="actions">
-  <button id="btn-save" data-action="save">💾 Save</button>
   <button id="btn-reset" data-action="reset">Reset</button>
 </div>
 
@@ -465,198 +461,9 @@ window.db = firebase.firestore();
 window.rtdb = firebase.database();
 const db = window.db;
 const rtdb = window.rtdb;
-const FORM_KEY = 'clearup';
-
-function getEventId() { return StaffFormSync.getEventId(); }
-function loadEventMetaAndApplyHiddenTasks() { return StaffFormSync.loadEventMetaAndApplyHiddenTasks(FORM_KEY); }
-function injectCustomTasks(formKey, eventMeta) { return StaffFormSync.injectCustomTasks(formKey || FORM_KEY, eventMeta); }
-function loadRealtimeChecklist(formKey) { return StaffFormSync.loadRealtimeChecklist(formKey || FORM_KEY); }
-function saveRealtimeChecklist(formKey) { return StaffFormSync.saveRealtimeChecklist(formKey || FORM_KEY); }
-function saveStaffSection(formKey) { return StaffFormSync.saveStaffSection(formKey || FORM_KEY); }
-function loadRealtimeSectionNotes(formKey) { return StaffFormSync.loadRealtimeSectionNotes(formKey || FORM_KEY); }
-function saveRealtimeSectionNotes(formKey) { return StaffFormSync.saveRealtimeSectionNotes(formKey || FORM_KEY); }
-function bindRealtimeSectionNotesSync(formKey) { return StaffFormSync.bindRealtimeSectionNotesSync(formKey || FORM_KEY); }
-function bindCheckboxMeta() { return StaffFormSync.bindCheckboxMeta(); }
-function bindRealtimeCheckboxSync(formKey, onCheckboxChanged) { return StaffFormSync.bindRealtimeCheckboxSync(formKey || FORM_KEY, onCheckboxChanged); }
-
-const EVENT_ID = new URLSearchParams(window.location.search).get('event');
-var staffInitials = localStorage.getItem('staffInitials');
-
-function promptInitials() {
-  var input = prompt('Enter your initials (e.g. JS):');
-  if (input && input.trim()) {
-    staffInitials = input.trim().toUpperCase().slice(0, 4);
-    localStorage.setItem('staffInitials', staffInitials);
-    document.getElementById('staffInitialsDisplay').textContent = staffInitials;
-  }
-}
-
-function changeInitials() { promptInitials(); }
-if (!staffInitials) { promptInitials(); } else { document.getElementById('staffInitialsDisplay').textContent = staffInitials; }
-
-function updateProgress() {
-  const all = document.querySelectorAll('.checklist-item input[type="checkbox"]');
-  const done = document.querySelectorAll('.checklist-item input[type="checkbox"]:checked');
-  const pct = all.length ? Math.round((done.length / all.length) * 100) : 0;
-  document.getElementById('progress-text').textContent = `${done.length} / ${all.length} items complete`;
-  document.getElementById('bar-fill').style.width = pct + '%';
-  document.querySelectorAll('.section').forEach(sec => {
-    const item = sec.querySelector('.checklist-item');
-    if (!item) return;
-    const sid = item.dataset.section;
-    const items = sec.querySelectorAll(`.checklist-item[data-section="${sid}"] input[type="checkbox"]`);
-    const checked = sec.querySelectorAll(`.checklist-item[data-section="${sid}"] input[type="checkbox"]:checked`);
-    const badge = sec.querySelector('.badge');
-    if (badge && sid) badge.textContent = `${checked.length}/${items.length}`;
-  });
-}
-
-bindRealtimeCheckboxSync(FORM_KEY, function(checkbox) {
-  checkbox.closest('.checklist-item').classList.toggle('done', checkbox.checked);
-  updateProgress();
-});
-
-function toggleSection(header) {
-  const body = header.nextElementSibling;
-  body.style.display = body.style.display === 'none' ? 'block' : 'none';
-}
-
-function addStaffMember(value = '') {
-  const list = document.getElementById('staff-list');
-  const row = document.createElement('div');
-  row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px;align-items:center;';
-  row.innerHTML = `
-    <input type="text" class="staff-input" placeholder="Staff member name..." value="${value}"
-      style="flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.92rem;background:#fdf7ff;"/>
-    <button type="button" class="btn-remove-staff js-remove-staff"
-      style="width:38px;height:38px;background:#c0392b;border:none;border-radius:6px;color:white;font-size:1rem;cursor:pointer;flex-shrink:0;">✕</button>`;
-  row.querySelector('input').addEventListener('input', updateStaffBadge);
-  list.appendChild(row);
-  updateStaffBadge();
-}
-
-function updateStaffBadge() {
-  const inputs = document.querySelectorAll('.staff-input');
-  const filled = [...inputs].filter(i => i.value.trim() !== '').length;
-  const badge = document.getElementById('badge-staff');
-  if (badge) badge.textContent = filled + ' staff';
-}
-
-async function saveForm() {
-  if (!EVENT_ID) { alert('No event selected.'); return; }
-  const btn = document.getElementById('btn-save');
-  btn.textContent = 'Saving...';
-  try {
-    await saveStaffSection(FORM_KEY);
-    await saveRealtimeSectionNotes(FORM_KEY);
-    await db.collection('events').doc(EVENT_ID).set({
-      [FORM_KEY]: { savedAt: new Date().toISOString() }
-    }, { merge: true });
-    btn.textContent = 'Saved!';
-    setTimeout(() => btn.textContent = '💾 Save', 2500);
-  } catch (e) {
-    btn.textContent = 'Error';
-    alert('Save failed: ' + e.message);
-    setTimeout(() => btn.textContent = '💾 Save', 2500);
-  }
-}
-
-function resetAll() {
-  if (!confirm('Reset all checkboxes? This cannot be undone.')) return;
-  document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
-    cb.checked = false;
-    cb.closest('.checklist-item').classList.remove('done');
-    const meta = cb.closest('.checklist-item').querySelector('.task-meta');
-    if (meta) meta.innerHTML = '';
-  });
-  updateProgress();
-  saveRealtimeChecklist(FORM_KEY);
-}
-
-if (!EVENT_ID) {
-  var banner = document.createElement('div');
-  banner.style.cssText = 'background:#fff3cd;color:#856404;padding:14px 20px;border-radius:10px;margin-bottom:20px;font-weight:600;font-size:0.92rem;';
-  banner.innerHTML = 'No event selected. <a href="../index.html" style="color:#c0392b;">Go to the dashboard</a> and open this form from there.';
-  document.body.insertBefore(banner, document.body.children[2]);
-}
-
-updateProgress();
-bindCheckboxMeta();
-loadEventMetaAndApplyHiddenTasks().then(function(ev) {
-  injectCustomTasks(FORM_KEY, ev);
-  loadRealtimeChecklist(FORM_KEY);
-  loadRealtimeSectionNotes(FORM_KEY);
-  bindRealtimeSectionNotesSync(FORM_KEY);
-  StaffFormSync.loadRealtimeItemQuantities(FORM_KEY);
-  StaffFormSync.bindRealtimeItemQuantitiesSync(FORM_KEY);
-});
-addStaffMember();
 </script>
-
-<script>
-(function () {
-  function wireSharedUiControls() {
-    document.querySelectorAll('.js-section-toggle').forEach(function (header) {
-      if (header.dataset.wiredToggle === '1') return;
-      header.dataset.wiredToggle = '1';
-      header.setAttribute('tabindex', '0');
-      header.setAttribute('role', 'button');
-      header.addEventListener('click', function () { if (typeof toggleSection === 'function') toggleSection(header); });
-      header.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          if (typeof toggleSection === 'function') toggleSection(header);
-        }
-      });
-    });
-
-    var initialsBtn = document.querySelector('.js-change-initials');
-    if (initialsBtn && !initialsBtn.dataset.wired) {
-      initialsBtn.dataset.wired = '1';
-      initialsBtn.addEventListener('click', function () { if (typeof changeInitials === 'function') changeInitials(); });
-    }
-
-    document.querySelectorAll('.js-add-staff').forEach(function (btn) {
-      if (btn.dataset.wiredAddStaff === '1') return;
-      btn.dataset.wiredAddStaff = '1';
-      btn.addEventListener('click', function () { if (typeof addStaffMember === 'function') addStaffMember(); else if (typeof addStaff === 'function') addStaff(); });
-    });
-
-    var actionMap = {
-      'save': 'saveForm',
-      'reset': 'resetAll',
-      'load': 'loadForm',
-      'print': 'printChecklist',
-      'save-progress': 'saveProgress'
-    };
-
-    document.querySelectorAll('[data-action]').forEach(function (btn) {
-      if (btn.dataset.wiredAction === '1') return;
-      btn.dataset.wiredAction = '1';
-      btn.addEventListener('click', function () {
-        var action = btn.getAttribute('data-action');
-        var fnName = actionMap[action];
-        if (fnName && typeof window[fnName] === 'function') window[fnName]();
-      });
-    });
-
-    document.addEventListener('click', function (event) {
-      var removeBtn = event.target.closest('.js-remove-staff');
-      if (removeBtn) {
-        var row = removeBtn.closest('.staff-row') || removeBtn.parentElement;
-        if (row) row.remove();
-        if (typeof updateStaffBadge === 'function') updateStaffBadge();
-      }
-    }, { once: true });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', wireSharedUiControls);
-  } else {
-    wireSharedUiControls();
-  }
-})();
-</script>
-
+<script src="/js/task-identity.js"></script>
+<script src="/js/setup-form-sync.js"></script>
+<script src="/js/checklist-form-ui.js"></script>
 </body>
 </html>

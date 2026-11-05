@@ -241,9 +241,15 @@
       renderTasks(latestEvent); renderStaff(latestEvent);
       Object.entries(metadata).forEach(([id, key]) => {
         const field = document.getElementById(id);
-        const value = key === stage + '.teamLeader' ?
+        let value = key === stage + '.teamLeader' ?
           (Object.hasOwn(latestEvent[stage] || {}, 'teamLeader') ? latestEvent[stage].teamLeader :
             (options.preserveLegacy ? checklist.teamLeader : '')) : key.split('.').reduce((value, part) => value == null ? undefined : value[part], latestEvent);
+        if (value === undefined && options.metadataFallbacks && options.metadataFallbacks[key]) {
+          for (const path of options.metadataFallbacks[key]) {
+            value = path.split('.').reduce((record, part) => record == null ? undefined : record[part], latestEvent);
+            if (value !== undefined) break;
+          }
+        }
         if (field && !dirty.has(field)) {
           const next = value == null ? (id === 'feast-hall-access-time' ? '13:00' : '') : String(value);
           if (field.tagName === 'SELECT' && next && !Array.from(field.options).some(option => option.value === next)) {
