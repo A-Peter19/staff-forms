@@ -24,6 +24,7 @@ function addStaffMember(value, staffId) {
   var inp = document.createElement('input');
   inp.type = 'text'; inp.className = 'staff-input'; inp.placeholder = 'Staff member name...'; inp.value = value;
   inp.style.cssText = 'flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:6px;font-size:0.92rem;background:#f5f8ff;';
+  inp.style.background = document.body.dataset.staffBackground || '#f5f8ff';
   inp.addEventListener('input', updateStaffBadge);
   var removeBtn = document.createElement('button');
   removeBtn.type = 'button'; removeBtn.textContent = '✕';
@@ -72,7 +73,8 @@ document.addEventListener('DOMContentLoaded', function () {
       if (backupPanel) backupPanel.remove();
       if (!saved.checkboxes || !Object.keys(saved.checkboxes).length) return;
       backupPanel = document.createElement('details');
-      backupPanel.className = 'staff-section';
+      backupPanel.className = 'section';
+      backupPanel.style.padding = '16px';
       const title = document.createElement('summary'); title.textContent = 'Previous saved checklist — review available';
       const explanation = document.createElement('p');
       explanation.textContent = 'These older entries have no stable task names. Review them against the current checklist; they have not been applied automatically.';
@@ -86,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
         list.appendChild(item);
       });
       backupPanel.append(title, explanation, list);
-      document.querySelector('.staff-section').after(backupPanel);
+      document.querySelector('.staff-section, #staff-section').after(backupPanel);
     }
   });
 });

@@ -48,3 +48,11 @@ rules are documented in `docs/wake-form-autosave.md`.
 Evening Party setup, during and clear-up are also included in the browser suite.
 It checks shared event details across stages, unknown saved table-style options,
 and preservation of positional backups without overwriting current realtime ticks.
+
+Flourish setup, during and clear-up are covered too, including existing saved note
+and quantity fixtures and shared sash/runner updates with separate stage staffing.
+Run just Flourish and its shared UI consumers with:
+
+```sh
+node --test --test-name-pattern='flourish/|evening-party/' scripts/setup-forms.test.js
+```
