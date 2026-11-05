@@ -1,0 +1,6 @@
+.housekeeping-content { padding: 20px 24px; }
+.housekeeping-content ol { margin: 0; padding-left: 24px; }
+.housekeeping-content li { padding-left: 4px; margin-bottom: 18px; }
+.housekeeping-content li:last-child { margin-bottom: 0; }
+.housekeeping-content h3 { margin: 0 0 6px; font-size: 1rem; }
+.housekeeping-content p { margin: 4px 0; line-height: 1.6; }

@@ -27,7 +27,7 @@
   };
   global.updateStaffBadge = function () {};
   global.updateProgress = function () {
-    document.querySelectorAll('.section').forEach(section => {
+    document.querySelectorAll('.section:not(.housekeeping-section)').forEach(section => {
       const name = section.querySelector('[data-toggle-section]').dataset.toggleSection;
       const boxes = [...section.querySelectorAll('.task input[type="checkbox"]')].filter(cb => !cb.closest('.task').hidden);
       const checked = boxes.filter(cb => cb.checked).length;
